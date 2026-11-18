@@ -2,7 +2,6 @@
 """Check a Moonwalk bundle against its staged source without installing it."""
 import argparse
 import configparser
-import hashlib
 import json
 from pathlib import Path
 import re
@@ -13,14 +12,11 @@ import xml.etree.ElementTree as ET
 
 import yaml
 
+from flatpak_provenance import file_hash, source_hash
+
 
 def run(*command):
     return subprocess.check_output(command, text=True, timeout=180).strip()
-
-
-def sha256(path):
-    with path.open("rb") as stream:
-        return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
 def require(actual, expected, field):
@@ -31,7 +27,14 @@ def require(actual, expected, field):
 def verify(candidate, bundle):
     manifest_path = candidate / "manifest.yaml"
     provenance = json.loads((candidate / "provenance.json").read_text())
-    require(sha256(manifest_path), provenance["manifest_sha256"], "staged manifest checksum")
+    require(file_hash(manifest_path), provenance["manifest_sha256"], "staged manifest checksum")
+    source = candidate / "source"
+    require(source_hash(source), provenance["source_sha256"], "staged source fingerprint")
+    for name, checksum in provenance["patches_sha256"].items():
+        patch = (candidate / name).resolve()
+        if not patch.is_relative_to(candidate.resolve()):
+            raise ValueError("staged patch is outside the candidate directory")
+        require(file_hash(patch), checksum, "staged patch checksum")
     revision = provenance["revision"]
     if not re.fullmatch(r"[0-9a-f]{40}", revision):
         raise ValueError("staged source revision must be a full Git commit")
@@ -42,7 +45,6 @@ def verify(candidate, bundle):
     arch = run("flatpak", "--default-arch")
     runtime = f"{manifest['runtime']}/{arch}/{manifest['runtime-version']}"
     app_ref = f"app/{app_id}/{arch}/{manifest.get('branch', 'master')}"
-    source = candidate / "source"
     appdata = f"{app_id}.appdata.xml"
     version = ET.parse(source / "app/deploy/linux" / appdata).find("releases/release").attrib["version"]
     engine_version = (source / "app/version.txt").read_text().strip()
@@ -73,7 +75,13 @@ def verify(candidate, bundle):
         require(installed_data.find("releases/release").attrib["version"], version, "AppStream version")
         if not (share / "applications" / f"{app_id}.desktop").is_file():
             raise ValueError("bundle is missing its desktop launcher")
-        require(sha256(share / "licenses/moonwalk/moonwalk/LICENSE"), sha256(source / "LICENSE"), "installed GPL notice")
+        require(file_hash(share / "licenses/moonwalk/moonwalk/LICENSE"), file_hash(source / "LICENSE"),
+                "installed GPL notice")
+        for module in manifest["modules"]:
+            for notice in module.get("license-files", []):
+                installed = share / "licenses" / app_id / module["name"] / Path(notice).name
+                if not installed.is_file():
+                    raise ValueError(f"bundle is missing a declared license file for {module['name']}")
 
         output = run(
             "flatpak", "build", "--runtime", "--readonly", "--unshare=network", "--unshare=ipc",
@@ -94,7 +102,7 @@ def verify(candidate, bundle):
             "product_version": version,
             "runtime_ref": runtime,
             "runtime_commit": run("flatpak", "info", "--show-commit", runtime),
-            "sha256": sha256(checked_bundle),
+            "sha256": file_hash(checked_bundle),
             "size_bytes": checked_bundle.stat().st_size,
             "source_revision": revision,
         }

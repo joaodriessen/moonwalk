@@ -4,15 +4,18 @@ import json
 import shlex
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import yaml
 
 SCRIPT = Path(__file__).resolve().parents[2] / "scripts/stage-flatpak-candidate.py"
 SPEC = importlib.util.spec_from_file_location("stage_flatpak", SCRIPT)
 staging = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(staging)
+with patch.object(sys, "path", [str(SCRIPT.parent), *sys.path]):
+    SPEC.loader.exec_module(staging)
 
 
 def git(repo, *args):
@@ -117,6 +120,14 @@ class CandidateStagingTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "exact commit in sdl"):
             self.stage(revision=commit(self.repo))
         self.assertFalse(self.output.exists())
+
+    def test_bundle_check_rejects_edited_staged_sources_before_importing(self):
+        self.stage()
+        (self.output / "source/app.cpp").write_text("unrecorded edits\n")
+        result = subprocess.run([sys.executable, SCRIPT.with_name("verify-flatpak-bundle.py"),
+                                 self.output, self.root / "candidate.flatpak"], capture_output=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn(b"staged source fingerprint differs", result.stderr)
 
     def test_requested_revision_uses_its_pinned_submodule_not_current_checkout(self):
         engine = self.repo / "engine"

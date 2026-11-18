@@ -52,11 +52,11 @@ tracks the inherited engine version.
    python3 scripts/verify-flatpak-bundle.py /path/to/candidate /path/to/Moonwalk-build.flatpak
    ```
 
-   The check imports the bundle into a temporary repository and runs its
-   binary's version command in an isolated runtime. It checks the app ID,
-   release version, source revision, launcher, and GPL notice, then prints a
-   checksum and runtime commit. Review permissions and test a fresh install
-   and an upgrade with private profiles separately. Check that settings and
+   The check verifies the staged files, imports the bundle into a temporary
+   repository, and runs its version command in an isolated runtime. It checks
+   the app ID, release version, source revision, launcher, and declared license
+   files, then prints a checksum and runtime commit. Review permissions and
+   test a fresh install and an upgrade with private profiles separately. Check that settings and
    pairings survive, run the affected streaming paths with that same bundle,
    and keep the previous usable bundle.
 5. Publish the tested bundle with its checksum, corresponding source, and
