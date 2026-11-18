@@ -1,0 +1,304 @@
+app-id: com.starlight.Starlight
+runtime: org.kde.Platform
+runtime-version: '6.10'
+sdk: org.kde.Sdk
+command: starlight
+rename-icon: starlight            # installs hicolor starlight.png -> com.starlight.Starlight.png
+# desktop + appdata already named com.starlight.Starlight.* -> no rename needed
+
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --socket=pulseaudio
+  - --device=all
+  - --talk-name=org.freedesktop.ScreenSaver
+  # Let the focused stream adjust the client's physical screen backlight.
+  - --system-talk-name=org.freedesktop.login1
+  - --env=IGNORE_RFI_LATENCY_BUG=1
+  # Flatpak's reproducible builds normalize all file timestamps to epoch, which defeats
+  # Qt's QML disk-cache invalidation: after an app update, stale compiled QML from
+  # ~/.var/app/.../qmlcache is still considered valid and silently overrides the shipped
+  # QML (measured: a Theme.qml change was invisible until the cache was bypassed). QML is
+  # AOT-compiled into the binary instead (CONFIG+=qtquickcompiler below), which never
+  # touches the disk cache; this env var closes the residual interpreted-fallback path
+  # (e.g. after a runtime point-update invalidates the AOT units' version stamps).
+  - --env=QML_DISABLE_DISK_CACHE=1
+  # Leave LIBVA_DRIVER_NAME UNSET (not set-empty) so libva auto-detects per GPU: on Haswell
+  # it tries iHD, that fails, and it falls back to our bundled i965; modern Intel gets iHD,
+  # AMD gets radeonsi. (A set-but-empty value makes libva look for "_drv_video.so" and fail.)
+  - --unset-env=LIBVA_DRIVER_NAME
+  - --env=LIBVA_DRIVERS_PATH=/app/lib/dri:/usr/lib/x86_64-linux-gnu/dri:/usr/lib/x86_64-linux-gnu/dri/intel-vaapi-driver:/usr/lib/x86_64-linux-gnu/dri/nvidia-vaapi-driver:/usr/lib/x86_64-linux-gnu/GL/lib/dri
+  - --filesystem=xdg-run/gamescope-0
+  - --filesystem=host-os:ro        # sole broad grant; droppable with the gamescope-wsi module
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - '*.a'
+  - /share/ffmpeg
+
+modules:
+  # --- ffnvcodec headers: enables FFmpeg NVDEC (build-time only) ---
+  - name: nv-codec-headers
+    buildsystem: simple
+    build-commands:
+      - make PREFIX=/app install
+    sources:
+      - type: git
+        url: https://github.com/FFmpeg/nv-codec-headers.git
+        tag: n12.2.72.0
+    cleanup: ['*']
+
+  # --- libplacebo (Vulkan) — verbatim from flathub moonlight ---
+  - name: libplacebo
+    buildsystem: meson
+    build-options:
+      config-opts:
+        - -Ddemos=false
+        - -Dvulkan=enabled
+        - -Dopengl=disabled
+        - -Dshaderc=enabled
+    sources:
+      - type: git
+        url: https://github.com/haasn/libplacebo.git
+        commit: d4624cbfb37fdef337a7da5794b66202671a89cd
+    cleanup: [/include, /lib/pkgconfig]
+
+  - name: libdecor
+    buildsystem: meson
+    build-options:
+      config-opts: [-Ddemo=false]
+    sources:
+      - type: git
+        url: https://gitlab.freedesktop.org/libdecor/libdecor.git
+        tag: 0.2.2
+        commit: 7807ae3480f5c6a37c5e8505d94af1e764aaf704
+
+  - name: SDL3
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      config-opts:
+        - -DSDL_ALSA=OFF
+        - -DSDL_RPATH=OFF
+        - -DSDL_KMSDRM=OFF
+        - -DSDL_INSTALL_DOCS=OFF
+        - -DSDL_TEST_LIBRARY=OFF
+        - -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=ON
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL.git
+        tag: release-3.4.12
+        commit: f87239e71e42da91ca317a12eefb82cfbf3393eb
+      - type: patch
+        path: patches/sdl3-wayland-brightness-scancodes.patch
+
+  - name: SDL2-compat
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      config-opts: [-DSDL2COMPAT_TESTS=OFF]
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/sdl2-compat.git
+        tag: release-2.32.70
+        commit: a53b6ad90ecd2d0ccfe01d5cfd2059793acf8c12
+      - type: patch
+        path: patches/sdl2-compat-brightness-scancodes.patch
+
+  - name: SDL2_ttf
+    buildsystem: cmake-ninja
+    builddir: true
+    build-options:
+      config-opts:
+        - -DSDL2TTF_VENDORED=ON
+        - -DSDL2TTF_SAMPLES=OFF
+    sources:
+      - type: git
+        url: https://github.com/libsdl-org/SDL_ttf.git
+        commit: a883e490e30fb44a5336ea3dcb990c6982c5216f   # branch SDL2
+
+  - name: dav1d
+    buildsystem: meson
+    config-opts: [-Denable_tools=false, -Denable_tests=false]
+    sources:
+      - type: git
+        url: https://code.videolan.org/videolan/dav1d.git
+        tag: 1.5.3
+        commit: b546257f770768b2c88258c533da38b91a06f737
+
+  # --- FFmpeg 8.1 (moonlight fork) + NVDEC fork-advantage flags ---
+  - name: ffmpeg
+    build-options:
+      config-opts:
+        - --fatal-warnings
+        - --disable-stripping
+        - --enable-pic
+        - --enable-lto
+        - --enable-shared
+        - --disable-static
+        - --disable-all
+        - --enable-avcodec
+        - --enable-avformat
+        - --enable-swscale
+        - --enable-decoder=h264
+        - --enable-decoder=hevc
+        - --enable-decoder=av1
+        - --enable-hwaccel=h264_vaapi
+        - --enable-hwaccel=hevc_vaapi
+        - --enable-hwaccel=av1_vaapi
+        - --enable-hwaccel=h264_vdpau
+        - --enable-hwaccel=hevc_vdpau
+        - --enable-hwaccel=av1_vdpau
+        - --enable-libdrm
+        - --enable-hwaccel=h264_vulkan
+        - --enable-hwaccel=hevc_vulkan
+        - --enable-hwaccel=av1_vulkan
+        - --enable-decoder=h264_v4l2m2m
+        - --enable-decoder=hevc_v4l2m2m
+        - --enable-libdav1d
+        - --enable-decoder=libdav1d
+        - --enable-v4l2-request
+        - --enable-hwaccel=h264_v4l2request
+        - --enable-hwaccel=hevc_v4l2request
+        - --enable-hwaccel=av1_v4l2request
+        # >>> Moonwalk fork advantage: NVIDIA NVDEC (no CUDA toolkit) <<<
+        - --enable-ffnvcodec
+        - --enable-nvdec
+        - --enable-hwaccel=h264_nvdec
+        - --enable-hwaccel=hevc_nvdec
+        - --enable-hwaccel=av1_nvdec
+    sources:
+      - type: git
+        url: https://github.com/cgutman/FFmpeg.git
+        commit: f116128cafb244bc0f809d0285932ced0471268d   # branch moonlight_8.1.1_r1
+
+  # --- libdrm with the Intel component: the SDK's stock libdrm only ships the core
+  # headers/.pc, not libdrm_intel (needed to build intel-vaapi-driver below). The runtime
+  # GL extension does carry a libdrm_intel.so at app-RUN-time, but not at build time, so we
+  # build our own here and ship it in /app/lib (self-contained, no cross-module coupling). ---
+  - name: libdrm
+    buildsystem: meson
+    config-opts:
+      - -Dintel=enabled
+      - -Dradeon=disabled
+      - -Damdgpu=disabled
+      - -Dnouveau=disabled
+      - -Dvmwgfx=disabled
+      - -Dfreedreno=disabled
+      - -Dvc4=disabled
+      - -Detnaviv=disabled
+      - -Dvalgrind=disabled
+      - -Dudev=false
+      - -Dman-pages=disabled
+      - -Dtests=false
+      - -Dcairo-tests=disabled
+    sources:
+      - type: archive
+        url: https://dri.freedesktop.org/libdrm/libdrm-2.4.124.tar.xz
+        sha256: ac36293f61ca4aafaf4b16a2a7afff312aa4f5c37c9fbd797de9e3c0863ca379
+
+  # --- i965 for Haswell/pre-Broadwell Intel (make-or-break) ---
+  - name: intel-vaapi-driver
+    buildsystem: meson
+    config-opts:
+      # Install i965_drv_video.so to our own app dir. Without this, the driver's meson takes
+      # libva's pkg-config `driverdir` -- which is the colon-separated RUNTIME search list --
+      # and tries to install into that literal multi-path string in read-only /usr. Set it
+      # explicitly; LIBVA_DRIVERS_PATH (finish-args) then makes libva find it at runtime.
+      - -Ddriverdir=/app/lib/dri
+    only-arches: [x86_64, i386]
+    sources:
+      - type: git
+        url: https://github.com/intel/intel-vaapi-driver.git
+        tag: '2.4.1'
+
+  # --- QAdwaitaDecorations: GNOME native titlebar WITH a real drop shadow. ---
+  # The runtime's own lib/plugins/wayland-decoration-client/libadwaita.so is Qt's
+  # in-tree adwaita plugin (qtwayland >= 6.8, a port of this very project) which
+  # DROPPED shadow painting: it reserves 10px shadow margins and leaves them fully
+  # transparent (verified in qtwayland 6.10.3 sources), so windows get a titlebar
+  # but no shadow. The standalone FedoraQt plugin still paints a real shadow and,
+  # since 2026-01-17 (post-0.1.7, main only), registers the collision-free plugin
+  # key "qadwaitadecorations" so it can be selected over Qt's in-tree copy (both
+  # also register "adwaita", a collision Qt's copy wins). Built from a pinned main
+  # commit: the 0.1.7 tag neither builds against Qt 6.10 nor has the dedicated key.
+  # app/main.cpp feature-detects this plugin's metadata and prefers
+  # QT_WAYLAND_DECORATION=qadwaitadecorations when it's present.
+  # NOTE: uses Qt private headers -- must be rebuilt when the runtime's Qt updates
+  # (a runtime major bump without a rebuild makes the plugin fail to load; main.cpp
+  # then falls back to the shadowless in-tree "adwaita" rather than breaking).
+  - name: qadwaitadecorations
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DUSE_QT6=ON
+      - -DQT_PLUGINS_DIR=/app/lib/plugins
+    sources:
+      - type: git
+        url: https://github.com/FedoraQt/QAdwaitaDecorations.git
+        commit: 22a97da98a8d91021c63600250711adf4ccf11d7
+
+  # --- gamescope WSI implicit Vulkan layer (x86_64). ---
+  - name: gamescope-wsi
+    buildsystem: simple
+    only-arches: [x86_64]
+    build-commands:
+      - install -Dm644 VkLayer_FROG_gamescope_wsi.x86_64.json /app/share/vulkan/implicit_layer.d/VkLayer_FROG_gamescope_wsi.x86_64.json
+    sources:
+      - type: inline
+        dest-filename: VkLayer_FROG_gamescope_wsi.x86_64.json
+        contents: |
+          {
+            "file_format_version": "1.0.0",
+            "layer": {
+              "name": "VK_LAYER_FROG_gamescope_wsi_x86_64",
+              "type": "GLOBAL",
+              "api_version": "1.3.221",
+              "library_path": "/var/run/host/usr/lib/libVkLayer_FROG_gamescope_wsi_x86_64.so",
+              "implementation_version": "1",
+              "description": "Gamescope WSI (XWayland Bypass) Layer (x86_64)",
+              "functions": { "vkNegotiateLoaderLayerInterfaceVersion": "vkNegotiateLoaderLayerInterfaceVersion" },
+              "enable_environment": { "ENABLE_GAMESCOPE_WSI": "1" },
+              "disable_environment": { "DISABLE_GAMESCOPE_WSI": "1" }
+            }
+          }
+
+  # --- Moonwalk app (built LAST; submodules fetched from git) ---
+  - name: starlight
+    buildsystem: qmake
+    config-opts:
+      - QMAKE_RPATHDIR=/app/lib
+      - PREFIX=/app
+    build-options:
+      config-opts:
+        - CONFIG+=enable-cuda
+        # AOT-compile QML (upstream enables this only for win/mac "since they always
+        # ship with the matching build of the Qt runtime" -- which is exactly the
+        # Flatpak situation too: the app is pinned to the runtime's Qt). Faster QML
+        # startup, and sidesteps the broken-by-design QML disk cache (see the
+        # QML_DISABLE_DISK_CACHE finish-arg above).
+        - CONFIG+=qtquickcompiler
+      arch:
+        x86_64:
+          config-opts:
+            - CONFIG+=enable-cuda
+            - CONFIG+=qtquickcompiler
+            - CONFIG+=disable-libdrm      # DRM/KMS renderer needs DRM-master; unusable in sandbox
+    sources:
+      - type: dir
+        path: ..
+        skip: [.git, build, flatpak]
+
+  # --- vainfo (libva-utils): a tiny, genuinely-useful VA-API diagnostic so a user or
+  # support can run `flatpak run --command=vainfo com.starlight.Starlight` to confirm their
+  # GPU's hardware decode is available inside the sandbox. Placed AFTER the app so its build
+  # doesn't invalidate the app module's flatpak-builder cache. ---
+  - name: libva-utils
+    buildsystem: meson
+    config-opts: [-Ddrm=true, -Dtests=false]
+    sources:
+      - type: git
+        url: https://github.com/intel/libva-utils.git
+        tag: '2.22.0'

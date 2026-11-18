@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/tests/data">
+        <file alias="page-contract-v1.json">../data/page-contract-v1.json</file>
+        <file alias="adwaita-tokens-v1.json">../data/adwaita-tokens-v1.json</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,91 @@
+name: Linux checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Also build the complete AOT application'
+        type: boolean
+        default: false
+  schedule:
+    - cron: '23 5 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: recursive
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Select validation scope
+        id: scope
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
+          EVENT_NAME: ${{ github.event_name }}
+          RELEASE_CHECK: ${{ github.event_name == 'schedule' || inputs.release == true }}
+        run: python3 scripts/ci-scope.py >> "$GITHUB_OUTPUT"
+      - name: Check repository links, release identity and privacy
+        run: |
+          python3 scripts/check-repository.py
+          python3 scripts/check-privacy.py
+          test "$(git rev-list --max-parents=0 HEAD | wc -l)" -eq 1
+      - name: Install dependencies
+        if: steps.scope.outputs.checks == 'true'
+        timeout-minutes: 10
+        run: |
+          # Avoid the intermittently stalled regional mirror on hosted runners.
+          # This changes only the ephemeral runner's Ubuntu archive URL.
+          sudo python3 - <<'PY_MIRROR'
+          from pathlib import Path
+          for path in [Path("/etc/apt/sources.list"), *Path("/etc/apt/sources.list.d").glob("*.sources"), *Path("/etc/apt/sources.list.d").glob("*.list")]:
+              if path.is_file():
+                  before = path.read_text()
+                  after = before.replace("http://azure.archive.ubuntu.com/ubuntu", "https://archive.ubuntu.com/ubuntu")
+                  if after != before:
+                      path.write_text(after)
+          PY_MIRROR
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 update
+          sudo apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 install --no-install-recommends -y python3-yaml ccache qmake6 qt6-base-dev qt6-declarative-dev \
+            qt6-declarative-dev-tools \
+            qml6-module-qtcore qml6-module-qtqml \
+            qml6-module-qtqml-models qml6-module-qtqml-workerscript \
+            qml6-module-qtquick qml6-module-qtquick-window \
+            qml6-module-qtquick-layouts qml6-module-qtquick-templates \
+            qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qttest \
+            qml6-module-qt-labs-settings xvfb xauth openbox x11-utils \
+            libqt6svg6-dev qt6-tools-dev-tools libgl1-mesa-dev \
+            libsdl2-dev libsdl2-ttf-dev libopus-dev libssl-dev \
+            libavcodec-dev libavformat-dev libswscale-dev libva-dev \
+            libvdpau-dev libdrm-dev wayland-protocols libwayland-dev
+      - name: Cache compiler output
+        if: steps.scope.outputs.checks == 'true'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ccache
+          key: linux-qt6-${{ runner.arch }}-${{ github.sha }}
+          restore-keys: linux-qt6-${{ runner.arch }}-
+      - name: Check development runner
+        if: steps.scope.outputs.checks == 'true'
+        run: python3 -m unittest discover -s tests/tools -v
+      - name: Run host tests (Qt compatibility floor)
+        if: steps.scope.outputs.checks == 'true'
+        run: ./dev test --all --no-scope --build-dir "${{ runner.temp }}/starlight-dev"
+      - name: Compile production QML and validate resource paths
+        if: steps.scope.outputs.checks == 'true'
+        run: ./dev qmlcheck --no-scope --build-dir "${{ runner.temp }}/starlight-dev"
+      - name: Build application with AOT QML compilation
+        if: steps.scope.outputs.app == 'true'
+        run: ./dev build --aot --no-scope --build-dir "${{ runner.temp }}/starlight-dev"

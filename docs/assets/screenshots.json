@@ -1,0 +1,168 @@
+{
+  "render_inputs_sha256": "2be4b2fa8496105d4461543636203d4fd9eb7b4a1c23047fd1432f22a8ffa9b9",
+  "render_input_scope": [
+    "app/",
+    "tests/preview/",
+    "tests/qml/"
+  ],
+  "qt": "6.12.0",
+  "renderer": "offscreen software; production QML with private synthetic test state",
+  "streaming_or_native_compositor_proof": false,
+  "images": [
+    {
+      "filename": "first-launch-light.png",
+      "scene": "first-run-empty",
+      "desktop": "gnome",
+      "scheme": "light",
+      "sha256": "4d483201a95263faaccf80153fafcaf8f93d7f9d465cecc2c5e0ca040d02dfa8",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "hosts-light.png",
+      "scene": "hosts-ready",
+      "desktop": "gnome",
+      "scheme": "light",
+      "sha256": "2652a4f5099bf4e7c85ae30e2e68b14243050f9277dba306e18ddcfec1f66714",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "pair-light.png",
+      "scene": "hosts-unpaired",
+      "desktop": "gnome",
+      "scheme": "light",
+      "sha256": "61d6ddcaea034f9750e9a0e3c01a98717f803acfdb6e4552d5347c809319fa16",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "pin-light.png",
+      "scene": "pairing",
+      "desktop": "gnome",
+      "scheme": "light",
+      "sha256": "043a11ed86ccc5d0c08e3f9232e378b5d9eee6e224633346e0af23d017b13404",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "preferences-light.png",
+      "scene": "settings",
+      "desktop": "gnome",
+      "scheme": "light",
+      "sha256": "dd72c67ce303b09cbdbd33e05c17886417c0cbabf4c338540376a11529404420",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "shortcuts-light.png",
+      "scene": "shortcuts",
+      "desktop": "gnome",
+      "scheme": "light",
+      "sha256": "825f50786b06ac7e6698166081a59026af4d2c3bb39b8d29cefdb5f2e944032c",
+      "dimensions": [
+        1720,
+        1960
+      ]
+    },
+    {
+      "filename": "first-launch-dark.png",
+      "scene": "first-run-empty",
+      "desktop": "gnome",
+      "scheme": "dark",
+      "sha256": "de6d2763bbda30dd9dd7de90b87d12fbf11315b9281170581cbfed06a21dfb62",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "hosts-dark.png",
+      "scene": "hosts-ready",
+      "desktop": "gnome",
+      "scheme": "dark",
+      "sha256": "b3107457f4569a8ce7300b90783d4a5edc90f174f1a3b47429d89d1902832835",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "pair-dark.png",
+      "scene": "hosts-unpaired",
+      "desktop": "gnome",
+      "scheme": "dark",
+      "sha256": "03a8fa74454f96d84ccab027d46ccb6cc15dde18ef64fe6aeca46963e816c164",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "pin-dark.png",
+      "scene": "pairing",
+      "desktop": "gnome",
+      "scheme": "dark",
+      "sha256": "ac0e8b37831abbcfb6d7aa5c9c0a9b6d9df9545b2d2d29a928820919b05c7d91",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "preferences-dark.png",
+      "scene": "settings",
+      "desktop": "gnome",
+      "scheme": "dark",
+      "sha256": "8cbc2ddd0e6333e0881e6d90785142487f7cfc85b857cb58fa9eaa8da0bc88b5",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "shortcuts-dark.png",
+      "scene": "shortcuts",
+      "desktop": "gnome",
+      "scheme": "dark",
+      "sha256": "2e378910fbaa83e50785fe4866f113d4ac00f6562f4cf60e2d87e2e2ae9acc80",
+      "dimensions": [
+        1720,
+        1960
+      ]
+    },
+    {
+      "filename": "kde-light.png",
+      "scene": "hosts-ready",
+      "desktop": "plasma",
+      "scheme": "light",
+      "sha256": "28f6e6bec13dcf88d50201f1cb5bd1644fd6735cf1b63e10af32e8594dc07c8e",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    },
+    {
+      "filename": "kde-dark.png",
+      "scene": "hosts-ready",
+      "desktop": "plasma",
+      "scheme": "dark",
+      "sha256": "5d52d85d6b20831ee54fab8138737ce9219bc568eeaf5319815657a633f57b0f",
+      "dimensions": [
+        1720,
+        1440
+      ]
+    }
+  ],
+  "scale_factor": 2
+}

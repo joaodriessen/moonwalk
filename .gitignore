@@ -1,0 +1,17 @@
+*pro.user
+
+
+**/.vs/
+.vscode/
+build/
+artifacts/
+libs/
+config.tests/*/.qmake.stash
+config.tests/*/Makefile
+
+# Python development-tool bytecode
+__pycache__/
+
+# Local coding-agent state is not source or release material.
+.claude/
+.codex/

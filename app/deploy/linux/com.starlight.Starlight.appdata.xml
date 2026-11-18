@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>com.starlight.Starlight</id>
+	<metadata_license>CC0-1.0</metadata_license>
+	<project_license>GPL-3.0+</project_license>
+	<name>Moonwalk</name>
+	<summary>See and control another computer from your Linux desktop</summary>
+
+	<description>
+		<p>Moonwalk is a Linux remote-desktop streaming client built on Moonlight Qt. It follows GNOME and KDE Plasma, with a generic layout for other desktops. A compatible host runs on the computer you want to use.</p>
+		<p>This is a private alpha for invited testers on a trusted local network. Hardware, host version and permissions affect available features; broad hardware qualification is incomplete.</p>
+		<ul>
+			<li>Discover, pair with and connect to a host's Desktop target</li>
+			<li>Automatic stream settings with per-host Manual choices and recovery options</li>
+			<li>In-stream controls for sound, fullscreen, input release and disconnect</li>
+			<li>Hardware video decoding where the GPU and drivers support it</li>
+			<li>Clipboard and file-transfer extensions with compatible hosts</li>
+		</ul>
+	</description>
+
+	<url type="homepage">https://github.com/joaodriessen/moonwalk</url>
+	<url type="bugtracker">https://github.com/joaodriessen/moonwalk/issues</url>
+	<url type="help">https://github.com/joaodriessen/moonwalk/blob/main/docs/guides/getting-started.md</url>
+	<url type="vcs-browser">https://github.com/joaodriessen/moonwalk</url>
+	<developer id="com.starlight">
+		<name>Moonwalk</name>
+	</developer>
+	<launchable type="desktop-id">com.starlight.Starlight.desktop</launchable>
+	<provides>
+		<binary>starlight</binary>
+	</provides>
+	<content_rating type="oars-1.1" />
+
+    <releases>
+        <release version="0.3.1-alpha.17" date="2026-11-16" type="development">
+            <description><p>Honor Automatic display preparation and explicit connection options. Surface supported host fallback warnings while keeping the existing paired streaming path.</p></description>
+        </release>
+        <release version="0.3.1-alpha.15" date="2026-11-15" type="development">
+            <description><p>Keep working streams connected while optimizing: apply supported quality changes live and defer picture changes to the next connection, with an optional Apply Now action.</p></description>
+        </release>
+        <release version="0.3.1-alpha.14" date="2026-11-15" type="development">
+            <description>
+                <p>Detects retained Desktop sessions and offers verified host-control takeover before preparing a new main display.</p>
+                <p>Checks ownership on compatible hosts instead of silently opening another client's shared capture.</p>
+            </description>
+        </release>
+        <release version="0.3.1-alpha.13" date="2026-11-13" type="development">
+            <description>
+                <p>Connects to the main Desktop instead of automatically creating an additional monitor.</p>
+                <p>Ends HTTP connections explicitly between paired host requests.</p>
+            </description>
+        </release>
+        <release version="0.3.1-alpha.12" date="2026-11-12" type="development">
+            <description>
+                <p>Uses an advertised private desktop role when available, reconnects that role and releases its display without cancelling another client's game.</p>
+                <p>Preserves standard Desktop behavior on other hosts and sends advertised application UUIDs alongside numeric IDs.</p>
+            </description>
+        </release>
+        <release version="0.3.1-alpha.11" date="2026-11-12" type="development">
+            <description>
+                <p>Distinguishes Desktop launch targets from Vibepollo running-app shortcuts and recognizes host titles padded for sorting.</p>
+            </description>
+        </release>
+        <release version="0.3.1-alpha.10" date="2026-11-12" type="development">
+            <description>
+                <p>Improves copied diagnostic redaction and reminds users to review reports before sharing.</p>
+                <p>Includes source license notices and clarifies background cleanup and keyboard shortcut descriptions.</p>
+            </description>
+        </release>
+        <release version="0.3.1-alpha.9" date="2026-11-06" type="development">
+            <description>
+                <p>Keeps automatic tuning history across reconnects, verifies applied pictures, restores ineffective trials once, and bounds tuning disruption.</p>
+                <p>Retains encoder restart costs across resolutions and preserves desktop geometry when the host cannot negotiate desktop scale.</p>
+                <p>Requires authenticated paired-client state for target cleanup and preserves client authentication on new TLS connections.</p>
+            </description>
+        </release>
+        <release version="0.3.1-alpha.8" date="2026-11-06" type="development">
+            <description>
+                <p>Returns to the launcher immediately on disconnect while ending the remote session in the background.</p>
+                <p>Improves automatic tuning on hosts with limited telemetry, tries bitrate before small resolution changes, preserves requested frame rate, and restores the previous mode when a trial does not help.</p>
+            </description>
+        </release>
+        <release version="0.3.1-alpha.7" date="2026-11-05" type="development">
+            <description>
+                <p>Improves Desktop session cleanup and recovery, qualifies automatic performance learning, and preserves supported desktop scaling.</p>
+                <p>Follows the local HUD theme, corrects cursor coordinate scaling and HUD text metrics, and adds a host performance reset and negotiated video protection status.</p>
+            </description>
+        </release>
+    </releases>
+
+	<branding>
+		<color type="primary" scheme_preference="light">#710085</color>
+		<color type="primary" scheme_preference="dark">#55285d</color>
+	</branding>
+</component>

@@ -1,0 +1,8 @@
+[Icon Theme]
+Name=Opaque header regression fixture
+Directories=16/actions
+
+[16/actions]
+Size=16
+Type=Fixed
+Context=Actions

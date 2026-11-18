@@ -1,0 +1,51 @@
+name: Something isn't working
+description: Tell us what went wrong.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "For suspected security vulnerabilities, follow [Security](https://github.com/joaodriessen/moonwalk/blob/main/SECURITY.md). Do not post credentials or vulnerability details in an ordinary issue."
+  - type: markdown
+    attributes:
+      value: "[Troubleshooting](https://github.com/joaodriessen/moonwalk/blob/main/docs/guides/troubleshooting.md) covers the most common problems, if you'd like to check there first."
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened?
+      description: Include the relevant error text after removing host names, addresses, account details, and paths.
+    validations: {required: true}
+  - type: textarea
+    id: steps
+    attributes:
+      label: How can we see it happen?
+      placeholder: "1. Open Moonwalk\n2. Press Connect\n3. ..."
+    validations: {required: true}
+  - type: input
+    id: version
+    attributes:
+      label: Moonwalk version
+      description: It's under About Moonwalk in the main menu.
+    validations: {required: true}
+  - type: input
+    id: system
+    attributes:
+      label: Your Linux distribution and desktop
+      placeholder: Fedora 44, GNOME
+    validations: {required: true}
+  - type: input
+    id: host
+    attributes:
+      label: Host software, version, and computer
+      placeholder: Moonwalk Host on a Mac mini, Sunshine on Windows 11
+    validations: {required: true}
+  - type: dropdown
+    id: network
+    attributes:
+      label: How are the computers connected?
+      options: [Both by cable, One by cable and one on Wi-Fi, Both on Wi-Fi, Other or not sure]
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostic summary or screenshots
+      description: In Moonwalk's main menu, choose Copy Diagnostic Summary and paste it here. Read it first, and remove host names, addresses and anything else private.
+      render: text

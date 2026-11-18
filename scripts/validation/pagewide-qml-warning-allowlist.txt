@@ -1,0 +1,7 @@
+main.qml Qt.labs.settings deprecation
+nested-session host portal registration noise
+SLBusy.qml:16:9 BusyIndicator color pair
+WindowEffects deliberate component-not-ready failure
+WindowEffects deliberate destroyed-while-pending teardown
+WindowEffects deliberate failing segue required property
+WindowEffects deliberate missing quit segue push failure

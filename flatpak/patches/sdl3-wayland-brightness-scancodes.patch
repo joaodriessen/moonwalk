@@ -1,0 +1,24 @@
+--- a/include/SDL3/SDL_scancode.h
++++ b/include/SDL3/SDL_scancode.h
+@@ -415,6 +415,8 @@
+                                        of the display. */
+     SDL_SCANCODE_CALL = 289, /**< Used for accepting phone calls. */
+     SDL_SCANCODE_ENDCALL = 290, /**< Used for rejecting phone calls. */
++    SDL_SCANCODE_BRIGHTNESSDOWN = 291, /**< Screen brightness down (SDL2 compatibility). */
++    SDL_SCANCODE_BRIGHTNESSUP = 292, /**< Screen brightness up (SDL2 compatibility). */
+ 
+     /* @} *//* Mobile keys */
+ 
+--- a/src/events/scancodes_xfree86.h
++++ b/src/events/scancodes_xfree86.h
+@@ -404,8 +404,8 @@
+     /* 221, 0x0dd */   SDL_SCANCODE_UNKNOWN,            // XF86Shop
+     /* 222, 0x0de */   SDL_SCANCODE_UNKNOWN,            // NoSymbol
+     /* 223, 0x0df */   SDL_SCANCODE_CANCEL,             // Cancel
+-    /* 224, 0x0e0 */   SDL_SCANCODE_UNKNOWN,            // XF86MonBrightnessDown
+-    /* 225, 0x0e1 */   SDL_SCANCODE_UNKNOWN,            // XF86MonBrightnessUp
++    /* 224, 0x0e0 */   SDL_SCANCODE_BRIGHTNESSDOWN,     // XF86MonBrightnessDown
++    /* 225, 0x0e1 */   SDL_SCANCODE_BRIGHTNESSUP,       // XF86MonBrightnessUp
+     /* 226, 0x0e2 */   SDL_SCANCODE_MEDIA_SELECT,       // XF86AudioMedia
+     /* 227, 0x0e3 */   SDL_SCANCODE_UNKNOWN,            // XF86Display
+     /* 228, 0x0e4 */   SDL_SCANCODE_UNKNOWN,            // XF86KbdLightOnOff

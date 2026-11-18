@@ -1,0 +1,18 @@
+name: An idea
+description: Suggest something Moonwalk could do.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+    validations: {required: true}
+  - type: textarea
+    id: today
+    attributes:
+      label: What happens today?
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would help?
+      description: If you're not sure whether this belongs in Moonwalk or the host app, file it here anyway.

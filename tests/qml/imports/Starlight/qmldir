@@ -1,0 +1,5 @@
+module Starlight
+singleton Appearance 1.0 Appearance.qml
+singleton PlasmaAppearance 1.0 PlasmaAppearance.qml
+singleton PlatformProfile 1.0 PlatformProfile.qml
+singleton Theme 1.0 Theme.qml

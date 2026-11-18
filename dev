@@ -1,0 +1,329 @@
+#!/usr/bin/env python3
+"""Incremental, isolated development checks. See docs/development.md."""
+import argparse
+import concurrent.futures
+import contextlib
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import re
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+import xml.etree.ElementTree as ET
+
+SOURCE = Path(__file__).resolve().parent
+SLOW = {"tst_gnomepages", "tst_plasmapages", "tst_gnomesettings",
+        "tst_plasmasettings", "tst_pageroutes"}
+CANCELLED = threading.Event()
+
+
+def interrupt(_signal, _frame):
+    # ThreadPoolExecutor waits for workers on exit; wake their process waits first.
+    CANCELLED.set()
+    raise KeyboardInterrupt
+
+
+def suites():
+    qml = {p.stem: p for p in sorted((SOURCE / "tests/qml").glob("tst_*.qml"))}
+    cpp = {p.parent.name: p for p in sorted((SOURCE / "tests/auto").glob("*/*.pro"))}
+    return {**cpp, **qml}
+
+
+def changed_suites(reference, available):
+    paths = subprocess.check_output(
+        ["git", "diff", "--name-only", reference, "--"], cwd=SOURCE, text=True).splitlines()
+    paths += subprocess.check_output(
+        ["git", "ls-files", "--others", "--exclude-standard"], cwd=SOURCE, text=True).splitlines()
+    selected = set()
+    qml = {name for name in available if name.startswith("tst_")}
+    for path in paths:
+        parts = Path(path).parts
+        if path.startswith(("docs/", ".github/ISSUE_TEMPLATE/")) or path.endswith(".md"):
+            continue
+        if path.startswith("tests/qml/tst_") and Path(path).stem in available:
+            selected.add(Path(path).stem)
+        elif path.startswith("tests/auto/") and len(parts) > 2 and parts[2] in available:
+            selected.add(parts[2])
+        elif path.startswith("app/gui/adaptive/gnome/"):
+            selected.update(name for name in qml if "gnome" in name)
+            selected.update({"tst_accessibility", "tst_pageroutes"})
+        elif path.startswith("app/gui/adaptive/plasma/"):
+            selected.update(name for name in qml if "plasma" in name)
+            selected.update({"tst_accessibility", "tst_pageroutes"})
+        elif path.startswith(("app/gui/", "tests/qml/", "tests/data/")):
+            selected.update(qml)
+        else:
+            # Unknown/shared changes broaden coverage rather than silently skip it.
+            selected.update(available)
+    return selected
+
+
+def terminate(process):
+    """Reap the entire private process group, including display/session helpers."""
+    with contextlib.suppress(ProcessLookupError):
+        os.killpg(process.pid, signal.SIGTERM)
+    try:
+        process.wait(timeout=3)
+    except subprocess.TimeoutExpired:
+        pass
+    with contextlib.suppress(ProcessLookupError):
+        os.killpg(process.pid, signal.SIGKILL)
+    process.wait()
+
+
+def execute(command, log, env, cwd, timeout):
+    start = time.monotonic()
+    with log.open("w") as output:
+        output.write("$ " + repr(command) + "\n")
+        output.flush()
+        if CANCELLED.is_set():
+            output.write("CANCELLED\n")
+            return 130, 0
+        process = subprocess.Popen(command, cwd=cwd, env=env, stdout=output,
+                                   stderr=subprocess.STDOUT, start_new_session=True)
+        try:
+            while not CANCELLED.is_set():
+                try:
+                    code = process.wait(timeout=0.1)
+                    break
+                except subprocess.TimeoutExpired:
+                    if time.monotonic() - start >= timeout:
+                        output.write(f"\nTIMEOUT after {timeout}s\n")
+                        code = 124
+                        break
+            else:
+                output.write("\nCANCELLED\n")
+                code = 130
+        finally:
+            terminate(process)
+    return code, round(time.monotonic() - start, 2)
+
+
+@contextlib.contextmanager
+def isolated_environment(parent):
+    with tempfile.TemporaryDirectory(prefix="xdg-", dir=parent) as private:
+        env = os.environ.copy()
+        for key, name in [("XDG_CONFIG_HOME", "config"), ("XDG_CACHE_HOME", "cache"),
+                          ("XDG_DATA_HOME", "data"), ("XDG_RUNTIME_DIR", "runtime")]:
+            directory = Path(private) / name
+            directory.mkdir(mode=0o700)
+            env[key] = str(directory)
+        # Never autolaunch on the user's session/display or inherit a desktop fixture.
+        for key in list(env):
+            if key.startswith("STARLIGHT_TEST_") or key in (
+                    "DISPLAY", "WAYLAND_DISPLAY", "DBUS_SESSION_BUS_ADDRESS",
+                    "XDG_CURRENT_DESKTOP", "XDG_SESSION_DESKTOP"):
+                env.pop(key, None)
+        env.update(QT_QPA_PLATFORM="offscreen", QT_QUICK_BACKEND="software",
+                   QT_QUICK_CONTROLS_STYLE="Material", QML_DISABLE_DISK_CACHE="1",
+                   DBUS_SESSION_BUS_ADDRESS="unix:path=" + private + "/no-session-bus")
+        yield env
+
+
+def configure_build(project, directory, log, env, args, aot=False):
+    directory.mkdir(parents=True, exist_ok=True)
+    command = [args.qmake, str(project)]
+    if project.name == "moonlight-qt.pro":
+        command.append("CONFIG+=qtquickcompiler" if aot else "CONFIG-=qtquickcompiler")
+    if shutil.which("ccache"):
+        command += ["QMAKE_CC=ccache gcc", "QMAKE_CXX=ccache g++"]
+    code, _ = execute(command, log.with_suffix(".qmake.log"), env, directory, 120)
+    if not code and re.search(r"TEMPLATE\s*=\s*subdirs", project.read_text()):
+        # qmake only regenerates the top-level Makefile. Existing subdirectory
+        # Makefiles otherwise retain old configuration/command-line arguments.
+        code, _ = execute(["make", "qmake_all"], log.with_suffix(".configure.log"),
+                          env, directory, 120)
+    if not code:
+        code, _ = execute(["make", "-j" + str(len(os.sched_getaffinity(0)))],
+                          log, env, directory, 1200)
+    if code:
+        raise RuntimeError(f"Build failed: see {log} and adjacent configuration logs")
+
+
+def compile_qml(args, root, results, env):
+    """Use the production AOT compiler without compiling/linking the C++ app."""
+    libexec = Path(subprocess.check_output(
+        [args.qmake, "-query", "QT_HOST_LIBEXECS"], text=True).strip())
+    compiler = libexec / "qmlcachegen"
+    if not compiler.is_file():
+        raise RuntimeError(f"Missing {compiler}; install Qt declarative development tools")
+    inputs = []
+    for resource in [SOURCE / "app/resources.qrc", SOURCE / "app/qml.qrc"]:
+        for entry in ET.parse(resource).iter("file"):
+            source = resource.parent / entry.text
+            if not source.is_file():
+                raise RuntimeError(f"Missing resource: {source}")
+            if source.suffix in (".qml", ".js", ".mjs"):
+                inputs.append((source, resource))
+    output = root / "qml-aot"
+    output.mkdir(exist_ok=True)
+
+    def compile_one(pair):
+        source, resource = pair
+        name = hashlib.sha256(str(source).encode()).hexdigest()[:16]
+        log = results / (source.name + "-" + name + ".log")
+        code, _ = execute([str(compiler), "--resource=" + str(resource),
+                           "-o", str(output / (name + ".cpp")), str(source)],
+                          log, env, SOURCE, args.timeout)
+        if code:
+            print(f"QML compilation failed: {source}\n{log.read_text()}", flush=True)
+        return code
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+        codes = list(pool.map(compile_one, inputs))
+    if any(codes):
+        raise RuntimeError(f"QML compilation failed; logs: {results}")
+    return len(inputs)
+
+
+def run_suite(name, project, args, root, results):
+    if project.suffix == ".qml":
+        command = [str(root / "build/qml/tst_qmlcharacterization"), "-input", str(project)]
+    else:
+        binaries = [p for p in (root / "build/auto" / name).rglob("tst_*")
+                    if p.is_file() and os.access(p, os.X_OK) and not p.suffix
+                    and not p.name.endswith("_helper")]
+        if len(binaries) != 1:
+            raise RuntimeError(f"Expected one test executable for {name}: {binaries}")
+        command = [str(binaries[0])]
+    command += args.function
+    log = results / (name + ".log")
+    with isolated_environment(results) as env:
+        env["QT_QUICK_CONTROLS_STYLE"] = args.style
+        code, elapsed = execute(command, log, env, SOURCE, args.timeout)
+    text = log.read_text(errors="replace")
+    totals = re.search(r"Totals: (\d+) passed, (\d+) failed, (\d+) skipped", text)
+    ok = code == 0 and totals is not None and int(totals[2]) == 0
+    record = dict(suite=name, ok=ok, seconds=elapsed, exit_code=code, log=str(log),
+                  passed=int(totals[1]) if totals else 0,
+                  failed=int(totals[2]) if totals else 0,
+                  skipped=int(totals[3]) if totals else 0)
+    print(f"{'PASS' if ok else 'FAIL'} {name:28} {elapsed:6.2f}s", flush=True)
+    if not ok:
+        print("\n".join(text.splitlines()[-20:]), flush=True)
+    return record
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=["check", "test", "build", "qmlcheck", "list"])
+    parser.add_argument("selectors", nargs="*", help="QML file stem or C++ suite directory")
+    parser.add_argument("--all", action="store_true", help="all host tests (no app build)")
+    parser.add_argument("--changed", metavar="REF", help="add suites affected since a Git ref")
+    parser.add_argument("--function", action="append", default=[], help="one QtTest function")
+    parser.add_argument("--aot", action="store_true", help="separate release/AOT app build")
+    parser.add_argument("--style", default="Material", help="Qt Quick Controls style for tests")
+    parser.add_argument("--timeout", type=int, default=120, help="seconds per test process")
+    parser.add_argument("--jobs", type=int, default=4, help="concurrent test processes")
+    parser.add_argument("--qmake", default=os.environ.get("QMAKE", "qmake6"))
+    parser.add_argument("--build-dir", type=Path, default=os.environ.get("STARLIGHT_DEV_ROOT"))
+    parser.add_argument("--no-scope", action="store_true", help="CI/container owns resource limits")
+    args = parser.parse_intermixed_args(argv)
+    available = suites()
+    if args.command == "list":
+        for name in available:
+            print(name)
+        return 0
+    if args.timeout < 1 or args.jobs < 1:
+        parser.error("--timeout and --jobs must be positive")
+    unknown = set(args.selectors) - available.keys()
+    if unknown:
+        parser.error("Unknown suite(s): " + ", ".join(sorted(unknown)) + "; use ./dev list")
+    selected = set(args.selectors)
+    if args.command == "check":
+        selected.update(available.keys() - SLOW)
+    if args.all:
+        selected.update(available)
+    if args.changed:
+        selected.update(changed_suites(args.changed, available))
+    if args.function and (args.command != "test" or len(selected) != 1):
+        parser.error("--function requires exactly one explicit test suite")
+    if args.command == "test" and not selected and not args.changed:
+        parser.error("Select a suite, --all, or --changed REF; use ./dev check for the fast gate")
+    if args.command in ("build", "qmlcheck") and (selected or args.function or args.changed):
+        parser.error("build/qmlcheck do not accept test selectors")
+    if args.aot and args.command != "build":
+        parser.error("--aot is only valid with build")
+    qmake = shutil.which(args.qmake)
+    if not qmake:
+        parser.error(f"{args.qmake} is missing; see docs/building.md")
+    args.qmake = qmake
+    qt = subprocess.check_output([qmake, "-query", "QT_VERSION"], text=True).strip()
+    identity = hashlib.sha256(str(SOURCE).encode()).hexdigest()[:12]
+    cache = Path(os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache")))
+    root = (args.build_dir or cache / "starlight-dev" / (identity + "-qt" + qt)).resolve()
+    # Scope the complete process tree on systemd desktops; CI opts out explicitly.
+    if not args.no_scope and not os.environ.get("STARLIGHT_DEV_MANAGED"):
+        if shutil.which("systemd-run") and subprocess.run(
+                ["systemctl", "--user", "show-environment"], stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL).returncode == 0:
+            return subprocess.call([
+                "systemd-run", "--user", "--quiet", "--wait", "--pipe", "--collect",
+                "-p", "MemoryHigh=3G", "-p", "MemoryMax=4G", "-p", "RuntimeMaxSec=1800",
+                "--working-directory=" + str(SOURCE),
+                "--setenv=STARLIGHT_DEV_MANAGED=1", "--setenv=STARLIGHT_DEV_ROOT=" + str(root),
+                *(["--setenv=STARLIGHT_BUILD_REVISION=" + os.environ["STARLIGHT_BUILD_REVISION"]]
+                  if "STARLIGHT_BUILD_REVISION" in os.environ else []),
+                sys.executable, str(SOURCE / "dev"), *(argv if argv is not None else sys.argv[1:]),
+                "--build-dir", str(root), "--qmake", args.qmake])
+        print("No user systemd manager; running directly (CI/container must bound resources).")
+    root.mkdir(parents=True, exist_ok=True)
+    # A cache belongs to one worktree and Qt version, including explicitly chosen caches.
+    identity_file = root / "source.json"
+    identity_data = {"source": str(SOURCE), "qt": qt}
+    with (root / ".lock").open("w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        if identity_file.exists() and json.loads(identity_file.read_text()) != identity_data:
+            raise RuntimeError(f"Cache belongs to a different source/Qt; choose another --build-dir: {root}")
+        identity_file.write_text(json.dumps(identity_data) + "\n")
+        results = root / "results" / (time.strftime("%Y%m%d-%H%M%S") + f"-{os.getpid()}")
+        results.mkdir(parents=True)
+        print(f"Qt {qt}; cache {root}\nLogs: {results}", flush=True)
+        start = time.monotonic()
+        with isolated_environment(results) as env:
+            if args.command == "qmlcheck":
+                count = compile_qml(args, root, results, env)
+                print(f"Compiled {count} QML/JS resources in {time.monotonic() - start:.2f}s")
+                return 0
+            if args.command == "build":
+                directory = root / ("app-aot" if args.aot else "app-build")
+                configure_build(SOURCE / "moonlight-qt.pro", directory,
+                                results / "app-build.log", env, args, args.aot)
+                print(f"Built {directory / 'app/starlight'} in {time.monotonic() - start:.1f}s")
+                return 0
+            if any(available[name].suffix == ".qml" for name in selected):
+                configure_build(SOURCE / "tests/qml/qml.pro", root / "build/qml",
+                                results / "qml-build.log", env, args)
+            for name in sorted(selected):
+                project = available[name]
+                if project.suffix == ".pro":
+                    configure_build(project, root / "build/auto" / name,
+                                    results / (name + "-build.log"), env, args)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+            records = list(pool.map(lambda name: run_suite(name, available[name], args, root, results),
+                                    sorted(selected)))
+        summary = dict(seconds=round(time.monotonic() - start, 2), qt=qt, suites=records)
+        (results / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+        failed = sum(not record["ok"] for record in records)
+        print(f"{len(records)} suites, {failed} failed, {sum(r['skipped'] for r in records)} skipped; "
+              f"{summary['seconds']:.2f}s including incremental build", flush=True)
+        return int(failed > 0)
+
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, interrupt)
+    signal.signal(signal.SIGTERM, interrupt)
+    try:
+        sys.exit(main())
+    except (RuntimeError, subprocess.CalledProcessError) as error:
+        print(error, file=sys.stderr)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        sys.exit(130)

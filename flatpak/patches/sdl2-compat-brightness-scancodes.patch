@@ -1,0 +1,38 @@
+--- a/src/sdl2_compat.c
++++ b/src/sdl2_compat.c
+@@ -2147,6 +2147,10 @@
+         return SDL_SCANCODE_MEDIA_EJECT;
+     case SDL2_SCANCODE_MEDIASELECT:
+         return SDL_SCANCODE_MEDIA_SELECT;
++    case SDL2_SCANCODE_BRIGHTNESSDOWN:
++        return SDL_SCANCODE_BRIGHTNESSDOWN;
++    case SDL2_SCANCODE_BRIGHTNESSUP:
++        return SDL_SCANCODE_BRIGHTNESSUP;
+     default:
+         return SDL_SCANCODE_UNKNOWN;
+     }
+@@ -2178,6 +2182,10 @@
+         return SDL2_SCANCODE_EJECT;
+     case SDL_SCANCODE_MEDIA_SELECT:
+         return SDL2_SCANCODE_MEDIASELECT;
++    case SDL_SCANCODE_BRIGHTNESSDOWN:
++        return SDL2_SCANCODE_BRIGHTNESSDOWN;
++    case SDL_SCANCODE_BRIGHTNESSUP:
++        return SDL2_SCANCODE_BRIGHTNESSUP;
+     default:
+         return SDL2_SCANCODE_UNKNOWN;
+     }
+@@ -2188,6 +2196,13 @@
+     /* Keys without the extended mask are passed through. */
+     if (!(keycode & SDLK_EXTENDED_MASK)) {
+         return keycode;
++    }
++
++    if (scancode == SDL_SCANCODE_BRIGHTNESSDOWN) {
++        return SDL_SCANCODE_TO_KEYCODE(SDL2_SCANCODE_BRIGHTNESSDOWN);
++    }
++    if (scancode == SDL_SCANCODE_BRIGHTNESSUP) {
++        return SDL_SCANCODE_TO_KEYCODE(SDL2_SCANCODE_BRIGHTNESSUP);
+     }
+ 
+     /* SDLK_TAB is an ASCII value and can't be converted directly from a scancode. */

@@ -1,0 +1,2 @@
+defining ‘QBitArray’, which previously failed to be complete in a SFINAE context [-Wsfinae-incomplete=]
+defining ‘QChar’, which previously failed to be complete in a SFINAE context [-Wsfinae-incomplete=]

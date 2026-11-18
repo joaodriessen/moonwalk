@@ -1,0 +1,16 @@
+# Normalize line endings for everything Git considers text, using its own
+# heuristic to decide what counts as text.
+* text=auto
+
+# Force LF for the file types this fork actually authors/edits day to day.
+*.sh   text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.qml  text eol=lf
+*.cpp  text eol=lf
+*.h    text eol=lf
+
+# Checked-in Windows binaries (inherited upstream packaging scaffolding,
+# unused by this fork's Linux/Flatpak build) — never touch as text.
+scripts/jom.exe binary
+scripts/vswhere.exe binary

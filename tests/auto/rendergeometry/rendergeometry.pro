@@ -1,0 +1,9 @@
+QT += core testlib
+QT -= gui
+CONFIG += c++17 console testcase link_pkgconfig
+PKGCONFIG += sdl2
+TEMPLATE = app
+TARGET = tst_rendergeometry
+INCLUDEPATH += ../../../app
+SOURCES += tst_rendergeometry.cpp
+HEADERS += ../../../app/streaming/video/rendergeometry.h ../../../app/streaming/viewscalepolicy.h
