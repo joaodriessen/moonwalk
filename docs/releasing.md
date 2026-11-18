@@ -45,10 +45,20 @@ tracks the inherited engine version.
    app and run `python3 scripts/check-repository.py --check-flatpak-pin`.
    This checks source inputs and the installed root license against that
    revision. Test access to the pinned source separately.
-4. Inspect the built bundle. Confirm the version, app ID, files, and
-   permissions. Test a fresh install and an upgrade with private profiles.
-   Check that settings and pairings survive. Run the affected streaming paths
-   using that exact bundle and keep the previous usable bundle.
+4. Verify the exported file against the staged candidate. With Flatpak,
+   OSTree, and the matching platform runtime installed, run:
+
+   ```sh
+   python3 scripts/verify-flatpak-bundle.py /path/to/candidate /path/to/Moonwalk-build.flatpak
+   ```
+
+   The check imports the bundle into a temporary repository and runs its
+   binary's version command in an isolated runtime. It checks the app ID,
+   release version, source revision, launcher, and GPL notice, then prints a
+   checksum and runtime commit. Review permissions and test a fresh install
+   and an upgrade with private profiles separately. Check that settings and
+   pairings survive, run the affected streaming paths with that same bundle,
+   and keep the previous usable bundle.
 5. Publish the tested bundle with its checksum, corresponding source, and
    release notes after the release decision. Leave earlier release assets
    intact so existing downloads remain identifiable.

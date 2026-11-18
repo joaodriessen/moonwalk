@@ -5,6 +5,9 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 
 ## Unreleased
 
+- Pin every Flatpak Git dependency to a commit, keep local build paths out of
+  staged provenance, and check the exported bundle against the source revision.
+
 - Rewrite the README, guides, package description, and support forms to
   match the current client and the features compatible hosts provide.
 - Clarify what the host page plans to request and what Moonwalk can confirm

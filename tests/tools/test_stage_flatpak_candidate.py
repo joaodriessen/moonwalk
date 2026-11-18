@@ -90,7 +90,7 @@ class CandidateStagingTests(unittest.TestCase):
         manifest_path = self.output / "manifest.yaml"
         manifest = yaml.safe_load(manifest_path.read_text())
         app = manifest["modules"][-1]
-        self.assertEqual(app["sources"], [{"type": "dir", "path": str(self.output / "source")}])
+        self.assertEqual(app["sources"], [{"type": "dir", "path": "source"}])
         self.assertEqual(app["build-options"]["env"], {"OTHER": "keep", "STARLIGHT_BUILD_REVISION": self.revision})
         self.assertEqual(result["build_working_directory"], str(self.output))
         self.assertEqual(shlex.split(result["build_command"])[-1], "manifest.yaml")
@@ -99,11 +99,24 @@ class CandidateStagingTests(unittest.TestCase):
         self.assertEqual(result["manifest_sha256"], staging.file_hash(manifest_path))
         self.assertEqual(result["patches_sha256"]["patches/input.patch"], staging.file_hash(patch))
         self.assertEqual(result["source_sha256"], staging.source_hash(self.output / "source"))
-        self.assertEqual(json.loads((self.output / "provenance.json").read_text()), result)
+        provenance = (self.output / "provenance.json").read_text()
+        self.assertNotIn(str(self.root), provenance)
+        self.assertNotIn("build_command", json.loads(provenance))
         second = self.stage(output=self.root / "candidate-two")
-        self.assertEqual(result["source_sha256"], second["source_sha256"])
-        self.assertEqual(result["dependencies_sha256"], second["dependencies_sha256"])
+        self.assertEqual(result["manifest_sha256"], second["manifest_sha256"])
+        self.assertEqual(provenance, (self.root / "candidate-two/provenance.json").read_text())
         self.assertFalse((self.root / "warm").exists(), "staging must not invoke the builder")
+
+    def test_tag_only_dependency_cannot_enter_a_candidate(self):
+        path = self.repo / "flatpak/com.starlight.Starlight.yaml"
+        manifest = yaml.safe_load(path.read_text())
+        source = manifest["modules"][0]["sources"][0]
+        del source["commit"]
+        source["tag"] = "v1.0"
+        path.write_text(yaml.safe_dump(manifest))
+        with self.assertRaisesRegex(RuntimeError, "exact commit in sdl"):
+            self.stage(revision=commit(self.repo))
+        self.assertFalse(self.output.exists())
 
     def test_requested_revision_uses_its_pinned_submodule_not_current_checkout(self):
         engine = self.repo / "engine"

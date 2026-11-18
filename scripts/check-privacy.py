@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Reject common private material from the exact staged Git tree."""
+"""Check the Git index or an exact commit for common private material."""
+import argparse
 from pathlib import PurePosixPath
 import re
 import struct
@@ -16,6 +17,8 @@ PRIVATE_FILES = re.compile(r"(?i)(?:\.(?:env|pfx|p12|key|etl|pcapng?|log|sqlite3
 PRIVATE_DIRS = {".claude", ".codex", ".ssh", ".gnupg", ".superpowers"}
 PNG = b"\x89PNG\r\n\x1a\n"
 PNG_PRIVATE_CHUNKS = {b"eXIf", b"tEXt", b"iTXt", b"zTXt"}
+PROJECT_EMAIL = re.compile(rb"(?:[A-Za-z0-9._+\[\]-]+@users\.noreply\.github\.com|"
+                           rb"noreply@github\.com|[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.invalid)")
 
 
 def check_blob(data):
@@ -40,25 +43,42 @@ def check_blob(data):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--commit", help="check the tree and metadata of a commit instead of the index")
+    parser.add_argument("--show-paths", action="store_true", help="include filenames in local findings")
+    args = parser.parse_args()
     git = ["git", "-C", str(PurePosixPath(__file__).parent.parent)]
-    entries = subprocess.check_output(git + ["ls-files", "--stage", "-z"]).split(b"\0")
     errors = 0
 
     def report(reason, path):
         nonlocal errors
         errors += 1
         # Avoid repeating sensitive names in hosted workflow logs.
-        where = f": {path}" if "--show-paths" in sys.argv else ""
+        where = f": {path}" if args.show_paths else ""
         print(f"Privacy check: {reason}{where}", file=sys.stderr)
+
+    if args.commit:
+        commit = subprocess.check_output(git + ["rev-parse", "--verify", "--end-of-options",
+                                                f"{args.commit}^{{commit}}"], text=True).strip()
+        addresses = subprocess.check_output(git + ["show", "-s", "--format=%ae%n%ce", commit]).splitlines()
+        if len(addresses) != 2 or not all(PROJECT_EMAIL.fullmatch(address) for address in addresses):
+            report("use a GitHub no-reply address or a project .invalid address", "commit metadata")
+        for reason in check_blob(subprocess.check_output(git + ["cat-file", "commit", commit])):
+            report(reason, "commit metadata")
+        command = ["ls-tree", "-rz", "--full-tree", commit]
+    else:
+        command = ["ls-files", "--stage", "-z"]
+    entries = subprocess.check_output(git + command).split(b"\0")
 
     with subprocess.Popen(git + ["cat-file", "--batch"], stdin=subprocess.PIPE, stdout=subprocess.PIPE) as batch:
         for entry in filter(None, entries):
             stat, raw_path = entry.split(b"\t", 1)
-            mode, oid, stage = stat.split()
+            mode, first, last = stat.split()
+            oid = last if args.commit else first
             path = PurePosixPath(raw_path.decode(errors="surrogateescape"))
             if PRIVATE_DIRS.intersection(path.parts) or PRIVATE_FILES.search(path.name):
                 report("private file or directory", path)
-            if stage != b"0":
+            if not args.commit and last != b"0":
                 report("unresolved index conflict", path)
                 continue
             if mode == b"160000":
@@ -77,7 +97,7 @@ def main():
     if errors:
         print(f"{errors} privacy findings. Review locally with --show-paths.", file=sys.stderr)
         return 1
-    print("Staged privacy checks passed.")
+    print("Commit privacy checks passed." if args.commit else "Staged privacy checks passed.")
     return 0
 
 

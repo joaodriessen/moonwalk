@@ -24,12 +24,6 @@ while read -r local_ref local_oid remote_ref remote_oid; do
         git rev-list "$tip" "^$remote_oid" > "$temp/commits"
     fi
     while IFS= read -r commit; do
-        git show -s --format='%ae%n%ce' "$commit" > "$temp/addresses"
-        if grep -qvE '^([A-Za-z0-9._+-]+@users\.noreply\.github\.com|[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.invalid)$' "$temp/addresses"; then
-            echo "Push blocked: use a GitHub no-reply address or a project .invalid address." >&2
-            exit 1
-        fi
-        GIT_INDEX_FILE="$temp/index" git read-tree "$commit"
-        GIT_INDEX_FILE="$temp/index" python3 scripts/check-privacy.py --show-paths
+        python3 scripts/check-privacy.py --commit "$commit" --show-paths
     done < "$temp/commits"
 done

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       release:
-        description: 'Also build the complete AOT application'
+        description: 'Verify release source and build the complete AOT application'
         type: boolean
         default: false
   schedule:
@@ -38,10 +38,17 @@ jobs:
           RELEASE_CHECK: ${{ github.event_name == 'schedule' || inputs.release == true }}
         run: python3 scripts/ci-scope.py >> "$GITHUB_OUTPUT"
       - name: Check repository links, release identity and privacy
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
-          python3 scripts/check-repository.py
-          python3 scripts/check-privacy.py
           test "$(git rev-list --max-parents=0 HEAD | wc -l)" -eq 1
+          base=$(git rev-parse --verify --quiet --end-of-options "$BASE_REF^{commit}") || base=""
+          revisions=$(git rev-list HEAD ${base:+"^$base"})
+          for revision in $revisions; do
+            python3 scripts/check-privacy.py --commit "$revision"
+          done
+          python3 scripts/check-privacy.py
+          python3 scripts/check-repository.py
       - name: Install dependencies
         if: steps.scope.outputs.checks == 'true'
         timeout-minutes: 10
@@ -82,6 +89,13 @@ jobs:
       - name: Check development runner
         if: steps.scope.outputs.checks == 'true'
         run: python3 -m unittest discover -s tests/tools -v
+      - name: Verify release source and stage the Flatpak
+        if: inputs.release == true
+        run: |
+          python3 scripts/check-repository.py --check-flatpak-pin
+          python3 scripts/stage-flatpak-candidate.py \
+            --output "$RUNNER_TEMP/moonwalk-candidate" \
+            --workspace "$RUNNER_TEMP/moonwalk-flatpak" > "$RUNNER_TEMP/moonwalk-stage.json"
       - name: Run host tests (Qt compatibility floor)
         if: steps.scope.outputs.checks == 'true'
         run: ./dev test --all --no-scope --build-dir "${{ runner.temp }}/starlight-dev"

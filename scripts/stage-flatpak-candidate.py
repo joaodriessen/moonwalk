@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import re
 import shlex
 import shutil
 import stat
@@ -86,6 +87,17 @@ def modules(manifest):
         yield from modules(module)
 
 
+def check_source_pins(all_modules):
+    for module in all_modules:
+        for source in module.get("sources", []):
+            kind = source.get("type")
+            if kind == "git" and not re.fullmatch(r"[0-9a-f]{40}", str(source.get("commit", ""))):
+                raise RuntimeError(f"Git source needs an exact commit in {module['name']}")
+            if kind in {"archive", "file"} and "url" in source:
+                if not re.fullmatch(r"[0-9a-f]{64}", str(source.get("sha256", ""))):
+                    raise RuntimeError(f"Downloaded source needs a SHA-256 checksum in {module['name']}")
+
+
 def stage(repo, revision, output, workspace, build_dir=None):
     repo, output, workspace = repo.resolve(), output.resolve(), workspace.resolve()
     effective_build = (build_dir or workspace / "build-dir").resolve()
@@ -112,6 +124,7 @@ def stage(repo, revision, output, workspace, build_dir=None):
         apps = [module for module in all_modules if module.get("name") == "starlight"]
         if len(apps) != 1 or len(apps[0].get("sources", [])) != 1 or apps[0]["sources"][0].get("type") != "git":
             raise RuntimeError("expected one starlight module with one canonical Git source")
+        check_source_pins(all_modules)
         dependencies = [module for module in all_modules if module is not apps[0]]
         patches = {}
         for module in all_modules:
@@ -135,25 +148,28 @@ def stage(repo, revision, output, workspace, build_dir=None):
                          if key in manifest},
             "modules": dependencies, "local_sources_sha256": patches,
         })
-        apps[0]["sources"] = [{"type": "dir", "path": str(output / "source")}]
+        apps[0]["sources"] = [{"type": "dir", "path": "source"}]
         apps[0].setdefault("build-options", {}).setdefault("env", {})["STARLIGHT_BUILD_REVISION"] = commit
         local_manifest = candidate / "manifest.yaml"
         local_manifest.write_text(yaml.safe_dump(manifest, sort_keys=False))
         build_command = ["flatpak-builder", "--user", "--force-clean",
                          f"--state-dir={workspace / '.flatpak-builder'}", f"--repo={workspace / 'repo'}",
                          str(effective_build), "manifest.yaml"]
-        result = {
+        provenance = {
             "revision": commit, "submodules": submodules, "source_sha256": source_hash(source),
             "canonical_manifest_sha256": file_hash(canonical), "manifest_sha256": file_hash(local_manifest),
             "dependencies_sha256": dependency_hash, "patches_sha256": patches,
             "dependencies": [{"name": item["name"], "definition_sha256": value_hash(item),
                               "sources": item.get("sources", [])} for item in dependencies],
+        }
+        result = {
+            **provenance,
             "build_command": shlex.join(build_command),
             "build_working_directory": str(output),
             "bundle_command": shlex.join(["flatpak", "build-bundle", str(workspace / "repo"),
-                                          str(output / f"Starlight-{commit[:12]}.flatpak"), manifest["app-id"]]),
+                                          str(output / f"Moonwalk-{commit[:12]}.flatpak"), manifest["app-id"]]),
         }
-        (candidate / "provenance.json").write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")
+        (candidate / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n")
         # A concurrent edit must not turn this into a claimed clean candidate.
         clean_repository(repo)
         candidate.rename(output)

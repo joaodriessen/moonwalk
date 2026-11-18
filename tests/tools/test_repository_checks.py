@@ -1,6 +1,8 @@
 """Release drift and missed-build regressions, using private synthetic files."""
 import importlib.util
 from pathlib import Path
+import shutil
+import sys
 import tempfile
 import unittest
 import subprocess
@@ -61,8 +63,14 @@ class RepositoryChecks(unittest.TestCase):
         self.assertEqual(len(repository.check(self.repo)), 2)
 
     def test_external_urls_and_fragments_need_no_network(self):
-        (self.repo / "docs/guide.md").write_text('[Section](#section) [Mail](mailto:test@example.invalid)')
+        (self.repo / "docs/guide.md").write_text(
+            "[Section](#section-1) [Mail](mailto:test@example.invalid)\n## Section\n## Section\n")
         self.assertEqual(repository.check(self.repo), [])
+
+    def test_links_to_missing_headings_are_rejected(self):
+        (self.repo / "README.md").write_text('[In code](docs/guide.md#example)')
+        (self.repo / "docs/guide.md").write_text('```sh\n# Example\n```\n')
+        self.assertTrue(any("missing heading" in error for error in repository.check(self.repo)))
 
     def test_links_cannot_escape_repository(self):
         (self.repo / "README.md").write_text('[Private](../)')
@@ -108,6 +116,35 @@ class RepositoryChecks(unittest.TestCase):
             with self.subTest(value=value):
                 manifest.write_text(value)
                 self.assertTrue(repository.check_flatpak_pin(self.repo))
+
+    def test_commit_privacy_catches_details_removed_from_the_next_revision(self):
+        def git(*args):
+            return subprocess.check_output(["git", "-C", str(self.repo), *args], text=True).strip()
+
+        git("init", "-q")
+        git("config", "user.name", "Dependency Bot")
+        git("config", "user.email", "1+dependency[bot]@users.noreply.github.com")
+        private_path = "/home/" + "fixture-account/private-file"
+        tracked = self.repo / "notes.md"
+        tracked.write_text(private_path)
+        git("add", "notes.md")
+        git("commit", "-qm", f"Copied a note from {private_path}")
+        intermediate = git("rev-parse", "HEAD")
+        tracked.write_text("Example notes only.\n")
+        git("add", "notes.md")
+        git("commit", "-qm", "Replace earlier notes")
+
+        scripts = self.repo / "scripts"
+        scripts.mkdir()
+        checker = scripts / "check-privacy.py"
+        shutil.copy(ROOT / "scripts" / checker.name, checker)
+        clean = subprocess.run([sys.executable, checker, "--commit", "HEAD"], capture_output=True)
+        self.assertEqual(clean.returncode, 0, clean.stderr)
+        failed = subprocess.run([sys.executable, checker, "--commit", intermediate], capture_output=True)
+        self.assertEqual(failed.returncode, 1)
+        self.assertEqual(failed.stderr.count(b"personal home path"), 2)
+        self.assertNotIn(private_path.encode(), failed.stderr)
+        self.assertNotIn(b"notes.md", failed.stderr)
 
 
 class ScopeChecks(unittest.TestCase):

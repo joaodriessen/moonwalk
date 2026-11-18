@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Offline checks for maintained docs and release identity, not release certification."""
 import argparse
+import hashlib
+from html import unescape
+import json
 from pathlib import Path, PurePosixPath
 import re
+import struct
 import subprocess
 import sys
 from urllib.parse import unquote, urlsplit
@@ -29,8 +33,66 @@ def check_tracked_paths(paths):
     return errors
 
 
+def heading_ids(text):
+    """Find IDs for the Markdown headings and explicit anchors used in the docs."""
+    ids = set(re.findall(r'<a\b[^>]*\b(?:id|name)="([^"]+)"', text))
+    fence = ""
+    for line in text.splitlines():
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", line)
+        if marker:
+            token, rest = marker.groups()
+            if not fence:
+                fence = token
+            elif token.startswith(fence) and not rest.strip():
+                fence = ""
+            continue
+        match = re.match(r"^ {0,3}#{1,6}\s+(.+?)\s*#*\s*$", line)
+        if fence or not match:
+            continue
+        title = re.sub(r"\[([^\]]+)\]\([^)]*\)", r"\1", match[1])
+        title = unescape(re.sub(r"<[^>]+>", "", title)).lower()
+        base = re.sub(r"[^\w -]", "", title).strip().replace(" ", "-")
+        slug, suffix = base, 1
+        while slug in ids:
+            slug = f"{base}-{suffix}"
+            suffix += 1
+        ids.add(slug)
+    return ids
+
+
+def check_screenshots(repo):
+    assets = repo / "docs/assets"
+    manifest = assets / "screenshots.json"
+    if not manifest.is_file():
+        return []
+    try:
+        data = json.loads(manifest.read_text())
+        revision = data["source_revision"]
+        if not re.fullmatch(r"[0-9a-f]{40}", revision):
+            return ["Screenshot provenance needs a full Git revision"]
+        inputs = subprocess.check_output(["git", "-C", str(repo), "ls-tree", "-r", revision, "--",
+                                          *data["render_input_scope"]], stderr=subprocess.DEVNULL)
+        errors = []
+        if hashlib.sha256(inputs).hexdigest() != data["render_inputs_sha256"]:
+            errors.append("Screenshot source fingerprint differs from the recorded revision")
+        for image in data["images"]:
+            name = image["filename"]
+            if Path(name).name != name or not name.endswith(".png"):
+                return ["Screenshot filenames must name PNGs next to the manifest"]
+            content = (assets / name).read_bytes()
+            if hashlib.sha256(content).hexdigest() != image["sha256"]:
+                errors.append(f"Screenshot checksum differs: {name}")
+            if (content[:8] != b"\x89PNG\r\n\x1a\n" or len(content) < 24
+                    or list(struct.unpack_from(">II", content, 16)) != image["dimensions"]):
+                errors.append(f"Screenshot dimensions differ: {name}")
+        return errors
+    except (OSError, ValueError, KeyError, TypeError, subprocess.CalledProcessError):
+        return ["Could not read screenshot provenance, Git revision, or PNG files"]
+
+
 def check(repo):
     errors = []
+    headings = {}
     # Historical design/validation records are not current instructions.
     documents = [repo / f for f in ("README.md", "SECURITY.md", "CONTRIBUTING.md", "CHANGELOG.md")]
     documents += sorted((repo / "docs").glob("*.md"))
@@ -44,11 +106,16 @@ def check(repo):
         targets += re.findall(r'\b(?:src|srcset)="([^"]+)"', text)
         for target in targets:
             url = urlsplit(target.strip("<>"))
-            if url.scheme or url.netloc or not url.path:
+            if url.scheme or url.netloc:
                 continue
-            linked = (path.parent / unquote(url.path)).resolve()
+            linked = (path.parent / unquote(url.path)).resolve() if url.path else path
             if not linked.is_relative_to(repo) or not linked.exists():
                 errors.append(f"broken local link in {path.relative_to(repo)}: {target}")
+            elif url.fragment and linked.suffix == ".md":
+                if linked not in headings:
+                    headings[linked] = heading_ids(linked.read_text())
+                if unquote(url.fragment) not in headings[linked]:
+                    errors.append(f"missing heading in {path.relative_to(repo)}: {target}")
     try:
         version = product_version((repo / "app/app.pro").read_text())
         metadata = ET.parse(repo / "app/deploy/linux/com.starlight.Starlight.appdata.xml").getroot()
@@ -60,7 +127,7 @@ def check(repo):
             errors.append(f"changelog has no release entry for {version}")
     except (ValueError, OSError, ET.ParseError) as error:
         errors.append(str(error))
-    return errors
+    return errors + check_screenshots(repo)
 
 
 def check_flatpak_pin(repo):

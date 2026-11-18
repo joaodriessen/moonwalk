@@ -76,7 +76,8 @@ of that traversal.
 
 ## GitHub checks
 
-Every run checks documentation links, the product version, and staged privacy.
+Every run checks documentation links and headings, screenshot hashes, the
+product version, and privacy in the proposed commits.
 Application changes also run the tests on Ubuntu 24.04's Qt 6.4.2 and compile
 the production QML. Changes limited to QML and JavaScript stop there. A change
 to C++, packaging, resources, dependencies, or CI itself adds the full app
@@ -100,7 +101,9 @@ python3 -m unittest discover -s tests/tools -p 'test_stage_flatpak_candidate.py'
 ```
 
 The helper archives the chosen commit and pinned submodules, copies the local
-patches, and writes hashes and the source revision to `provenance.json`.
+patches, and writes hashes and the source revision to `provenance.json` without
+embedding the local build paths. Git dependencies require exact commits, even
+when a tag is listed. Downloads require SHA-256 checksums.
 Initialize the submodules first. Use a clean checkout and a new output
 directory. The helper rejects unsafe output paths and common private filenames.
 It excludes ignored local files and Git metadata. Review the staged contents
@@ -110,8 +113,9 @@ Run the printed `build_command` from `build_working_directory`, then run the
 bundle command. The helper prints both commands. It does not build or install
 anything. Use `--build-dir` to select an existing build directory in the
 workspace. Flatpak Builder canonicalizes manifest paths, so a new staging
-directory can affect cache reuse. Dependency hashes record manifest inputs,
-including tags as written.
+directory can affect cache reuse. If you installed Flatpak Builder from
+Flathub, use `flatpak run org.flatpak.Builder` in place of `flatpak-builder` and
+pass the staged manifest as an absolute path.
 
 ## Finishing a change
 
