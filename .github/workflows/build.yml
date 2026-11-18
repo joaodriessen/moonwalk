@@ -70,11 +70,13 @@ jobs:
             libsdl2-dev libsdl2-ttf-dev libopus-dev libssl-dev \
             libavcodec-dev libavformat-dev libswscale-dev libva-dev \
             libvdpau-dev libdrm-dev wayland-protocols libwayland-dev
+          # The development runner uses a temporary XDG cache for each invocation.
+          printf 'CCACHE_DIR=%s\n' "$RUNNER_TEMP/moonwalk-ccache" >> "$GITHUB_ENV"
       - name: Cache compiler output
         if: steps.scope.outputs.checks == 'true'
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          path: ~/.cache/ccache
+          path: ${{ env.CCACHE_DIR }}
           key: linux-qt6-${{ runner.arch }}-${{ github.sha }}
           restore-keys: linux-qt6-${{ runner.arch }}-
       - name: Check development runner
