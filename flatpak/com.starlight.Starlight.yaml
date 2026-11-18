@@ -287,9 +287,13 @@ modules:
             - CONFIG+=qtquickcompiler
             - CONFIG+=disable-libdrm      # DRM/KMS renderer needs DRM-master; unusable in sandbox
     sources:
-      - type: dir
-        path: ..
-        skip: [.git, build, flatpak]
+        # Public builds fetch this exact reviewed source revision and its gitlinks.
+        # For an authenticated/private checkout or local edits, use the staging
+        # helper described in docs/development.md.
+      - type: git
+        url: https://github.com/joaodriessen/moonwalk.git
+        commit: 8295927adaf118921254e98e8b61e363cc08ac38
+        disable-shallow-clone: true
 
   # --- vainfo (libva-utils): a tiny, genuinely-useful VA-API diagnostic so a user or
   # support can run `flatpak run --command=vainfo com.starlight.Starlight` to confirm their
