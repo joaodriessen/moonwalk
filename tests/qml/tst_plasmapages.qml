@@ -351,7 +351,7 @@ TestCase {
         verify(dialogs.state.body.indexOf("unsaved") >= 0)
         page.dismissOverlay(41)
         page.overlay("connection-test", "", ({ result: -1, dispatched: true }))
-        verify(dialogs.state.body.indexOf("is testing") >= 0)
+        verify(dialogs.state.body.indexOf("Checking whether this network") >= 0)
         page.dismissOverlay(41)
         page.overlay("rename-host", "host-a", ({ name: "Apollo" }))
         var primary = objectNamed("plasma-host-dialog-primary-field")
@@ -389,7 +389,7 @@ TestCase {
         var reason = control("hosts.unsupported-server")
         verify(reason !== null)
         compare(reason.visible, true)
-        verify(reason.text.indexOf("Update Moonwalk") >= 0)
+        verify(reason.text.indexOf("Check for a newer build") >= 0)
         compare(control("hosts.connect").enabled, false)
     }
 
@@ -573,7 +573,7 @@ TestCase {
         var dialogs = objectNamed("plasma-host-dialog-layer")
         page.overlay("connection-test", "host-a", ({ result: 0, blockedPorts: "" }))
         tryCompare(dialogs, "visibleOverlayKind", "connection-test")
-        verify(dialogs.state.body.indexOf("No Internet streaming ports") >= 0)
+        verify(dialogs.state.body.indexOf("port check passed") >= 0)
         page.overlay("details", "host-a", ({ details: "Frozen detail" }))
         page.selectedHostSnapshot = Object.assign({}, page.selectedHostSnapshot,
                                                    { details: "Live changed" })
@@ -744,11 +744,11 @@ TestCase {
         const groups = [
             { mode: "hosts.display-mode", flag: "manualDisplay", command: "setDisplayMode",
               rows: ["hosts.desktop-scale", "hosts.view-scale", "hosts.display-target"],
-              summary: "Uses the closest text size supported by this host. Desktop sessions get a display of their own." },
+              summary: "Fits the picture to the window and requests the closest supported text size. Requests a virtual display when the host allows it." },
             // This Sunshine host draws its own pointer too, so Automatic says how to hide it.
             { mode: "hosts.input-mode", flag: "manualInput", command: "setInputMode",
               rows: ["hosts.pointer-mode", "hosts.local-cursor"],
-              summary: "Suits desktops and games, with a responsive local cursor. This host still draws its own; press Ctrl+Alt+Shift+N" }
+              summary: "Uses desktop or game pointer movement and draws the cursor locally. If you see two pointers, press Ctrl+Alt+Shift+N" }
         ]
         groups.forEach(function(group) {
             const mode = control(group.mode)

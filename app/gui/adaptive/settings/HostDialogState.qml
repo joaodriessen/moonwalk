@@ -106,23 +106,23 @@ QtObject {
     readonly property string pin: String(payload.pin || "")
     readonly property string body: {
         switch (kind) {
-        case "add-host": return qsTranslate("PcView", "The address of the computer running the streaming host.")
-        case "pairing": return qsTranslate("PcView", "Enter this PIN on %1. Moonwalk Host asks for it on screen; on Sunshine and compatible hosts, open the web interface and choose PIN.")
+        case "add-host": return qsTranslate("PcView", "Enter the address of the computer running the host software.")
+        case "pairing": return qsTranslate("PcView", "Enter this PIN on %1. On Moonwalk Host, open Pair New Device from the menu bar. On Sunshine, Apollo, and Vibepollo, use the host's PIN page.")
                                .arg(payload.hostName || qsTranslate("PcView", "the host"))
         case "connection-test":
             if (payload.dispatched === true)
-                return qsTranslate("PcView", "Moonwalk is testing your network connection to determine if any required ports are blocked.")
+                return qsTranslate("PcView", "Checking whether this network blocks internet streaming ports…")
             if (payload.result === 0)
-                return qsTranslate("PcView", "No Internet streaming ports were blocked by this network. This does not test your host or local network connection.")
+                return qsTranslate("PcView", "The internet port check passed. It did not check your host or local connection.")
             if (payload.result > 0)
-                return qsTranslate("PcView", "Required Internet streaming ports are blocked by this network. Streaming over the Internet may not work here.") + "\n\n" + qsTranslate("PcView", "The following network ports were blocked:") + "\n" + (payload.blockedPorts || "")
+                return qsTranslate("PcView", "This network blocks ports used for internet streaming.") + "\n\n" + qsTranslate("PcView", "The following network ports were blocked:") + "\n" + (payload.blockedPorts || "")
             if (payload.result === -1)
-                return qsTranslate("PcView", "The network test could not be performed because Moonwalk's connection-testing servers weren't reachable. Check your internet connection or try again later.")
-            return qsTranslate("PcView", "Moonwalk is testing your network connection to determine if any required ports are blocked.")
+                return qsTranslate("PcView", "Moonwalk couldn't reach the port test service. Check your internet connection and try again.")
+            return qsTranslate("PcView", "Checking whether this network blocks internet streaming ports…")
         case "confirm-quit": return payload.retainedDesktopTakeover === true
-            ? qsTranslate("PcView", "End the host’s retained Desktop stream and prepare a main display for this device? Other viewers of that stream will be disconnected.")
-            : qsTranslate("PcView", "Quit %1 before connecting? Any unsaved progress in that app will be lost.").arg(payload.runningAppLabel || qsTranslate("PcView", "the running app"))
-        case "confirm-end": return qsTranslate("PcView", "End %1 on the host without starting another stream? Unsaved work may be lost.").arg(payload.runningAppLabel || qsTranslate("PcView", "the remote session"))
+            ? qsTranslate("PcView", "End the existing Desktop stream and ask the host for a new display? This can disconnect other viewers.")
+            : qsTranslate("PcView", "Quit %1 before connecting? You may lose unsaved work in that app.").arg(payload.runningAppLabel || qsTranslate("PcView", "the running app"))
+        case "confirm-end": return qsTranslate("PcView", "End %1 on the host? If this closes an app, unsaved work may be lost.").arg(payload.runningAppLabel || qsTranslate("PcView", "the remote session"))
         case "confirm-delete": return qsTranslate("PcView", "You will need to pair again to stream from this host.")
         case "details": return payload.details || ""
         case "error": return HostError.message(payload)
@@ -135,9 +135,9 @@ QtObject {
                                                  : qsTranslate("PcView", "Width")
     readonly property string secondaryPlaceholder: qsTranslate("PcView", "Height")
     readonly property string rangeNote: kind === "custom-resolution"
-                                        ? qsTranslate("PcView", "Up to %1×%2, the size of this display").arg(maximumWidth).arg(maximumHeight)
+                                        ? qsTranslate("PcView", "Maximum size for this display is %1×%2").arg(maximumWidth).arg(maximumHeight)
                                         : kind === "custom-frame-rate"
-                                          ? qsTranslate("PcView", "10–%1 fps, as fast as this display refreshes").arg(maximumFrameRate) : ""
+                                          ? qsTranslate("PcView", "Enter a rate from 10 to %1 FPS.").arg(maximumFrameRate) : ""
     readonly property string acceptLabel: {
         switch (kind) {
         case "confirm-delete": return qsTranslate("PcView", "Remove")
@@ -206,7 +206,7 @@ QtObject {
         return saved
     }
     function applyPreset(id, name) {
-        presetStatus = page.applyPreset(id) ? qsTranslate("PcView", "Now using “%1”. Applies next connection.").arg(name)
+        presetStatus = page.applyPreset(id) ? qsTranslate("PcView", "“%1” is selected for the next connection.").arg(name)
                                             : qsTranslate("PcView", "Could not apply “%1”.").arg(name)
     }
     function duplicatePreset(id, name) {
@@ -217,7 +217,7 @@ QtObject {
         var normalized = String(name || "").trim()
         if (!normalized) return false
         var renamed = page.renamePreset(id, normalized)
-        presetStatus = renamed ? "" : qsTranslate("PcView", "Could not rename this setup.")
+        presetStatus = renamed ? "" : qsTranslate("PcView", "Could not rename these saved settings.")
         return renamed
     }
     function removePreset(id, name) {

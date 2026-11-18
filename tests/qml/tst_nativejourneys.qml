@@ -246,8 +246,8 @@ TestCase {
         compare(error.accessibleItem.Accessible.role, Accessible.Dialog)
         const description = error.accessibleItem.Accessible.description
         verify(description.indexOf("Alpha") >= 0)
-        verify(description.indexOf('named "Desktop"') >= 0)
-        verify(description.indexOf("reconnect") >= 0)
+        verify(description.indexOf("named Desktop") >= 0)
+        verify(description.indexOf("connect again") >= 0)
         compare(Object.keys(route.context.pendingEffects).length, 0, "no launch on missing Desktop")
         tryCompare(nativeControl("reject"), "activeFocus", true)
         keyClick(Qt.Key_Space)

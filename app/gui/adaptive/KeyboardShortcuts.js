@@ -10,7 +10,7 @@ function reference() {
         + qsTranslate("KeyboardShortcuts", "K — Toggle capture of system keyboard shortcuts") + "\n"
         + qsTranslate("KeyboardShortcuts", "S — Toggle performance statistics") + "\n"
         + qsTranslate("KeyboardShortcuts", "V — Type clipboard text on the host") + "\n\n"
-        + qsTranslate("KeyboardShortcuts", "Typing clipboard text is a fallback when automatic text clipboard synchronization is unavailable. Input release and fullscreen require a desktop environment.")
+        + qsTranslate("KeyboardShortcuts", "Use the clipboard shortcut when the host can't sync text automatically. Input release and fullscreen require a desktop session.")
 }
 
 // The same reference as data, for surfaces that draw the keys.
@@ -19,7 +19,7 @@ function groups() {
     function during(key, label) { return { keys: held.concat([key]), label: label } }
     return [
         { title: qsTranslate("KeyboardShortcuts", "During a Stream"),
-          note: qsTranslate("KeyboardShortcuts", "Typing clipboard text is a fallback when automatic text clipboard synchronization is unavailable."),
+          note: qsTranslate("KeyboardShortcuts", "Use the clipboard shortcut when the host can't sync text automatically."),
           shortcuts: [
               during("O", qsTranslate("KeyboardShortcuts", "Open stream controls")),
               during("Q", qsTranslate("KeyboardShortcuts", "Disconnect from the stream")),

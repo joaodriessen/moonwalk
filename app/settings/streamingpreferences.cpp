@@ -707,51 +707,16 @@ void StreamingPreferences::reload()
         enableHdr = true;
     }
 
-    // Starlight one-time legacy-preference correction.
-    //
-    // This fork's client honors stored Moonlight.conf preferences directly (the old wrapper
-    // always forced --vsync on the launch CLI, which masked bad stored values). Profiles carried
-    // over from that era can have a legacy vsync=false landmine, which caused live judder for the
-    // owner once the fork started honoring the stored value.
-    //
-    // Enforce the measured-safe values from the latency/jitter program findings
-    // (Moonwalk Host repository: docs/design/2026-07-13-latency-jitter-findings.md, "Client settings
-    // that measurably matter" table) for the settings with a known verdict ONLY:
-    //   - vsync OFF -> render collapsed to 33fps / 22% jitter drops on this stack. Force ON.
-    //   - frame-pacing ON -> +16-29ms frame queue delay. Force OFF.
-    // Deliberately does NOT touch bitrate/resolution/fps/localCursor/absolute-mouse; those are
-    // user-chosen and have no measured verdict from that program.
-    //
-    // Gated on its own marker (independent of upstream's SER_DEFAULTVER/CURRENT_DEFAULT_VER) so
-    // it runs exactly once per profile: the marker is written to the settings store immediately
-    // below, so the next reload() (next launch, or any later settings save) reads
-    // starlightPrefsVersion >= 1 and skips this block for good, even if the user later chooses
-    // vsync off or frame-pacing on for themselves.
+    // Version 1 originally forced VSync on and frame pacing off. Keep the
+    // marker for later migrations, but honor imported settings.
     int starlightPrefsVersion = settings.value(SER_STARLIGHT_PREFS_VERSION, 0).toInt();
     if (starlightPrefsVersion < 1) {
-        // v1 used to FORCE vsync=on / framePacing=off here — a correction for
-        // this project's own wrapper-era profiles, measured against one
-        // specific host pipeline. For the public release (2026-07-17, D1/C3)
-        // that forcing is retired: a user importing a real Moonlight config
-        // arrives with settings they chose on purpose, and silently
-        // overriding them is not this app's call. Fresh installs get the
-        // same values via ordinary defaults; the marker bump stays so the
-        // version ladder (v2 per-host migration below) is unchanged.
         settings.setValue(SER_STARLIGHT_PREFS_VERSION, 1);
     }
 
-    // Per-host settings migration (docs/design/2026-07-14-per-host-settings.md
-    // §5). Seeds every known host's hostsettings/<uuid>/* block from the
-    // template values just loaded above (from loaded values and defaults
-    //, if this profile also predates that marker), so an
-    // existing host like the owner's Mac mini keeps its live config completely
-    // unchanged (native/60/47.5Mbps/vsync-on/pacing-off/localCursor) the first
-    // time this build runs against its profile. Runs once (gated on
-    // starlightPrefsVersion < 2, independent of CURRENT_DEFAULT_VER above) and
-    // is doubly idempotent: the version-marker gate PLUS a per-key contains()
-    // check mean a half-completed run, or a re-run against a profile where the
-    // owner has since edited some per-host values by hand, never clobbers
-    // anything.
+    // Version 2 copies the loaded connection defaults into missing per-host
+    // keys. Checking each key makes a partial migration safe to repeat.
+    // See docs/design/2026-07-14-per-host-settings.md.
     if (starlightPrefsVersion < 2) {
         QStringList hostUuids;
 

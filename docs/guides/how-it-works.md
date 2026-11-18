@@ -1,60 +1,62 @@
 # How Moonwalk works
 
-This is the longer explanation, for the curious. You don't need it to use Moonwalk.
-
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/how-it-works-dark.svg">
-    <img src="../assets/how-it-works-light.svg" width="720" alt="Moonwalk on your Linux computer receives picture and sound from a host on the other computer, and sends your keyboard, mouse and gamepad back.">
+    <img src="../assets/how-it-works-light.svg" width="720" alt="A host sends picture and sound to the Linux client. The client sends keyboard, mouse, and gamepad input to the host.">
   </picture>
 </p>
 
-## What happens when you connect
+The host captures its desktop and encodes the picture. Moonwalk receives the
+video and audio, decodes them, and plays them on your Linux computer. Input
+travels in the other direction. On a suitable setup, the host and client GPUs
+do the video encoding and decoding. Software paths also exist, depending on
+the hardware, drivers, and codec.
 
-1. **Capture.** The host records the other computer's screen and sound.
-2. **Compress.** It turns the screen into compressed video using that computer's graphics hardware.
-3. **Send.** The video and sound travel across your network.
-4. **Decode.** Moonwalk decompresses the video, using your graphics hardware if it can.
-5. **Show.** The picture appears in a window or fullscreen.
-6. **Respond.** Your keyboard, mouse and gamepad go back the other way, and the cycle continues many times a second.
+Pairing identifies the client to the host before the first stream. You enter
+the PIN in the host's pairing screen. The host can then grant that device
+permissions to stream, send input, or use optional features.
 
-## Words you'll see
+## Terms
 
-| Word | What it means |
+| Term | Meaning |
 | --- | --- |
-| **Host** | The computer you're connecting to, or the program on it that shares the screen. |
-| **Client** | The computer in front of you. Moonwalk is a client. |
-| **Pairing** | Introducing a client to a host with a PIN, once, so they trust each other afterward. |
-| **Bitrate** | How much data the stream uses each second. Higher looks sharper but asks more of your network. Measured in Mbps. |
-| **Codec** | The format used to compress the video, such as H.264, HEVC or AV1. |
-| **Decoder** | The part of your computer that decompresses the video. A hardware decoder is usually much more efficient than your processor. |
-| **Virtual display** | A pretend screen that a host creates, sized for your session, so your stream doesn't have to use a physical screen. |
-| **Moonlight-compatible** | Host software that speaks the protocol Moonlight uses. Sunshine, Apollo, Vibepollo and Moonwalk Host all do. |
+| **Host** | The computer whose desktop you use, or the software sharing it. |
+| **Client** | The device running Moonwalk. |
+| **Bitrate** | Data per second, usually in Mbps. A higher video bitrate gives the encoder more room to preserve detail and needs more network capacity. |
+| **Codec** | The video compression format, such as H.264, HEVC, or AV1. Both ends need to support it. |
+| **Virtual display** | A screen the host creates in software. It can have a different size or refresh rate from the physical monitor. |
+| **Moonlight-compatible** | Uses the streaming protocol Moonlight clients speak. Extensions and permissions vary by host. |
 
-## What the Flatpak includes
+## Flatpak permissions
 
-Flatpak packages Moonwalk with the libraries it needs, including video decoding libraries and drivers for some older graphics hardware. Your graphics hardware and drivers still decide what works.
+The Flatpak includes video libraries and some drivers. GPU support still
+depends on the installed system driver. The package has network, display, audio,
+and device access, including gamepads. It can read system files for graphics
+integration, and it can ask the desktop to keep the screen awake. The manifest
+also includes access to the Gamescope socket and login manager. Your home
+directory isn't granted wholesale. The desktop file picker can grant access to
+files you choose. See the [manifest](../../flatpak/com.starlight.Starlight.yaml)
+for the full list.
 
-The Flatpak has access to your network, display, sound and all devices, including gamepads. It can also read your system's installed files (not your home folder), adjust screen brightness and keep the screen awake.
+## What Moonwalk sends over the network
 
-## Moonwalk and Moonwalk Host
+Moonwalk uses your network to find hosts, pair, and stream. It can also:
 
-Moonwalk works with any Moonlight-compatible host. With [Moonwalk Host](https://github.com/joaodriessen/Skylight), the two apps can also share the Mac's cursor shapes, images on the clipboard and files, and agree on a desktop size that suits your screen. Those extras rely on both apps, so other hosts don't offer them. Apollo-compatible hosts have their own extras, which Moonwalk detects by asking the host what it supports.
+- Download controller mappings and host compatibility information from
+  `moonlight-stream.org`.
+- Discover your public IPv4 address using `stun.moonlight-stream.org` for
+  certain IPv4 host additions, including local discovery.
+- Check streaming ports using `qt.conntest.moonlight-stream.org`. This can
+  happen when adding a host, through **Test Internet Streaming Ports**, or after
+  certain stream failures.
 
-## What Moonwalk sends over your network
+These services receive normal connection information, such as your public
+address. The **Detect blocked connections automatically** setting controls the
+check when you add a host manually. The other diagnostics have their own entry
+points. Moonwalk has no analytics service.
 
-Besides finding, pairing with and streaming from your hosts, Moonwalk can:
-
-- download gamepad mappings and a host compatibility list from `moonlight-stream.org`
-- ask `stun.moonlight-stream.org` for your public internet address when a host is added
-- contact `qt.conntest.moonlight-stream.org` to work out why a connection failed
-
-These are downloads and network tests, and nothing about you or your usage is uploaded. **Detect blocked connections automatically** in Preferences controls the test used when you add a host by hand. Some tests run after a failed stream regardless, so it isn't a complete offline switch.
-
-## Going deeper
-
-The [architecture document](../ARCHITECTURE.md) explains how the code is organized.
-
----
-
-[All guides](README.md)
+When you connect to a host, permissions and pairing determine which data is
+sent there. See [Security](../../SECURITY.md) for what to expect from encryption
+and [Compatibility](../compatibility.md#features-by-host) for clipboard,
+file transfer, and display features.

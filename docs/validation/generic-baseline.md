@@ -1,8 +1,8 @@
-# Generic Controls style baseline
+# Qt Quick Controls style baseline
 
-This is the deterministic no-visual-drift gate for the Task 7 single-style
-bootstrap. It characterizes the real QML roots rather than equivalent test
-fixtures:
+This historical check recorded the Material style before the current
+adaptive launcher. See [Architecture](../ARCHITECTURE.md) for current style
+selection. The test used these production QML roots:
 
 - `app/gui/main.qml`
 - `app/gui/StreamSegue.qml`

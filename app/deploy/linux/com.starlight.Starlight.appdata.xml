@@ -4,17 +4,16 @@
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-3.0+</project_license>
 	<name>Moonwalk</name>
-	<summary>See and control another computer from your Linux desktop</summary>
+	<summary>Stream and control another computer from Linux</summary>
 
 	<description>
-		<p>Moonwalk is a Linux remote-desktop streaming client built on Moonlight Qt. It follows GNOME and KDE Plasma, with a generic layout for other desktops. A compatible host runs on the computer you want to use.</p>
-		<p>This is a private alpha for invited testers on a trusted local network. Hardware, host version and permissions affect available features; broad hardware qualification is incomplete.</p>
+		<p>Moonwalk streams a remote desktop in a window or fullscreen. It sends keyboard, mouse, and gamepad input back to the host. The interface follows GNOME and KDE Plasma, and each host has its own stream settings.</p>
+		<p>This private alpha is for invited testers on a local network. Run compatible host software on the computer you want to control.</p>
 		<ul>
-			<li>Discover, pair with and connect to a host's Desktop target</li>
-			<li>Automatic stream settings with per-host Manual choices and recovery options</li>
-			<li>In-stream controls for sound, fullscreen, input release and disconnect</li>
-			<li>Hardware video decoding where the GPU and drivers support it</li>
-			<li>Clipboard and file-transfer extensions with compatible hosts</li>
+			<li>Discover a host, pair with a PIN, and open its Desktop entry.</li>
+			<li>Start with Automatic settings based on your display, or choose a mode for each host.</li>
+			<li>Mute sound, release input, change the view, or disconnect from the stream controls.</li>
+			<li>Copy text, images, or files when the paired host supports it.</li>
 		</ul>
 	</description>
 
@@ -33,57 +32,57 @@
 
     <releases>
         <release version="0.3.1-alpha.17" date="2026-11-16" type="development">
-            <description><p>Honor Automatic display preparation and explicit connection options. Surface supported host fallback warnings while keeping the existing paired streaming path.</p></description>
+            <description><p>Send the standard display request in Automatic and honor explicit command-line options. Show the host warning when it reports that the virtual display was disabled.</p></description>
         </release>
         <release version="0.3.1-alpha.15" date="2026-11-15" type="development">
-            <description><p>Keep working streams connected while optimizing: apply supported quality changes live and defer picture changes to the next connection, with an optional Apply Now action.</p></description>
+            <description><p>Keep working streams connected. Adjust bitrate where the host can do it live and save picture changes for the next connection. Apply Now reconnects at your request.</p></description>
         </release>
         <release version="0.3.1-alpha.14" date="2026-11-15" type="development">
             <description>
-                <p>Detects retained Desktop sessions and offers verified host-control takeover before preparing a new main display.</p>
-                <p>Checks ownership on compatible hosts instead of silently opening another client's shared capture.</p>
+                <p>Offer takeover when a compatible host is holding a Desktop session for another device.</p>
+                <p>Check session ownership where the host can report it.</p>
             </description>
         </release>
         <release version="0.3.1-alpha.13" date="2026-11-13" type="development">
             <description>
-                <p>Connects to the main Desktop instead of automatically creating an additional monitor.</p>
-                <p>Ends HTTP connections explicitly between paired host requests.</p>
+                <p>Open the main Desktop when you choose Connect.</p>
+                <p>Close HTTP connections between paired host requests.</p>
             </description>
         </release>
         <release version="0.3.1-alpha.12" date="2026-11-12" type="development">
             <description>
-                <p>Uses an advertised private desktop role when available, reconnects that role and releases its display without cancelling another client's game.</p>
-                <p>Preserves standard Desktop behavior on other hosts and sends advertised application UUIDs alongside numeric IDs.</p>
+                <p>Use a separate Remote Monitor on hosts that offer it. Reconnect to that display and close it independently of another client's app.</p>
+                <p>Keep the normal Desktop path on other hosts and send application UUIDs when available.</p>
             </description>
         </release>
         <release version="0.3.1-alpha.11" date="2026-11-12" type="development">
             <description>
-                <p>Distinguishes Desktop launch targets from Vibepollo running-app shortcuts and recognizes host titles padded for sorting.</p>
+                <p>Find the real Desktop entry when Vibepollo also lists a running-app shortcut. Recognize titles padded for sorting.</p>
             </description>
         </release>
         <release version="0.3.1-alpha.10" date="2026-11-12" type="development">
             <description>
-                <p>Improves copied diagnostic redaction and reminds users to review reports before sharing.</p>
-                <p>Includes source license notices and clarifies background cleanup and keyboard shortcut descriptions.</p>
+                <p>Mask more private information in copied diagnostics and remind users to review them before sharing.</p>
+                <p>Include source license notices and clarify background cleanup and shortcuts.</p>
             </description>
         </release>
         <release version="0.3.1-alpha.9" date="2026-11-06" type="development">
             <description>
-                <p>Keeps automatic tuning history across reconnects, verifies applied pictures, restores ineffective trials once, and bounds tuning disruption.</p>
-                <p>Retains encoder restart costs across resolutions and preserves desktop geometry when the host cannot negotiate desktop scale.</p>
-                <p>Requires authenticated paired-client state for target cleanup and preserves client authentication on new TLS connections.</p>
+                <p>Keep recent tuning results across reconnects. Check received picture sizes and return to a previous mode when a trial fails to help.</p>
+                <p>Remember when bitrate changes restart the encoder. Keep desktop geometry steady when the host cannot set UI scale.</p>
+                <p>Verify paired host state before ending a remote session and authenticate fresh TLS connections.</p>
             </description>
         </release>
         <release version="0.3.1-alpha.8" date="2026-11-06" type="development">
             <description>
-                <p>Returns to the launcher immediately on disconnect while ending the remote session in the background.</p>
-                <p>Improves automatic tuning on hosts with limited telemetry, tries bitrate before small resolution changes, preserves requested frame rate, and restores the previous mode when a trial does not help.</p>
+                <p>Return to the host list while the remote session ends in the background.</p>
+                <p>Try bitrate first, then smaller resolution steps at the same frame rate. Restore the previous mode when a trial fails to help.</p>
             </description>
         </release>
         <release version="0.3.1-alpha.7" date="2026-11-05" type="development">
             <description>
-                <p>Improves Desktop session cleanup and recovery, qualifies automatic performance learning, and preserves supported desktop scaling.</p>
-                <p>Follows the local HUD theme, corrects cursor coordinate scaling and HUD text metrics, and adds a host performance reset and negotiated video protection status.</p>
+                <p>Improve Desktop cleanup and recovery. Use delivered frame cadence and activity to guide Automatic.</p>
+                <p>Follow the desktop theme in stream controls, fix cursor positioning, and show negotiated video encryption. Add a way to reset learned host performance.</p>
             </description>
         </release>
     </releases>

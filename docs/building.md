@@ -1,68 +1,87 @@
-# Building from source
+# Building Moonwalk
 
-Most people should use the Flatpak from [Releases](https://github.com/joaodriessen/moonwalk/releases). This page is for building Moonwalk yourself. If you plan to change the code, see the [development workflow](development.md) as well.
+The Linux client uses Qt 6 and qmake. Clone with submodules before building.
 
-## Build the Flatpak
-
-You'll need `flatpak` and `flatpak-builder`.
-
-```bash
-flatpak install flathub org.kde.Platform//6.10 org.kde.Sdk//6.10
-flatpak-builder --user --install --force-clean --install-deps-from=flathub \
-  build-dir flatpak/com.starlight.Starlight.yaml
-flatpak run com.starlight.Starlight
+```sh
+git clone --recursive https://github.com/joaodriessen/moonwalk.git
+cd moonwalk
 ```
 
-The recipe is `flatpak/com.starlight.Starlight.yaml`. It downloads an exact commit from this repository, which can be older than both `main` and your checkout. This command builds that pinned revision, **not your local edits**. For a candidate from a specific committed checkout, use the [exact-source staging helper](development.md#local-flatpak-candidates). While the repository is private, anonymous fetching of the pinned source will fail; staging uses your existing checkout without placing credentials in the manifest.
+If you already have a checkout, run `git submodule update --init --recursive`.
+The private repository requires GitHub access.
 
-## Build natively
+## Flatpak
 
-Moonwalk builds the same way as Moonlight Qt, with Qt 6 and qmake, plus some bundled helper libraries that come along when you clone with `--recursive`.
+Install `flatpak`, `flatpak-builder`, and the KDE 6.10 platform and SDK. The
+recipe uses Flathub for its runtime dependencies.
 
-**Debian and Ubuntu** are what Moonwalk has recently been built and tested on:
+```sh
+flatpak install --user flathub org.kde.Platform//6.10 org.kde.Sdk//6.10
+```
 
-```bash
+The [manifest](../flatpak/com.starlight.Starlight.yaml) pins a Git commit. For
+the private repository, use the [local candidate workflow](development.md#local-flatpak-candidates).
+It stages a committed revision and its submodules from your authenticated
+checkout. The helper prints the build and bundle commands. A manifest build
+that fetches from GitHub needs access to the pinned commit.
+
+After building a bundle, install it with `flatpak install --user ./NAME.flatpak`
+and run `flatpak run com.starlight.Starlight`. Replace `NAME.flatpak` with
+the bundle's filename. See the [install guide](guides/getting-started.md) for
+updates and removal.
+
+## Native Linux build
+
+CI builds on Ubuntu 24.04 with Qt 6.4.2. The following packages include the
+compiler and Qt Quick modules needed for a native build and offscreen checks.
+
+```sh
 sudo apt-get update
-sudo apt-get install -y qmake6 qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools \
+sudo apt-get install build-essential git pkg-config python3 python3-yaml \
+  qmake6 qt6-base-dev qt6-declarative-dev qt6-declarative-dev-tools \
   libqt6svg6-dev qt6-tools-dev-tools libgl1-mesa-dev \
+  qml6-module-qtcore qml6-module-qtqml qml6-module-qtqml-models \
+  qml6-module-qtqml-workerscript qml6-module-qtquick qml6-module-qtquick-window \
+  qml6-module-qtquick-layouts qml6-module-qtquick-templates \
+  qml6-module-qtquick-controls qml6-module-qtquick-dialogs qml6-module-qttest \
+  qml6-module-qt-labs-settings \
   libsdl2-dev libsdl2-ttf-dev libopus-dev libssl-dev \
   libavcodec-dev libavformat-dev libswscale-dev libva-dev \
   libvdpau-dev libdrm-dev wayland-protocols libwayland-dev
 ```
 
-**Fedora** should work, but it hasn't been verified recently:
+On other distributions, install the corresponding development packages.
+Package names and FFmpeg availability vary by distribution.
 
-```bash
-sudo dnf install -y qt6-qtbase-devel qt6-qtdeclarative-devel \
-  qt6-qtsvg-devel qt6-qttools-devel mesa-libGL-devel \
-  SDL2-devel SDL2_ttf-devel opus-devel openssl-devel \
-  ffmpeg-devel libva-devel libvdpau-devel libdrm-devel \
-  wayland-protocols-devel wayland-devel
+- On Fedora, look for `qt6-qtbase-devel`, `qt6-qtdeclarative-devel`,
+  `qt6-qtsvg-devel`, `qt6-qttools-devel`, `SDL2-devel`, `SDL2_ttf-devel`,
+  and the FFmpeg, OpenSSL, Opus, VA-API, VDPAU, DRM, and Wayland development
+  packages.
+- On Arch, the equivalent packages include `base-devel`, `qt6-base`,
+  `qt6-declarative`, `qt6-svg`, `qt6-tools`, `sdl2`, `sdl2_ttf`,
+  `opus`, `openssl`, `ffmpeg`, `libva`, `libvdpau`, `libdrm`,
+  `wayland-protocols`, and `wayland`.
+
+Run `./dev build` for an incremental build. The command prints the executable
+path. For a standalone qmake build, run the following from the checkout:
+
+```sh
+mkdir -p build
+cd build
+qmake6 ../moonlight-qt.pro
+make -j"$(nproc)"
+./app/starlight
 ```
 
-**Arch** should also work, and hasn't been build-verified either:
+To install the native binary, launcher, and icons under `/usr/local`, run
+`sudo make install` from that build directory.
 
-```bash
-sudo pacman -S --needed qt6-base qt6-declarative qt6-svg qt6-tools \
-  mesa sdl2 sdl2_ttf opus openssl ffmpeg libva libvdpau libdrm \
-  wayland-protocols wayland
-```
+### GNOME window decorations
 
-Then clone and build:
+On Wayland, [QAdwaitaDecorations](https://github.com/FedoraQt/QAdwaitaDecorations)
+provides GNOME-style decorations where the window uses Qt's Wayland
+decoration plugin. The Flatpak includes it. On a native build without the
+plugin, Qt can fall back to simpler decorations. Plasma uses its own style
+when the required KDE modules are available.
 
-```bash
-git clone --recursive https://github.com/joaodriessen/moonwalk.git
-cd moonwalk
-qmake6 moonlight-qt.pro
-make -j$(nproc)
-```
-
-The program is `app/starlight`. To install it for everyone on the computer, along with its launcher entry and icon:
-
-```bash
-sudo make install   # installs to /usr/local/bin/starlight by default
-```
-
-### A native-looking window on GNOME
-
-On KDE, Moonwalk's window gets a proper title bar and shadow automatically. On GNOME, a native build also needs the [QAdwaitaDecorations](https://github.com/FedoraQt/QAdwaitaDecorations) plugin, which isn't installed by default anywhere. The Flatpak includes it. Without it, the window works, but has a plain, flat frame.
+[Development workflow](development.md) · [Release checklist](releasing.md)

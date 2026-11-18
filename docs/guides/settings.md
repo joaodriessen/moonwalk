@@ -1,92 +1,93 @@
 # Settings
 
-You can use Moonwalk without changing anything. This guide is for when you want to.
+Open a host's page to change that computer's stream, display, and input
+settings. For settings that apply to every host, open **Preferences**
+(**Configure Moonwalk…** on Plasma) or press **Ctrl+,**. Press **Ctrl+F** to
+search Preferences.
 
-There are two places for settings:
+Each host starts in **Automatic**. Switch a group to **Manual** to see its
+controls. Moonwalk remembers those choices when you switch back to Automatic.
 
-- **The host page** holds settings for one computer: picture, display, keyboard and mouse. They're saved separately for each host.
-- **Preferences** holds settings for Moonwalk as a whole. Open it from the main menu (it's called **Configure Moonwalk…** on KDE), or press Ctrl+,. You can search it with Ctrl+F.
+## Stream
 
-## On the host page
+**Picture and bandwidth** sets the picture Moonwalk asks the host for.
+Automatic targets your display's size and refresh rate, taking host and decoder
+limits into account. The numbers on the host card describe the request.
 
-### Stream
-
-**Picture and bandwidth** defaults to **Automatic**. It chooses resolution, frame rate, codec and bitrate policy for this display and host. The summary is a plan, not proof that the host will deliver that frame rate. Automatic preserves your saved Manual choices for later.
-
-Choose **Manual** to reveal these controls:
-
-| Setting | What it does |
+| Manual setting | What it changes |
 | --- | --- |
-| **Resolution** | Choose a size, or keep matching the local display at the next connection. A manually fixed size stays until you change it. |
-| **Frame rate** | Choose a rate, or match the local screen's current refresh at connection time (10–480 FPS, with 60 when unavailable). Actual delivery still depends on both machines and the network. |
-| **Video codec** | Automatic, H.264, HEVC (H.265) or AV1. Availability depends on the host and decoder. |
-| **Limit bandwidth** | Enables a chosen bitrate target instead of letting the quality policy choose it. |
-| **Bandwidth limit** | The chosen target in Mbps. Encoded traffic varies with the picture, and transport overhead makes network traffic a different measurement. |
+| **Resolution** | Choose a fixed size, or match the local display on the next connection. |
+| **Frame rate** | Choose a fixed rate, or match the screen's refresh rate. When Moonwalk can't read it, it uses 60 FPS. |
+| **Video codec** | Choose Automatic, H.264, HEVC (H.265), or AV1. Both the host and the decoder must support the codec. |
+| **Limit bandwidth** | Enables a manual video bitrate target. |
+| **Bandwidth limit** | The chosen target in Mbps. The total network traffic also includes audio and protocol overhead. |
 
-The summary may describe bitrate as **Automatic**, **Recommended** (when the host cannot change it live), or **Limited**. These are not three separate Stream mode buttons. Automatic can react to measured pressure where supported; it does not guarantee a stutter-free connection. See [Smoother streaming](performance.md).
+See [Streaming performance](performance.md) for what **Automatic**,
+**Recommended**, and **Limited** mean on the host card.
 
-### Display
+## Display
 
-**Automatic**, the default, chooses the closest supported host text size, fits the whole picture in the window and, on hosts that offer it, gives desktop sessions a display of their own. Choose **Manual** to set **Remote text size**, **View scale** and **Host display** yourself. Your Manual choices are kept if you switch back to Automatic, and come back when you choose Manual again.
+**Size and fit** covers the host's display and the local view. In Automatic,
+Moonwalk fits the picture to the window and requests a size for the host
+display when the host supports it.
 
-| Setting | What it does |
+| Manual setting | What it changes |
 | --- | --- |
-| **Remote text size** | Moonwalk Host only. Chooses how large text and windows appear on the Mac: **Automatic**, **Small (1×)** or **Large (2×)**. This changes the Mac desktop's layout without changing how many pixels are sent. It takes effect when you connect. **Large (2×)** needs a resolution with an even width and height. |
-| **Host display** | On hosts that let Moonwalk choose, such as Apollo: **Automatic**, **Use host setting**, **Dedicated virtual display** or **Physical display**. A dedicated virtual display is a separate screen just for your session. If you explicitly ask for one and the host's driver isn't ready, Moonwalk tells you rather than using another screen. The host's own settings can override this. Available choices depend on the advertised capability; the host's display policy still applies. |
-| **View scale** | **Fit in Window** or **Actual Size**. See [Fitting the picture](while-streaming.md#fitting-the-picture). |
+| **Remote text size** | On Moonwalk Host, scale the Mac desktop UI to **Small (1×)** or **Large (2×)**, or let Moonwalk choose. Large needs an even picture width and height. It takes effect when you connect. Windows text scaling is set on the host. |
+| **View scale** | **Fit in Window** shows the full picture. **Actual Size** draws one remote pixel per local pixel. |
+| **Host display** | Choose **Automatic**, **Use host setting**, **Dedicated virtual display**, or **Physical display** where supported. The host may deny a request or apply its own policy. Moonwalk reports when a requested virtual display cannot be prepared. |
 
-On Windows, the resolution and Windows' own text scaling are separate things. Moonwalk doesn't change Windows' text scaling.
+[Which desktop you get](../compatibility.md#which-desktop-you-get) explains
+how a host's display policy and retained sessions affect the result.
 
-### Keyboard and Mouse
+## Keyboard and Mouse
 
-**Automatic**, the default, uses the Automatic pointer below and draws the cursor on your computer. Choose **Manual** to set **Pointer** and **Local cursor** yourself; as with Display, your Manual choices are kept for later. **Type with this computer's keyboard layout** stays in view either way, because only you know whether your layout matches the host's.
+**Pointer and cursor** defaults to Automatic pointer movement with a local
+cursor. In Manual, you can choose how movement is sent to the host:
 
-**Pointer** decides how your mouse moves on the host:
+- **Automatic** uses absolute positioning on desktops and relative movement
+  for games.
+- **Desktop** sends the cursor position on the picture.
+- **Game** sends the distance and direction the mouse moved. Use it for games
+  where the mouse turns a camera.
 
-| Choice | What it does | Best for |
-| --- | --- | --- |
-| **Automatic** | Follows your pointer on desktops, and switches to game-style movement in games | Almost everyone |
-| **Desktop** | The host's pointer always sits exactly where yours is | Desktop work |
-| **Game** | Sends how far the mouse moved, so games can turn the camera | Games that control the camera with the mouse |
+**Local cursor** draws the pointer on your computer so it can move without
+waiting for video from the host. Moonwalk Host can coordinate its own cursor
+with yours. If you see two pointers on another host, **Ctrl+Alt+Shift+N** asks
+a supporting host to toggle its cursor.
 
-**Type with this computer's keyboard layout** sends the text you type rather than physical key presses, so accents and other languages come out right. Shortcuts still use physical keys. Turn it off for games.
+**Type with this computer's keyboard layout** sends typed text, including
+accents and input method text. Shortcuts still use keys. Turn it off if a
+game needs the physical keys for movement or other controls.
 
-**Local cursor** draws the pointer on your computer, so moving it doesn't wait on the network. It's on for every new host. Moonwalk Host hides its own pointer while yours is shown. Sunshine, Apollo and their forks keep drawing theirs; press Ctrl+Alt+Shift+N during the stream to hide it there. That toggle stays switched on the host until you press it again.
+## Advanced
 
-### Advanced
+- **Saved Settings** keeps named configurations for the selected host.
+- **Re-evaluate This Host** clears learned performance limits and leaves
+  pairing, Manual choices, presets, and last-working settings available.
+- **Restore Last Working Settings** restores the settings from the last
+  healthy stream.
 
-| Setting | What it does |
-| --- | --- |
-| **Saved Settings** | Keeps named setups for this host so you can switch between them. |
-| **Re-evaluate This Host** | Clears learned performance limits while preserving pairing, Manual choices, presets and last-working settings. |
-| **Restore Last Working Settings** | Restores the settings recorded from a previous healthy stream. |
+Use **Host Details** in the host's menu to see its addresses or choose a
+specific address. Keep the address on **Automatic** unless Moonwalk picks
+the wrong route.
 
-Decoder and frame-pacing controls described in older guides are not exposed in this adaptive settings page. The codec choice is under **Stream → Manual**. Audio behavior depends on the host and available playback devices; the current page has no per-host Channels selector.
-
-### The host menu
-
-The **⋮** button next to a host (the Host Actions button on KDE) has actions for that host, including **Host Details**. There you can see its information, copy any value, and choose a specific address to connect to. Leave the address on **Automatic** unless Moonwalk is picking the wrong network route. An address is only saved when you choose **Save** or **Automatic** (**Use Automatic** on KDE).
-
-## In Preferences
+## Preferences
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/preferences-dark.png">
-    <img src="../assets/preferences-light.png" width="620" alt="The Preferences dialog, with sections for Streaming, Audio and Keyboard, each holding switches and dropdowns.">
+    <img src="../assets/preferences-light.png" width="620" alt="Preferences with Streaming, Audio, and Keyboard sections.">
   </picture>
 </p>
 
-A few settings people most often look for:
-
-| Setting | What it does |
+| Preference | When to use it |
 | --- | --- |
-| **Streaming display mode** | Fullscreen is usually fastest. Borderless windowed works better with Alt+Tab, screenshots and overlays. |
-| **End games when you disconnect** | Ends a streamed game or app; unsaved work may be lost, so this is off by default. Desktop streams request session cleanup in the background without logging out of the remote desktop; cleanup failures are reported. |
-| **Mute the host's speakers while streaming** | Keeps the sound from coming out of both computers. Takes effect the next time an app starts on the host. |
-| **Capture system keyboard shortcuts** | Sends shortcuts like Alt+Tab to the host instead of your own desktop. |
-| **Find hosts on the local network automatically** | Turn this off if you'd rather add hosts by address. |
-| **Language** | Moonwalk's display language. |
+| **Streaming display mode** | Choose how a stream opens. Borderless windowed mode makes switching between apps easier. |
+| **End games when you disconnect** | Ask the host to quit a streamed game or app when you disconnect. This can lose unsaved work. Desktop session cleanup runs separately. |
+| **Mute the host's speakers while streaming** | Keep audio from playing on both machines. Applies the next time a host app starts. |
+| **Capture system keyboard shortcuts** | Send shortcuts such as Alt+Tab to the host when capture is active. |
+| **Find hosts on the local network automatically** | Turn off discovery if you prefer to add hosts by address. |
+| **Language** | Change the interface language. Untranslated labels appear in English. |
 
----
-
-Next: [While you're streaming](while-streaming.md) · [Smoother streaming](performance.md) · [All guides](README.md)
+[Stream controls](while-streaming.md) · [All guides](README.md)

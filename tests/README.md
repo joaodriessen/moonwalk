@@ -1,8 +1,9 @@
 # Tests
 
-Tests are built separately from the application. `moonlight-qt.pro` deliberately
-does not include this directory in `SUBDIRS`, so production, embedded, and
-packaging builds do not link Qt Test.
+Use `./dev check` for the usual checks or `./dev test NAME` for a single suite.
+The [development guide](../docs/development.md) covers isolation and test
+selection. Tests build separately, so production and packaging builds
+don't link Qt Test.
 
 The current Linux-only qmake entry point is `tests/tests.pro`:
 

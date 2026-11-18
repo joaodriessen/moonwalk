@@ -88,7 +88,7 @@ QString SupportInfo::summary() const
             .arg(QStringLiteral(STARLIGHT_VERSION_STR), QStringLiteral(STARLIGHT_BUILD_REVISION),
                  QStringLiteral(VERSION_STR), QString::fromLatin1(qVersion()),
                  QSysInfo::prettyProductName(), QSysInfo::currentCpuArchitecture());
-    result += QStringLiteral("Timing: network RTT is round-trip; decoder/queue/render and host encoder age are separate measurements.\n");
+    result += QStringLiteral("RTT measures network round trip. Host processing, decoding, queueing, and rendering are separate timings.\n");
     QFile log(m_LogPath);
     if (!m_LogPath.isEmpty() && log.open(QIODevice::ReadOnly)) {
         constexpr qint64 maximumBytes = 64 * 1024;
@@ -114,7 +114,7 @@ QString SupportInfo::summary() const
             result += QStringLiteral("\nRecent application log (in memory, up to 64 KiB; review before sharing):\n");
             result += redact(QString::fromUtf8(snapshot));
         } else {
-            result += QStringLiteral("\nNo application log is available in this process. Use the launcher menu after a stream for session details.\n");
+            result += QStringLiteral("\nThis process has no application log. After a stream, use Copy Diagnostic Summary in the Moonwalk window.\n");
         }
     }
     return result;

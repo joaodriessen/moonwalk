@@ -1,26 +1,23 @@
-# Moonwalk documentation
+# Project documentation
 
-## Using Moonwalk
+Start with the [user guides](guides/README.md) for installation, settings, and
+troubleshooting. [Compatibility](compatibility.md) lists supported paths and
+what still needs testing.
 
-Start with the [guides](guides/README.md). They assume no technical background.
+## Build, develop, and release
 
-## Working on Moonwalk
-
-| Page | What's in it |
+| Page | Use it to |
 | --- | --- |
-| [Contributing](../CONTRIBUTING.md) | How to send a change |
-| [Building from source](building.md) | Flatpak and native builds |
-| [Development workflow](development.md) | The `./dev` tool, tests and checks |
-| [Architecture](ARCHITECTURE.md) | How the code fits together |
-| [Compatibility](compatibility.md) | Supported targets, experimental paths and unverified limits |
-| [Release checklist](releasing.md) | Source, artifacts, privacy and acceptance checks |
-| [Repository privacy](privacy.md) | Synthetic fixtures, reports and screenshots |
-| [Security](../SECURITY.md) | What Moonwalk trusts, and how to report a problem |
-| [Changelog](../CHANGELOG.md) | What changed in each build |
+| [Contributing](../CONTRIBUTING.md) | Report a problem or send a patch |
+| [Building from source](building.md) | Build a Flatpak or native Linux executable |
+| [Development](development.md) | Run tests, preview a page, or stage a Flatpak |
+| [Architecture](ARCHITECTURE.md) | Find the relevant code and ownership boundaries |
+| [Release checklist](releasing.md) | Qualify a candidate for distribution |
+| [Screenshots](screenshots.md) | Refresh the synthetic documentation images |
+| [Privacy](privacy.md) | Check source, issue reports, and artifacts for private data |
+| [Security](../SECURITY.md) | Understand the trust model and report a vulnerability |
+| [Changelog](../CHANGELOG.md) | Look up changes by build |
 
-## Project records
-
-These are working notes kept for reference. They describe how decisions were reached at the time, so they may not match the current app. You don't need them to use or build Moonwalk.
-
-- [`design/`](design/) holds design decisions.
-- [`validation/`](validation/) holds past test scripts and results.
+The [design notes](design/) record architecture decisions and migrations.
+The [validation reports](validation/) describe particular test runs. Dates and
+limits in those reports matter when applying their results to current code.

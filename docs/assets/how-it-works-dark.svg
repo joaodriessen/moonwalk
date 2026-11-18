@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 960 330" width="960" height="330" role="img" aria-label="Moonwalk on your Linux computer receives picture and sound from a host on the other computer, and sends your keyboard, mouse and gamepad back." font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans','Adwaita Sans',Helvetica,Arial,sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 960 330" width="960" height="330" role="img" aria-label="The host sends audio and video to Moonwalk. Moonwalk sends keyboard, mouse, and gamepad input to the host." font-family="-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans','Adwaita Sans',Helvetica,Arial,sans-serif">
 <defs>
 <marker id="ha" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#62a0ea" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
 <marker id="hb" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M1 1 L8 5 L1 9" fill="none" stroke="#ffa348" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
@@ -16,10 +16,10 @@
 <rect x="741" y="180" width="88" height="7" rx="3.5" fill="#2d333b" stroke="#30363d" stroke-width="1.5"/>
 <rect x="759" y="88" width="52" height="36" rx="4" fill="none" stroke="#9198a1" stroke-width="3"/>
 <text x="785" y="232" fill="#e6edf3" font-size="19" font-weight="600" text-anchor="middle">The other computer</text>
-<text x="785" y="260" fill="#9198a1" font-size="15" font-weight="400" text-anchor="middle">Runs a host, like Moonwalk Host or Sunshine</text>
+<text x="785" y="260" fill="#9198a1" font-size="15" font-weight="400" text-anchor="middle">Runs compatible host software</text>
 <text x="480" y="92" fill="#62a0ea" font-size="16" font-weight="600" text-anchor="middle">Picture and sound</text>
 <line x1="620" y1="110" x2="340" y2="110" stroke="#62a0ea" stroke-width="3.5" stroke-linecap="round" marker-end="url(#ha)"/>
 <line x1="340" y1="172" x2="620" y2="172" stroke="#ffa348" stroke-width="3.5" stroke-linecap="round" marker-end="url(#hb)"/>
-<text x="480" y="202" fill="#ffa348" font-size="16" font-weight="600" text-anchor="middle">Keyboard, mouse and gamepad</text>
+<text x="480" y="202" fill="#ffa348" font-size="16" font-weight="600" text-anchor="middle">Keyboard, mouse, and gamepad</text>
 <text x="480" y="284" fill="#9198a1" font-size="15" font-weight="400" text-anchor="middle">Both on the same local network</text>
 </svg>

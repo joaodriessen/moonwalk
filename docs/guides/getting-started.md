@@ -1,123 +1,101 @@
 # Getting started
 
-You'll install Moonwalk, introduce it to the other computer once, and connect. Once the other computer is ready, this takes a few minutes.
+## Set up a host
 
-## Before you start
+Install and start host software on the computer you want to control. Use
+[Sunshine](https://github.com/LizardByte/Sunshine) on Windows or Linux, or
+[Apollo](https://github.com/ClassicOldSong/Apollo) or
+[Vibepollo](https://github.com/Nonary/Vibepollo) on Windows. If you're testing the
+Mac companion, see [Moonwalk Host](https://github.com/joaodriessen/Skylight).
+You'll need access to that separate private alpha.
 
-The other computer needs to be running a **host**, which is the program that shares its screen. Install it first, following the host's own instructions:
+In the host's application list, look for **Desktop**. Moonwalk uses this entry
+to open the remote desktop. Moonwalk Host includes it. On hosts that manage an
+application list, add **Desktop** with no launch command if it's missing.
 
-- **On a Mac,** use [Moonwalk Host](https://github.com/joaodriessen/Skylight).
-- **On a Windows or Linux PC,** use [Sunshine](https://github.com/LizardByte/Sunshine), [Apollo](https://github.com/ClassicOldSong/Apollo) or Vibepollo.
+## Install Moonwalk
 
-Moonwalk opens an application called **Desktop** on the host, which shows the whole screen. Moonwalk Host has one already. On other hosts, check the list of applications in the host's settings. If there's no `Desktop`, add an application with that name and leave its command empty.
+Use the Flatpak bundle supplied for testing, or [build from source](../building.md).
+If you don't have Flatpak yet, follow [the setup instructions](https://flatpak.org/setup/)
+for your distribution.
 
-## 1. Install Moonwalk
+Run these commands from the directory containing your bundle. Substitute its
+filename for `Moonwalk-VERSION.flatpak`. Some tester builds start with
+`Starlight`.
 
-Download the `.flatpak` file from [Releases](https://github.com/joaodriessen/moonwalk/releases). Builds are currently shared with invited testers, so you'll need access to this repository.
-
-Then open a terminal in your Downloads folder. Replace `Moonwalk-VERSION.flatpak` with the **exact filename you downloaded**, including its version and revision. Older releases have names starting with `Starlight`; use their actual name. Avoid a wildcard when several builds are in the same folder:
-
-```bash
-cd ~/Downloads
+```sh
 flatpak install --user ./Moonwalk-VERSION.flatpak
 flatpak run com.starlight.Starlight
 ```
 
-Flatpak may offer to download the KDE 6.10 runtime, which Moonwalk runs on. Say yes. If it can't find the runtime, run `flatpak install flathub org.kde.Platform//6.10` first. After installing, Moonwalk also appears in your desktop's app launcher.
+If Flatpak can't find the KDE 6.10 runtime, make sure Flathub is configured
+and install it with `flatpak install --user flathub org.kde.Platform//6.10`.
+You can also open **Moonwalk** from your app launcher after installation.
 
-If you don't have Flatpak yet, [Flatpak's setup page](https://flatpak.org/setup/) has instructions for each Linux distribution.
+## Find the host
 
-To update, finish streaming and close Moonwalk, then install the newer bundle in the same way. Settings and pairings stay under the same app ID. There is no automatic updater yet. A newer source checkout does not mean a newer downloadable build; check the release notes and **About Moonwalk**.
-
-See [compatibility](../compatibility.md) before choosing a host or assuming an optional feature is available.
-
-## 2. Find the other computer
-
-Make sure the host is running on the other computer and that both computers are on the same network. Moonwalk looks for hosts by itself, and any it finds appear in the list.
+With both computers on the same local network, open Moonwalk. Hosts it
+discovers appear in the sidebar.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/first-launch-dark.png">
-    <img src="../assets/first-launch-light.png" width="620" alt="Moonwalk before it has found a host. The page says No Hosts Found Yet, and offers an Add Host button.">
+    <img src="../assets/first-launch-light.png" width="620" alt="Moonwalk's empty host list with an Add Host button.">
   </picture>
 </p>
 
-**If nothing appears** after a little while, press **Add Host…** and type the other computer's address, shown in its network settings. [Finding that address](troubleshooting.md#i-cant-find-my-host) is covered in troubleshooting.
+If the host doesn't appear, use **Add Host…** and enter the other computer's
+address. See [finding your host](troubleshooting.md#i-cant-find-my-host) for
+where to look up the address.
 
-## 3. Pair them
+## Pair and connect
 
-You only do this once for each host. It proves that you control both computers.
-
-Select the host and press **Pair**.
-
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../assets/pair-dark.png">
-    <img src="../assets/pair-light.png" width="620" alt="Moonwalk with a host named Lounge selected. The page says Pair with Lounge and shows a Pair button.">
-  </picture>
-</p>
-
-Moonwalk then shows a four-digit PIN and waits.
+1. Select the host and press **Pair**. Moonwalk shows a four-digit PIN.
+2. Enter the PIN in the host's pairing screen. In Sunshine, open **PIN** in
+   the host web interface, usually at `https://localhost:47990` on the host.
+   Apollo and Vibepollo have a similar pairing page. On Moonwalk Host, use
+   **Pair New Device…** in the Mac menu bar and select the pending device.
+   Any login the host's web interface requires happens there.
+3. When the host accepts the PIN, press **Connect** in Moonwalk.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/pin-dark.png">
-    <img src="../assets/pin-light.png" width="620" alt="A dialog titled Pair with Lounge, showing a four-digit PIN and a Waiting for the host message.">
+    <img src="../assets/pin-light.png" width="620" alt="The PIN dialog for an example host called Lounge.">
   </picture>
 </p>
 
-Enter that PIN **on the other computer**:
+**Resume Desktop** means the host still has a Desktop target running.
+**Switch to Desktop** means another application is running. Read the
+confirmation before ending or taking over an existing session.
 
-- **Moonwalk Host:** click the Moonwalk Host icon in the Mac's menu bar, choose **Pair New Device…**, select your computer, type the PIN and press **Pair Device**.
-- **Sunshine and Apollo:** on that computer, open the host's web page. For Sunshine, that's `https://localhost:47990`, which is also available from its tray icon. Go to **PIN**, type the PIN and submit it. Your browser may warn about the page's certificate, and you may need to create a login the first time.
+The host page shows the resolution, frame rate, and bitrate Moonwalk plans
+to request. Start with **Automatic**. The host and decoder can limit what the
+stream actually delivers.
 
-Moonwalk notices when you've finished and closes the dialog.
+## During the stream
 
-## 4. Connect
+Press **Ctrl+Alt+Shift+Z** to release your keyboard and mouse. Click the
+picture to control the host again. Press **Ctrl+Alt+Shift+Q** to disconnect,
+or open the controls at the top of the picture and choose **Disconnect**.
 
-Press **Connect**. Moonwalk shows you what it's doing, and then the other computer's screen appears.
+Moonwalk returns to the host list while it asks the host to end the Desktop
+stream. Your remote desktop applications stay open. See
+[stream controls and shortcuts](while-streaming.md) for details.
 
-If you've connected before, the button may say **Resume Desktop**, when a previous target is still resumable on the host. **Switch to Desktop** means another app is running on the host, and Moonwalk asks before quitting it.
+## Update or remove Moonwalk
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="../assets/hosts-dark.png">
-    <img src="../assets/hosts-light.png" width="620" alt="A paired host shown as Ready, with a Connect button and the resolution, frame rate and bitrate it will use.">
-  </picture>
-</p>
+Close Moonwalk before installing a newer bundle with the same command.
+Settings and pairings use the same Flatpak app ID. Builds are distributed
+manually during the private alpha.
 
-The card shows what you're about to get. Moonwalk normally matches your screen's resolution and refresh rate, so you shouldn't need to change anything first.
+To remove the user installation, run:
 
-## 5. Take your keyboard and mouse back
-
-While you're streaming, your keyboard and mouse belong to the other computer. To get them back, press **Ctrl+Alt+Shift+Z**. Click the stream to return.
-
-To finish, press **Ctrl+Alt+Shift+Q**, or click **Controls** or the thin grip at the top of the stream and choose **Disconnect**. Whatever was running on the other computer keeps running.
-
-[While you're streaming](while-streaming.md) covers everything else.
-
-## Other things worth knowing
-
-### Each host has its own settings
-
-Resolution, frame rate, picture and input settings belong to each host, so each computer can be set up to suit it. Moonwalk reselects the last host you used. Pressing Enter in the list connects to it, or pairs or wakes it if that's what it needs.
-
-### Coming from Moonlight
-
-Moonwalk never changes your Moonlight setup, and the two apps keep separate settings. The Flatpak can't read Moonlight's settings, so you'll pair each host again. A build you compile yourself copies them the first time it opens, and leaves Moonlight's files alone.
-
-### Updating
-
-Download the newer `.flatpak` and install it the same way. Your hosts and settings stay. Moonwalk doesn't check for updates by itself.
-
-### Removing Moonwalk
-
-```bash
-flatpak uninstall com.starlight.Starlight
+```sh
+flatpak uninstall --user com.starlight.Starlight
 ```
 
-To remove your hosts, pairings and settings as well, add `--delete-data`.
+Add `--delete-data` only if you also want to remove Moonwalk's settings,
+hosts, and pairings.
 
----
-
-Next: [Settings](settings.md) · [While you're streaming](while-streaming.md) · [All guides](README.md)
+[Settings](settings.md) · [Troubleshooting](troubleshooting.md) · [All guides](README.md)

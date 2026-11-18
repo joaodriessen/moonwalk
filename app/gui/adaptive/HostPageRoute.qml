@@ -5,8 +5,7 @@ import ComputerModel 1.0
 import ".." as Legacy
 import "gnome" as Gnome
 
-// Non-painted ownership bridge. The legacy surface remains the selected
-// generic presentation while route lifetime and context ownership move here.
+// Routes shared host-page actions and state to the selected desktop surface.
 Item {
     id: root
 
@@ -57,9 +56,7 @@ Item {
         property bool surfaceActivated: false
     }
 
-    // Compatibility forwarding remains intentionally narrow and temporary:
-    // legacy visual tests still exercise the existing painted surface while
-    // Task 5 moves segue/effect ownership into main.qml.
+    // Legacy view tests exercise the route through these pairing properties.
     readonly property int testPairAttemptId:
         page.baseOverlay.kind === "pairing" ? page.baseOverlay.payload.attemptId : -1
     readonly property string testOverlayKind:

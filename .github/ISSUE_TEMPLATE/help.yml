@@ -1,34 +1,36 @@
-name: I need help
-description: Get help with installing, pairing or streaming.
+name: Ask for help
+description: Get unstuck while installing, pairing, or streaming.
 labels: [help wanted]
 body:
   - type: markdown
     attributes:
-      value: "Remove private details from messages and screenshots before sharing. For suspected vulnerabilities, follow [Security](https://github.com/joaodriessen/moonwalk/blob/main/SECURITY.md)."
-  - type: input
-    id: version
-    attributes:
-      label: Moonwalk version
-      description: It's under About Moonwalk in the main menu, if the app opens.
+      value: >-
+        See the [setup and troubleshooting guides](https://github.com/joaodriessen/moonwalk/blob/main/docs/guides/README.md).
+        Remove private details from error messages and screenshots before sharing them.
   - type: dropdown
     id: step
     attributes:
       label: Where are you stuck?
-      options: [Installing, Finding my host, Pairing, Connecting, During a stream, Updating or removing, Something else]
+      options: [Installing, Finding a host, Pairing, Connecting, During a stream, Updating or removing, Something else]
     validations: {required: true}
   - type: textarea
     id: happened
     attributes:
       label: What happened, and what have you tried?
-      description: Include any message you saw, word for word.
+      description: Include any error message after removing private information.
     validations: {required: true}
+  - type: input
+    id: version
+    attributes:
+      label: Moonwalk version
+      description: Open About Moonwalk in the main menu if the app starts.
   - type: input
     id: system
     attributes:
-      label: Your Linux distribution and desktop
-      placeholder: Fedora 44, GNOME
+      label: Client distribution and desktop
+      placeholder: Fedora with GNOME
   - type: input
     id: host
     attributes:
-      label: The host, and the computer it runs on
-      placeholder: Moonwalk Host on a Mac mini
+      label: Host app and OS
+      placeholder: Sunshine on Windows 11

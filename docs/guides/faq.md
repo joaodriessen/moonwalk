@@ -1,64 +1,66 @@
-# Questions and answers
+# Frequently asked questions
 
-## What does Moonwalk do?
+## How is Moonwalk different from Moonlight?
 
-It lets you see and control another computer from your Linux desktop. The other computer does the work and sends a video of its screen. Your keyboard, mouse and gamepad are sent back.
-
-## How is it different from Moonlight?
-
-Moonwalk is built on [Moonlight Qt](https://github.com/moonlight-stream/moonlight-qt) and uses its streaming engine, so it talks to the same hosts. The differences are:
-
-- It's only for Linux.
-- It has a new interface made for GNOME and KDE Plasma.
-- Each host has its own settings.
-- It works with Moonwalk Host for extras such as files, clipboard and cursor shapes.
-
-Moonlight runs on many more devices and has a much longer track record. If you need something proven, or you're not on Linux, use Moonlight.
+Moonwalk uses the [Moonlight Qt](https://github.com/moonlight-stream/moonlight-qt)
+engine. It targets Linux, has GNOME and KDE Plasma layouts, and remembers stream
+and input settings per host. It also uses optional features from compatible
+hosts. Moonlight itself supports more client platforms and has a longer release
+history.
 
 ## Will it change my Moonlight setup?
 
-No. Moonwalk keeps its own settings and leaves Moonlight's alone. The Flatpak can't read Moonlight's settings, so you'll pair each host again.
+Moonwalk keeps its own settings. With the Flatpak, pair your hosts again. A
+native build can import an existing Moonlight configuration on first launch
+and leaves the original files in place.
 
 ## Do I need Moonwalk Host?
 
-Only if the other computer is a Mac. Moonwalk also works with Sunshine, Apollo, Vibepollo and other Moonlight-compatible hosts. Some extras need Moonwalk Host. See the [table in the README](../../README.md#what-you-can-do).
-
-## Is it free?
-
-Yes. It's free software under the GPL-3.0 license, and it has no accounts or subscriptions.
+Use Moonwalk Host if you have access to the Mac companion alpha and want to
+stream your Mac. On Windows and Linux, use a compatible host such as Sunshine.
+Apollo and Vibepollo are Windows alternatives. The
+[compatibility table](../compatibility.md#features-by-host) shows which extras
+each host can provide.
 
 ## Can I use it over the internet?
 
-It's made for your local network, and that's what has been tested. Moonwalk has a **Test Internet Streaming Ports…** tool inherited from Moonlight, and connecting by a remote address may work, but it's untested here. If you try it, use a private tunnel such as a VPN, and don't open the host's ports to the internet.
+Moonwalk has primarily been tested on local networks. A private VPN can make a
+remote host reachable. Keep the host's ports off the public internet. The
+**Test Internet Streaming Ports** menu entry is a diagnostic inherited from
+Moonlight. See [Security](../../SECURITY.md).
 
-## Is it safe?
+## Is the stream encrypted?
 
-A paired computer gets your keyboard and mouse input during a stream, and sends you video and audio. A malicious host could send unexpected data, so only pair with hosts you trust. By default, many hosts don't encrypt video on the local network, so use a network you trust as well. Neither Moonwalk nor its engine has had an independent audit. See [Security](../../SECURITY.md).
+It depends on what the host and client negotiate. Encrypted pairing or input
+doesn't establish that video is encrypted. Open **Stream Controls** to see
+whether the connection negotiated video encryption.
 
 ## Does Moonwalk send data anywhere else?
 
-There are no accounts or analytics. Besides talking to your hosts, it makes a few functional network requests, such as downloading gamepad mappings. [How it works](how-it-works.md#what-starlight-sends-over-your-network) lists them.
+It has no account or analytics service. It can contact Moonlight's services
+for mappings, compatibility information, and connection diagnostics.
+[Network requests](how-it-works.md#what-moonwalk-sends-over-the-network)
+describes when.
 
 ## Does it work with games?
 
-Yes. It streams whatever is on the host's Desktop target, and gamepads are supported. Set **Pointer** to **Game** if a game's camera behaves oddly. There's no game library or app picker: open games on the remote desktop as you normally would.
+You can open a game on the streamed desktop and use a supported gamepad.
+For a game that moves the camera with the mouse, try **Game** pointer mode
+if Automatic picks the wrong behavior. Moonwalk's host page opens
+**Desktop**. The command-line interface also accepts named apps.
 
-## Why Flatpak?
+## How do I update?
 
-Flatpak carries the video decoding libraries with the app, so it works the same way across Linux distributions. You can also [build it yourself](../building.md), but what you need varies by distribution.
-
-## Does it update itself?
-
-No. Install a newer file to update. Your hosts and settings stay.
-
-## Why is it a private alpha?
-
-It has been used heavily on a small set of computers, but installing and streaming on other Linux hardware and desktops needs more testing.
+Close Moonwalk and install the newer Flatpak bundle. Existing builds use the
+same app ID, so settings and pairings are kept. Moonwalk does not check for
+updates itself. There is currently no Flathub release.
 
 ## Which languages are available?
 
-English is complete. French, German and Dutch can be selected, but they're partly translated and fall back to English.
+Choose a language in Preferences. The list includes translations inherited
+from Moonlight and partially translated Moonwalk pages. Where a translation
+is missing, the app shows the English label.
 
----
+## What does Moonwalk cost?
 
-[All guides](README.md) · [Troubleshooting](troubleshooting.md)
+Moonwalk is free software under the [GPL-3.0](../../LICENSE).

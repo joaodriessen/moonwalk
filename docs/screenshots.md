@@ -1,13 +1,14 @@
 # Documentation screenshots
 
-The current documentation images use production QML with synthetic hosts and
-preferences from [the preview driver](../tests/preview/Driver.qml). They do not
-connect to real hosts, use saved pairings or demonstrate measured performance.
-The renderer creates private XDG state and disconnects from the session bus.
+The [preview renderer](../tests/preview/preview.py) loads production QML
+with the scenes in [Driver.qml](../tests/preview/Driver.qml). It uses
+temporary settings, example hosts, and no desktop session bus. These captures
+show the interface. Check a live session for compositor decorations, hardware,
+and actual streaming behavior.
 
-[Capture provenance](assets/screenshots.json) records the render input
-fingerprint, Qt version, image dimensions and SHA-256 values. These are offscreen
-software renders, not proof of native compositor decorations or hardware support.
+[Capture provenance](assets/screenshots.json) records the source revision,
+Qt version, dimensions, and checksums. The render input fingerprint is the
+SHA-256 of `git ls-tree -r <revision> -- app tests/preview tests/qml`.
 
 ## Refreshing the images
 
@@ -43,8 +44,7 @@ Assets are named `<basename>-<light|dark>.png`. Preserve the theme pairs and ref
 the provenance when changing them. Keep real addresses, pairing codes, account
 names and desktop content out of captures. The visible PIN is a test fixture.
 
-The preview command exits unsuccessfully if a scene throws or a capture cannot
-be saved. It can still save other successful scenes, so do not publish a partial
-set after a failed run. Inspect both themes, dialogs and text wrapping before
+A failed scene or capture makes the command exit nonzero. Check the exit
+status before copying any screenshots, since other scenes may have saved. Inspect both themes, dialogs and text wrapping before
 committing. App icons and social-preview artwork are separate assets; their
 provenance is not established by this capture process.

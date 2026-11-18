@@ -1104,11 +1104,11 @@ QVariantMap Session::controlState() const
             {"liveBitrateNotice", m_RuntimeBitrateNotice},
             {"optimizationAvailable", m_Recommendation.createdAt > 0},
             {"optimizationNotice", m_Recommendation.createdAt <= 0 ? QString() : m_Recommendation.bitrateKbps > 0
-                ? tr("Try a %1 Mbps encoder target to reduce congestion while keeping this picture size. Saved for your next connection. Apply now briefly reconnects the stream.")
+                ? tr("Try %1 Mbps at the current resolution. Moonwalk will use it next time you connect. Apply Now reconnects this stream.")
                     .arg(m_Recommendation.bitrateKbps / 1000.0, 0, 'f', 1)
                 : m_Recommendation.rollback
-                ? tr("The new picture did not improve delivery. The previous picture will return on your next connection. Apply now briefly reconnects the stream.")
-                : tr("Try %1 × %2 at %3 fps: this may improve smoothness or detail. Saved for your next connection. Apply now briefly reconnects the stream.")
+                ? tr("The new picture didn't improve delivery. Moonwalk will use the previous mode next time. Apply Now reconnects this stream.")
+                : tr("Try %1 × %2 at %3 FPS. Moonwalk will use it next time you connect. Apply Now reconnects this stream.")
                     .arg(m_Recommendation.target.width).arg(m_Recommendation.target.height).arg(m_Recommendation.target.fps)},
             {"safeTrial", m_SafeSettingsTrial}, {"safeKept", m_SafeSettingsKept}, {"hasVideo", hasVideoFrame()}};
 }
@@ -1166,7 +1166,7 @@ void Session::prepareControlsClipboard()
     if (s_ActiveSession == this && m_ControlsOpen && m_Window &&
             !m_StartCancellation.isCancelled()) {
         const QString notice = NativeClipboard::prepareForQtControls() ? QString() :
-            tr("Clipboard paste is unavailable in these controls on this system. Paste directly into the remote app instead.");
+            tr("Clipboard paste is unavailable in this panel. Return to the stream and paste into the remote app.");
         if (notice != m_ControlsClipboardNotice) {
             m_ControlsClipboardNotice = notice;
             emit controlsChanged();
@@ -1727,12 +1727,12 @@ void Session::emitLaunchWarning(QString text)
 bool Session::validateLaunch(SDL_Window* testWindow)
 {
     if (!m_Computer->isSupportedServerVersion) {
-        emit displayLaunchError(tr("The version of GeForce Experience on %1 is not supported by this build of Moonwalk. You must update Moonwalk to stream from %1.").arg(m_Computer->name));
+        emit displayLaunchError(tr("This build of Moonwalk cannot connect to the version of GeForce Experience on %1. Check for an update to Moonwalk.").arg(m_Computer->name));
         return false;
     }
 
     if (m_Preferences->absoluteMouseMode && !m_App.isAppCollectorGame) {
-        emitLaunchWarning(tr("Your selection to enable remote desktop mouse mode may cause problems in some apps."));
+        emitLaunchWarning(tr("Desktop pointer mode can interfere with games that use the mouse to turn a camera."));
     }
 
     if (m_Preferences->videoDecoderSelection == StreamingPreferences::VDS_FORCE_SOFTWARE) {
@@ -1957,7 +1957,7 @@ bool Session::validateLaunch(SDL_Window* testWindow)
 
     // Check for unmapped gamepads
     if (!SdlInputHandler::getUnmappedGamepads().isEmpty()) {
-        emitLaunchWarning(tr("An attached gamepad has no mapping and won't be usable. See Settings → Gamepad to remap it."));
+        emitLaunchWarning(tr("A connected gamepad has no button mapping. Moonwalk can't use that controller."));
     }
 
     // If we removed all codecs with the checks above, use H.264 as the codec of last resort.
@@ -2490,7 +2490,7 @@ void Session::warnCursorReconnectRequired()
 {
     if (m_CursorReconnectWarningShown) return;
     m_CursorReconnectWarningShown = true;
-    emitLaunchWarning(tr("This stream includes the host cursor. Enable Local cursor and Absolute mouse mode, then reconnect to use a local cursor."));
+    emitLaunchWarning(tr("The host includes its cursor in the picture. Choose Desktop pointer mode and Local cursor, then reconnect to draw a local cursor."));
 }
 
 void Session::notifyMouseModeChanged(bool absolute)
@@ -2593,13 +2593,13 @@ bool Session::startConnectionAsync()
             const bool takeoverApproved = m_DesktopTakeoverApproved;
             m_DesktopTakeoverApproved = false;
             if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid) {
-                emit displayLaunchError(tr("The host identity changed. No remote session was changed."));
+                emit displayLaunchError(tr("The host's identity changed before takeover. Check the pairing before connecting again."));
                 return false;
             }
             auto apps = http.getAppList();
             const auto caps = HostCapabilities::parse(fresh);
             if (m_Preferences->displayTarget == "virtual" && (!caps.virtualDisplay || !caps.virtualDisplayReady)) {
-                emit displayLaunchError(tr("The host's virtual display driver is unavailable. No retained session was changed."));
+                emit displayLaunchError(tr("The virtual display driver is unavailable. Moonwalk stopped before taking over the session."));
                 return false;
             }
             // Connect means the existing desktop, not an additional monitor.
@@ -2609,32 +2609,32 @@ bool Session::startConnectionAsync()
                 m_HostTargetMayExist = false;
                 fresh = http.getAuthenticatedServerInfo(NvHTTP::NVLL_ERROR);
                 if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid) {
-                    emit displayLaunchError(tr("The host identity changed. No remote application was started."));
+                    emit displayLaunchError(tr("The host's identity changed before launch. Check the pairing before connecting again."));
                     return false;
                 }
                 apps = http.getAppList();
             }
             if (NvApp::hasForeignDesktop(apps)) {
                 if (!takeoverApproved) {
-                    emit displayLaunchError(tr("The host retains a Desktop stream from another device. Return to the host page to take it over and prepare a main display."));
+                    emit displayLaunchError(tr("Another device started this Desktop session. Return to the host page to review the takeover prompt."));
                     return false;
                 }
                 http.takeOverRetainedDesktop(m_Computer->uuid, NvApp::desktopTarget(apps, false));
                 m_HostTargetMayExist = false;
                 fresh = http.getAuthenticatedServerInfo(NvHTTP::NVLL_ERROR);
                 if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid) {
-                    emit displayLaunchError(tr("The host identity changed. No Desktop was launched."));
+                    emit displayLaunchError(tr("The host's identity changed during takeover. Check the pairing before trying to open Desktop again."));
                     return false;
                 }
                 apps = http.getAppList();
                 if (NvApp::hasForeignDesktop(apps)) {
-                    emit displayLaunchError(tr("A retained Desktop is still present. No shared stream was opened."));
+                    emit displayLaunchError(tr("The previous Desktop session is still running. End it before opening a new one."));
                     return false;
                 }
             }
             const auto target = NvApp::desktopTarget(apps, false);
             if (!target.isInitialized()) {
-                emit displayLaunchError(tr("The host does not currently offer the requested desktop session."));
+                emit displayLaunchError(tr("The requested Desktop session is no longer available."));
                 return false;
             }
             m_App = target;
@@ -2669,7 +2669,7 @@ bool Session::startConnectionAsync()
         if (remoteMonitor) {
             const auto supported = NvApp::desktopTarget(http.getAppList(), true);
             if (!m_HostCapabilities.virtualDisplay || !m_HostCapabilities.virtualDisplayReady || !supported.isRemoteMonitor()) {
-                emit displayLaunchError(tr("The host no longer offers this private desktop session. Reconnect from the host page."));
+                emit displayLaunchError(tr("The host no longer offers this separate display. Reconnect from the host page."));
                 return false;
             }
         }
@@ -2678,7 +2678,7 @@ bool Session::startConnectionAsync()
                 (!remoteMonitor && runningApp != 0 && !sameRunningTarget) ||
                 NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid) {
             m_RetryableTermination = false;
-            emit displayLaunchError(tr("The remote session changed. Return to the host page to choose what to connect to. No remote app was closed."));
+            emit displayLaunchError(tr("The session changed before Moonwalk could connect. Go back to the host page to choose what to open."));
             return false;
         }
         // Same immutable effective contract as input visibility and shape sync,
@@ -3015,7 +3015,7 @@ QString Session::endHostTarget()
         const QString fresh = http.getAuthenticatedServerInfo(NvHTTP::NVLL_ERROR);
         if (m_App.isRemoteMonitor()) {
             if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid)
-                return tr("Disconnected. The host identity changed, so its session was left untouched.");
+                return tr("Disconnected. The host's identity changed before Moonwalk could end the remote session.");
             // This control is TLS-client scoped. Never cancel the global game
             // to release this client's independent desktop display.
             http.disconnectRemoteMonitor();
@@ -3027,14 +3027,14 @@ QString Session::endHostTarget()
               current,qPrintable(NvHTTP::getXmlString(fresh,"ActiveStreams")));
         if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid ||
             (current && !m_App.matchesRunningTarget(current, NvHTTP::getXmlString(fresh, "currentgameuuid"))))
-            return tr("Disconnected. The host's running target changed, so it was left untouched.");
+            return tr("Disconnected. The remote session changed before Moonwalk could finish cleanup.");
         if (NvHTTP::getXmlString(fresh, "ActiveStreams").toInt() > 0)
-            return tr("Disconnected. The host still reports an active stream, so its session was left untouched.");
+            return tr("Disconnected from this device. The host still reports an active stream.");
         if (current) http.quitApp();
     } catch (const GfeHttpResponseException&) {
-        return tr("Disconnected, but the host did not confirm that its streaming session ended. Check the host's status before reconnecting.");
+        return tr("Disconnected. The host couldn't confirm cleanup. Check its status before you reconnect.");
     } catch (const QtNetworkReplyException&) {
-        return tr("Disconnected, but the host could not be reached to end its streaming session. It may still be in use.");
+        return tr("Disconnected. Moonwalk couldn't reach the host to end the session. It may still be in use.");
     }
     return {};
 }
@@ -3742,7 +3742,7 @@ void Session::exec()
         }
         if (m_CaptureHealthSupported && !m_FirstFrameNotified &&
                 Uint32(SDL_GetTicks()-presentationStartedAt)>15000) {
-            emit displayLaunchError(tr("The Mac did not provide a usable desktop image. Check Screen Recording permission in Moonwalk Host on the Mac, then try again."));
+            emit displayLaunchError(tr("Moonwalk Host didn't send a usable desktop picture. Check its Screen Recording permission on the Mac and try again."));
             m_RetryableTermination = false;
             m_UnexpectedTermination = true;
             goto DispatchDeferredCleanup;
@@ -3931,7 +3931,7 @@ void Session::exec()
                     clipboardFocusGuard.focusedClipboardChanged(value.hash);
                     if (!value.png.isEmpty()) m_ClipboardSync->enqueueLocalImage(value.png);
                     else {
-                        m_TextInputNotice = tr("Image clipboard skipped: choose a complete PNG up to 4 MiB and 4096 pixels. The original clipboard was preserved.");
+                        m_TextInputNotice = tr("Image not copied. Use a PNG up to 4 MiB and 4096 pixels per side.");
                         m_TextInputNoticeAt = SDL_GetTicks();
                     }
                     break;
@@ -4297,7 +4297,7 @@ void Session::exec()
                 m_CompositionText.clear();
                 m_InputHandler->setTextComposition(false);
                 if (LiSendUtf8TextEvent(event.text.text, unsigned(strlen(event.text.text))) != 0) {
-                    m_TextInputNotice = tr("Couldn't send composed text. Try again or switch to physical keys in stream controls.");
+                    m_TextInputNotice = tr("Couldn't send the composed text. Try again, or turn off local keyboard layout in Stream Controls.");
                     m_TextInputNoticeAt = SDL_GetTicks();
                 }
             }

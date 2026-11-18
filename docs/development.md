@@ -1,120 +1,97 @@
-# Development: a short feedback loop
+# Developing Moonwalk
 
-Use `./dev` from a checkout with the Qt 6 build dependencies installed. Python 3,
-qmake6 and make are the only runner dependencies. See the
-[build prerequisites](building.md).
+Install the [build dependencies](building.md), then run `./dev` from the checkout.
+Use the existing build cache for day-to-day work.
 
 ```sh
-./dev check                         # quick host checks; normal stopping point
-./dev test tst_gnomepages            # only the page being changed
-./dev test tst_gnomepages --function test_bitrateSliderSurvivesDragAndFollowsPreferences
-./dev test workflows                # one C++ suite
-./dev check --changed main          # quick checks plus affected suites
-./dev test --all                    # all host tests, still no app rebuild
-./dev qmlcheck                      # production QML compiler, no C++ app build
-./dev build                         # incremental local app, no AOT
-./dev build --aot                   # separate release/AOT build
-./dev list                         # available suite names
+./dev list                            # list suites
+./dev test workflows                  # run one C++ suite
+./dev test tst_gnomepages             # run one QML suite
+./dev check                           # quick checks across the app
+./dev check --changed main            # quick checks and suites affected since main
+./dev test --all                      # all host-side suites
+./dev qmlcheck                        # compile production QML resources
+./dev build                           # build the app incrementally
+./dev build --aot                     # build the app with ahead-of-time QML
 ```
 
-Use an actual function name from the chosen test file with `--function`.
-`./dev --help` lists the remaining options. Native KDE-style checks can use
-`./dev test tst_plasmapages --style org.kde.desktop` when the style is installed.
+Pass `--function` to run one case. For QML, use `CaseName::function_name`.
+`./dev --help` lists all options. With the KDE style installed, use
+`./dev test tst_plasmapages --style org.kde.desktop` to exercise that style.
 
-## See the interface
+## Preview the interface
 
-`tests/preview/preview.py --desktop gnome|plasma|generic --scheme light|dark --out DIR [--scenes a,b]`
-renders named scenes of the production `main.qml` against the test doubles, with private
-state and no display or session bus. The scene list is in `tests/preview/Driver.qml`. It
-builds separately and is not part of the app or `./dev`. KDE scenes need the Breeze and
-Kirigami packages. Offscreen renders show layout, not window frames or compositor behavior.
-`--contrast`, `--rtl`, `--accent COLOR`, `--font` and `--scale` render the same scenes under those
-conditions; a scene that throws is logged and skipped, and any scene/capture
-failure makes the command exit unsuccessfully. Use a fresh output directory so
-files left from an older run cannot be mistaken for new captures.
+```sh
+python3 tests/preview/preview.py --desktop gnome --scheme light \
+  --scenes hosts-ready --out /path/to/new-preview
+```
 
-## What happens automatically
+The preview renders production QML with synthetic hosts. Choose `gnome`,
+`plasma`, or `generic` and `light` or `dark`. Plasma requires Breeze and
+Kirigami. See [screenshots](screenshots.md) for scene names and how to refresh
+the documentation captures. These are offscreen renders. Check a real desktop
+for window decorations, device input, and compositor behavior.
 
-- Builds persist outside the checkout in `$XDG_CACHE_HOME/starlight-dev/`
-  (normally `~/.cache/starlight-dev/`), keyed by checkout path and Qt version.
-  `STARLIGHT_DEV_ROOT` or `--build-dir` can select a cache explicitly. The runner
-  refuses to mix sources or Qt versions and locks a cache against concurrent writers.
-- Only the requested test targets are built. QML-only work reuses the QML runner;
-  C++-only checks do not build the QML runner or the streaming application.
-  qmake/make still check dependencies on every invocation, so caching is not
-  permission to run stale code. If installed, ccache accelerates C/C++ compilation.
-- Every test process gets fresh private XDG config/data/cache/runtime directories.
-  It uses offscreen software rendering and cannot attach to the user's display or
-  session bus. No production hosts, preferences, or credentials are copied.
-- Desktop builds/tests run in a transient systemd user service capped at 3 GiB
-  memory-high / 4 GiB memory-max. CI/containers can use `--no-scope` when they own
-  resource containment. Compilation uses the available CPUs; tests use four
-  processes by default (`--jobs` changes test concurrency only).
-- A hung test is terminated with its process group after 120 seconds. Logs are
-  written while it runs, retained under the printed results directory, and include
-  commands. Test runs also write `summary.json` with duration, exit status, pass/fail/skip counts and
-  log paths. Missing totals, timeout, or a test failure makes the command fail.
+## Build and test isolation
 
-Do not delete caches as a debugging ritual. Select a different `--build-dir` only
-when investigating a cache/build discrepancy. No fresh worktree is needed for each
-edit. No global settings changes, desktop startup, full Flatpak rebuild, or clean
-application rebuild belong in the ordinary edit/test loop.
+Builds are stored under `$XDG_CACHE_HOME/starlight-dev/` (normally
+`~/.cache/starlight-dev/`), keyed by checkout and Qt version. Use `--build-dir`
+or `STARLIGHT_DEV_ROOT` to choose another directory when investigating a cache
+problem. The runner locks each cache and refuses to mix Qt versions or sources.
 
-## Choose checks by the change
+The runner builds only the requested targets and checks dependencies on each
+run. It uses ccache when available. Builds and tests use temporary XDG state.
+Tests render offscreen with software and use no production settings, pairing
+credentials, desktop session, or session bus.
 
-| Change | Enough during development | Broaden when |
-| --- | --- | --- |
-| Documentation or comments | Review the diff and links | Instructions change executable behavior |
-| Copy, icon, spacing or color | Inspect the affected rendered surface | Interaction or shared components changed |
-| One page's behavior | Its QML suite or relevant function | Shared routes/focus/state are affected |
-| Shared QML or UI state | `./dev check --changed main` | Finishing a cross-page change: `./dev test --all` |
-| C++ logic | Relevant C++ suite, then `./dev build` | Shared interfaces or engine behavior changed |
-| Build tooling | Runner tests and one real cached invocation | Toolchain or packaging changed |
-| Packaging/runtime/decoder/input | Appropriate build plus targeted runtime proof | Preparing a release |
+On a systemd desktop, the runner uses a transient user service with 3 GiB
+memory-high and 4 GiB memory-max. Use `--no-scope` in CI or a container that
+already limits resources. Compilation uses the CPUs available to the process.
+`--jobs` changes the number of concurrent tests, which defaults to four.
 
-`--changed REF` includes tracked changes relative to REF and untracked files.
-Known page paths select their adapter, accessibility and route suites. Shared or
-unknown code broadens to all affected host suites; documentation selects none.
-It is a conservative convenience, not a substitute for understanding the change.
+Test processes have a 120-second limit. Read logs and `summary.json` in the
+printed results directory. The summary records duration, exit status, and
+pass, fail, and skip counts.
 
-Add a regression test when it would catch a plausible recurring bug. Prefer an
-existing test/fixture over a new harness. Do not add tests that repeat constants,
-pin incidental layout implementation, or require a full process matrix for a copy
-edit. Keep behavior assertions; fix slow setup and querying before deleting useful
-coverage. Use QtTest `findChild` for named controls. The graph walker is reserved
-for tests that actually need enumeration; never traverse facade snapshots or Qt
-value wrappers as UI objects.
+## Choose what to run
 
-## CI and release certification
+| Change | Start with |
+| --- | --- |
+| Documentation or comments | Read the diff and run the repository checks. Try any new or changed command. |
+| Interface copy or styling | Check the affected page and run the QML compiler. |
+| A single workflow | Run the relevant suite or test case. |
+| Shared QML, focus, or state | Run `./dev check --changed main`. Use `./dev test --all` for changes across pages. |
+| C++ behavior | Run the focused suite and build the app. Broaden for shared interfaces. |
+| Tooling | Run its tests and one real invocation with a reused cache. |
+| Packaging, GPU, or input | Build the package and test the affected feature in its runtime environment. |
 
-Repository links and product-version consistency are checked even on documentation-only changes.
-Unknown non-documentation inputs, resources and nested submodule updates trigger a full app build.
+`--changed REF` considers changes relative to REF and untracked files. Known
+page paths select the relevant adapter and workflow suites. Shared or unknown
+code selects broader coverage.
 
-Pull requests run the host test hierarchy on Ubuntu 24.04's Qt compatibility floor.
-They also run the production QML compiler and validate resource paths, without
-compiling/linking the C++ application. They build the complete application only
-when C++/build/dependency/resource inputs change.
-QML/copy edits do not pay for a complete AOT streaming-client build. The workflow's
-manual `release` option and weekly run add a full AOT build regardless of paths.
-CI caches compiler output, not test results. Local commits never count as remote
-CI execution; inspect the actual CI result after publication.
+Add regression tests where they can catch a failure someone might hit again.
+Use QtTest's `findChild` for named controls. Reserve the graph walker for tests
+that need to enumerate UI objects, and keep facade snapshots and Qt values out
+of that traversal.
 
-Release certification is explicit, before distributing a build: AOT app build,
-Qt-floor and shipped Flatpak-runtime checks, relevant native desktop/style tests,
-and real streaming/input checks for changes in those areas. The specialized
-`scripts/validation/` display/style/release harnesses remain available for that
-purpose. Offscreen tests do not prove compositor, accessibility speech, physical
-controller, hardware decode, or streaming behavior.
+## GitHub checks
 
-The adaptive native shell is already the default, with legacy fallback. Historical
-Task 11 checklists describe the original migration, not work required for every
-subsequent patch. The existing Flatpak packaging/runtime remains the production
-delivery path; this workflow does not install anything.
+Every run checks documentation links, the product version, and staged privacy.
+Application changes also run the tests on Ubuntu 24.04's Qt 6.4.2 and compile
+the production QML. Changes limited to QML and JavaScript stop there. A change
+to C++, packaging, resources, dependencies, or CI itself adds the full app
+build. The weekly run and manual `release` option also build the app with AOT.
+GitHub caches compiler output. Tests run again on each applicable change.
+
+The Qt floor checks are separate from the shipped Flatpak runtime. Use the
+[release checklist](releasing.md) for package, desktop, and real-stream tests.
+Offscreen tests cover workflows and layout but can't measure hardware decode,
+physical input, screen reader speech, or stream cadence.
 
 ## Local Flatpak candidates
 
-For an exact local Flatpak candidate, stage a clean committed revision instead of
-pointing the manifest at a working checkout (Python 3.12+ and PyYAML required):
+With Python 3.12 or newer and PyYAML, stage a committed revision from a recursive
+checkout:
 
 ```sh
 python3 scripts/stage-flatpak-candidate.py --revision HEAD \
@@ -122,42 +99,22 @@ python3 scripts/stage-flatpak-candidate.py --revision HEAD \
 python3 -m unittest discover -s tests/tools -p 'test_stage_flatpak_candidate.py'
 ```
 
-The helper archives tracked source and each recursive submodule's pinned commit,
-copies the manifest's local patches, supplies the exact build revision to qmake,
-and records hashes in `provenance.json`. Submodules must already be initialized;
-the helper never fetches. Dirty source or an existing candidate directory is an
-error. Ignored personal files and Git/worktree metadata are excluded; tracked
-private agent state and common credential filenames are rejected, including in
-submodules. Local manifest inputs cannot overwrite staged source or provenance.
-The force-clean build directory must not overlap the checkout, candidate, export
-repository or builder state. These guards do not inspect arbitrary secret values.
-It prints
-build/export commands using the workspace's existing builder state and build
-directory (`--build-dir` can select another existing directory); it does not run
-them or install the app. Run `build_command` from `build_working_directory`:
-the relative `manifest.yaml` name is resolved in that directory. Flatpak Builder
-canonicalizes manifest paths, so this alone does not preserve cache reuse across
-different candidate directories. Confirm dependency cache hits before an expensive
-build. Dependency hashes describe recorded manifest inputs,
-including tag references, and do not claim to resolve floating tags.
+The helper archives the chosen commit and pinned submodules, copies the local
+patches, and writes hashes and the source revision to `provenance.json`.
+Initialize the submodules first. Use a clean checkout and a new output
+directory. The helper rejects unsafe output paths and common private filenames.
+It excludes ignored local files and Git metadata. Review the staged contents
+before distributing them.
+
+Run the printed `build_command` from `build_working_directory`, then run the
+bundle command. The helper prints both commands. It does not build or install
+anything. Use `--build-dir` to select an existing build directory in the
+workspace. Flatpak Builder canonicalizes manifest paths, so a new staging
+directory can affect cache reuse. Dependency hashes record manifest inputs,
+including tags as written.
 
 ## Finishing a change
 
-Inspect the diff, run the relevant checks once, and state what passed and what was
-not exercised. Retest after another change or an unresolved failure, not merely
-because a commit was created. Small fixes do not need a separate design document,
-multi-stage review ceremony, screenshot tour, or full release certification.
-Write a short design only for changes whose tradeoffs need recording. Keep private
-machine evidence outside the repository and link it from the machine's continuity
-record where applicable.
-
-The `nvpairing` C++ suite covers pairing protocol bounds and the raw clipboard/cursor
-HTTP seam. Those endpoints require identity encoding and finite `Content-Length`
-for entity-bearing responses; 204/304 retain their legal bodyless semantics. Qt
-can report completion on truncated chunked/connection-close bodies, so chunked,
-compressed and unframed entity responses are rejected. Skylight's Simple-Web-Server
-response writer supplies the required length. Complete fixed-length 404/503 remain
-status-preserving responses. This compatibility restriction belongs to the raw
-extension seam, not normal server-info/launch HTTP.
-
-See the [release checklist](releasing.md) before packaging for other users.
+Report the checks you ran, the results, and any test gaps. Keep personal logs
+and machine details outside the repo. For source and image review, see
+[repository privacy](privacy.md).

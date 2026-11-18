@@ -1,8 +1,8 @@
-# Starlight receiver feedback extension
+# Receiver feedback in Moonwalk
 
-The nested `moonlight-common-c` repository remains the public upstream submodule,
-pinned to `2ea47752c3051d72a64bcca190024e8b354fa1ef`. Do not create or push a
-private replacement commit into its gitlink for this extension.
+The nested `moonlight-common-c` submodule points to upstream commit
+`2ea47752c3051d72a64bcca190024e8b354fa1ef`. Keep Moonwalk's extension in
+this wrapper so a recursive clone can fetch the unmodified library.
 
 The outer qmake target compiles `AdaptiveVideoQueue.c` instead of upstream
 `src/RtpVideoQueue.c`. This tracked wrapper includes that original file, renames
@@ -39,7 +39,7 @@ available after the queue advances; only the final block advances the frame.
 The wrapper snapshots input metadata before that ownership transfer. An upstream
 pin update must review those assumptions and the missing-block report behavior,
 update the source hash comment, and run the registered `adaptivefeedback` suite.
-Do not silently replace its completion checks with frame-number advancement alone.
+Keep checking completed FEC blocks. The frame number alone can't prove completion.
 
 The ordinary hosted suite checks actual receiver/FEC processing, bounded queueing,
 AES-GCM wire packets, lifecycle, disabled/other-host preservation and missing-block

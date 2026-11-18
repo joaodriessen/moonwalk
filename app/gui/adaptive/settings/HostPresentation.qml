@@ -89,13 +89,13 @@ QtObject {
         ["Sunshine", "Apollo", "Vibeshine", "Vibepollo"].indexOf(host.serverSoftware || "") >= 0
     // What the host does with its own pointer while ours is drawn, if that needs saying.
     readonly property string hostCursorNote: hostTogglesCursorByHand
-        ? qsTranslate("PcView", "This host still draws its own; press Ctrl+Alt+Shift+N in the stream to hide it.")
+        ? qsTranslate("PcView", "If you see two pointers, press Ctrl+Alt+Shift+N to toggle the host cursor.")
         : host.serverSoftware && host.serverSoftware !== "Skylight"
-          ? qsTranslate("PcView", "This host still draws its own too.") : ""
+          ? qsTranslate("PcView", "The host may draw a second cursor.") : ""
     readonly property string localCursorDescription: {
-        var base = qsTranslate("PcView", "Draws a responsive cursor on this computer.")
+        var base = qsTranslate("PcView", "Draws the pointer here so it can move without waiting for video.")
         if (host.serverSoftware === "Skylight")
-            return base + " " + qsTranslate("PcView", "Moonwalk Host hides its own.")
+            return base + " " + qsTranslate("PcView", "Moonwalk Host can hide the remote cursor while this one is visible.")
         return hostCursorNote ? base + " " + hostCursorNote : base
     }
 
@@ -111,15 +111,15 @@ QtObject {
                                         ? qsTranslate("PcView", "Cancel Wake and Connect")
                                         : qsTranslate("PcView", "Wake and Connect")
     readonly property string runningNote: switchToDesktop
-        ? qsTranslate("PcView", "%1 is running. Connecting to Desktop will ask before quitting it.")
+        ? qsTranslate("PcView", "%1 is running. Moonwalk will ask before closing it to open Desktop.")
           .arg(host.runningAppName || qsTranslate("PcView", "Another app")) : ""
     readonly property string resumeRunningLabel: switchToDesktop
         ? qsTranslate("PcView", "Resume %1").arg(host.runningAppName || qsTranslate("PcView", "App")) : ""
     readonly property bool waking: page.waitingForWake === true && hasHost && !online
     readonly property string wakingNote: waking
-        ? qsTranslate("PcView", "Waking %1. Moonwalk connects as soon as it is ready.").arg(host.name) : ""
+        ? qsTranslate("PcView", "Waiting for %1 to wake. Moonwalk will connect when the host is ready.").arg(host.name) : ""
     readonly property string unsupportedNote: hasHost && online && paired && !supported
-        ? qsTranslate("PcView", "This host's server version is unsupported. Update Moonwalk to connect to this host.") : ""
+        ? qsTranslate("PcView", "This version of Moonwalk cannot connect to the host. Check for a newer build.") : ""
 
     // A host with nothing to configure yet gets a full status page rather than
     // an empty settings form.
@@ -134,9 +134,9 @@ QtObject {
         if (!hasHost || settingsVisible) return ""
         if (checking) return qsTranslate("PcView", "Checking whether this host is available…")
         if (!online) return host.wakeable === true
-            ? qsTranslate("PcView", "Wake it from here, or turn it on and check it is on this network.")
-            : qsTranslate("PcView", "Turn it on and check it is on this network. It appears here when it is ready.")
-        return qsTranslate("PcView", "Enter a PIN on the host once, and this device can connect from then on.")
+            ? qsTranslate("PcView", "Wake this host from here or check that it is on and connected to this network.")
+            : qsTranslate("PcView", "Check that the host is on, connected to this network, and running its streaming software.")
+        return qsTranslate("PcView", "Pair once by entering the PIN on the host.")
     }
 
     // ---- First launch and an empty list ----------------------------------
@@ -148,8 +148,8 @@ QtObject {
     readonly property string emptyBody: discoveryOff
         ? qsTranslate("PcView", "Add a host by its address, or turn discovery back on in Preferences.")
         : stillSearching
-          ? qsTranslate("PcView", "Checking your network for computers running Moonwalk Host, Sunshine or a compatible host.")
-          : qsTranslate("PcView", "Start the host on the other computer and keep both on the same network. Moonwalk keeps looking, or you can add it by address.")
+          ? qsTranslate("PcView", "Looking for compatible hosts on your local network.")
+          : qsTranslate("PcView", "Start the host software with both computers on the same network. If the host doesn't appear, add it by address.")
 
     // ---- What the next stream will be ------------------------------------
     // The stream plan chooses for Automatic and prices every Manual choice;
@@ -172,12 +172,12 @@ QtObject {
     readonly property string automaticChoice: plan.width > 0
         ? qsTranslate("PcView", "%1 at %2 fps").arg(sizeText(plan.width, plan.height)).arg(plan.fps) : ""
     readonly property string streamModeDescription: manual
-        ? qsTranslate("PcView", "Your own choices. Any that this host or computer can’t keep up with say so.")
+        ? qsTranslate("PcView", "Uses your saved stream settings. Check the individual controls for limits.")
         : plan.limitedByHost === true && plan.limitReason
           ? sentence(plan.limitReason)
           : automaticChoice.length > 0
-            ? qsTranslate("PcView", "%1, to match this display.").arg(automaticChoice)
-            : qsTranslate("PcView", "Chosen for this display and host.")
+            ? qsTranslate("PcView", "Plans %1 for this display.").arg(automaticChoice)
+            : qsTranslate("PcView", "Chooses a starting picture and bitrate for this display and host.")
     readonly property var modeOptions: [
         { text: qsTranslate("PcView", "Automatic"), value: "automatic" },
         { text: qsTranslate("PcView", "Manual"), value: "manual" }
@@ -186,14 +186,14 @@ QtObject {
     // what it does; Manual shows the choices.
     readonly property bool manualDisplay: prefs.manualDisplay === true
     readonly property bool manualInput: prefs.manualInput === true
-    readonly property string ownChoices: qsTranslate("PcView", "Your own choices.")
+    readonly property string ownChoices: qsTranslate("PcView", "Uses your saved settings.")
     readonly property bool ownDisplayForDesktop: host.virtualDisplaySupported === true && host.virtualDisplayReady === true
     readonly property string displayModeDescription: manualDisplay ? ownChoices
-        : (host.desktopScaleSupported === true ? qsTranslate("PcView", "Uses the closest text size supported by this host.")
+        : (host.desktopScaleSupported === true ? qsTranslate("PcView", "Fits the picture to the window and requests the closest supported text size.")
                                                 : qsTranslate("PcView", "The whole picture fits the window. The host controls text size."))
-          + (ownDisplayForDesktop ? " " + qsTranslate("PcView", "Desktop sessions get a display of their own.") : "")
+          + (ownDisplayForDesktop ? " " + qsTranslate("PcView", "Requests a virtual display when the host allows it.") : "")
     readonly property string inputModeDescription: manualInput ? ownChoices
-        : qsTranslate("PcView", "Suits desktops and games, with a responsive local cursor.")
+        : qsTranslate("PcView", "Uses desktop or game pointer movement and draws the cursor locally.")
           + (hostCursorNote ? " " + hostCursorNote : "")
     // What the next connection will be, at a glance.
     readonly property var streamFacts: plan.width > 0 ? [
@@ -209,13 +209,13 @@ QtObject {
                 : qsTranslate("PcView", "Matches this display") },
         { objectName: "bitrate", label: qsTranslate("PcView", "Bitrate"),
           value: bitrateText,
-          note: qualityMode === "manual" ? bitrateMode : qsTranslate("PcView", "Estimated budget") }
+          note: qualityMode === "manual" ? bitrateMode : qsTranslate("PcView", "Planned bitrate budget") }
     ] : []
     // "2880×1800 · 60 FPS · up to 53 Mbps", for screen readers and small spaces.
     readonly property string streamSummary: plan.width > 0
         ? [sizeText(plan.width, plan.height),
            qsTranslate("PcView", "%1 FPS").arg(plan.fps),
-           qsTranslate("PcView", "%1 estimated budget").arg(bitrateText)].join(" · ")
+           qsTranslate("PcView", "%1 planned bitrate budget").arg(bitrateText)].join(" · ")
         : ""
 
     readonly property var codecOptions: [
@@ -237,8 +237,8 @@ QtObject {
     readonly property int pointerMode: prefs.automaticPointer === true ? 0 : prefs.absoluteMouseMode === true ? 1 : 2
     readonly property string pointerDescription: pointerMode === 0
         ? qsTranslate("PcView", "Follows your pointer on desktops, and uses relative movement in games.")
-        : pointerMode === 1 ? qsTranslate("PcView", "The host pointer always follows your pointer.")
-        : qsTranslate("PcView", "Sends relative movement, as most games expect.")
+        : pointerMode === 1 ? qsTranslate("PcView", "Sends the pointer position on the picture.")
+        : qsTranslate("PcView", "Sends the distance and direction the mouse moves.")
 
     function indexForValue(options, value) {
         for (var index = 0; index < options.length; ++index) {
@@ -350,8 +350,8 @@ QtObject {
                 shown: root.manual
                 title: qsTranslate("PcView", "Limit bandwidth")
                 subtitle: root.qualityMode === "manual"
-                          ? qsTranslate("PcView", "The stream never uses more than this, even when the network has room.")
-                          : qsTranslate("PcView", "Off: the stream uses as much as the network gives it.")
+                          ? qsTranslate("PcView", "Uses the bitrate target you set below.")
+                          : qsTranslate("PcView", "Chooses a bitrate based on the stream and host.")
                 keywords: qsTranslate("PcView", "bitrate data cap")
                 checked: root.qualityMode === "manual"
                 onToggled: function(wanted) { root.page.setBandwidthLimit(wanted) }
@@ -367,7 +367,7 @@ QtObject {
                 stepSize: 500
                 value: Math.max(root.bandwidthFloor, root.prefs.bitrateKbps || 0)
                 valueText: qsTranslate("PcView", "%1 Mbps").arg((value / 1000).toFixed(1))
-                accessibleDescription: root.withWarning(qsTranslate("PcView", "Up to %1 Mbps").arg((value / 1000).toFixed(1)), warning)
+                accessibleDescription: root.withWarning(qsTranslate("PcView", "Target %1 Mbps").arg((value / 1000).toFixed(1)), warning)
                 onMoved: function(wanted) { root.page.setBitrateKbps(wanted) }
             }
         },
@@ -393,7 +393,7 @@ QtObject {
                 title: qsTranslate("PcView", "Remote text size")
                 subtitle: root.host.desktopScaleSupported === true
                     ? qsTranslate("PcView", "Text and interface size on the host.")
-                    : qsTranslate("PcView", "This host does not support desktop scaling.")
+                    : qsTranslate("PcView", "This host controls its own text size.")
                 sensitive: root.host.desktopScaleSupported === true
                 options: root.desktopScaleOptions
                 textRole: "text"
@@ -421,10 +421,10 @@ QtObject {
                        && (root.host.virtualDisplaySupported === true || (root.prefs.displayTarget || "host") !== "host")
                 title: qsTranslate("PcView", "Host display")
                 subtitle: root.host.virtualDisplaySupported !== true
-                    ? qsTranslate("PcView", "This host does not advertise virtual display control.")
+                    ? qsTranslate("PcView", "This host has not offered a choice of displays.")
                     : root.host.virtualDisplayReady === true
-                      ? qsTranslate("PcView", "Automatic uses a dedicated display for desktop sessions.")
-                      : qsTranslate("PcView", "The virtual display driver is not ready. Automatic uses the host setting.")
+                      ? qsTranslate("PcView", "Automatic asks the host for a virtual display for Desktop.")
+                      : qsTranslate("PcView", "The virtual display driver is unavailable. Automatic follows the host setting.")
                 options: [qsTranslate("PcView", "Automatic"), qsTranslate("PcView", "Use host setting"),
                           qsTranslate("PcView", "Dedicated virtual display"), qsTranslate("PcView", "Physical display")]
                 currentIndex: Math.max(0, ["auto", "host", "virtual", "physical"].indexOf(root.prefs.displayTarget || "host"))
@@ -476,7 +476,7 @@ QtObject {
             SettingRow {
                 controlId: "starlight.hosts.local-text-input"
                 title: qsTranslate("PcView", "Type with this computer’s keyboard layout")
-                subtitle: qsTranslate("PcView", "For accented characters and input methods. Turn off for games.")
+                subtitle: qsTranslate("PcView", "Sends accents and input method text. Turn off for games that need physical keys.")
                 checked: root.prefs.localTextInput === true
                 onToggled: function(wanted) { root.page.setLocalTextInput(wanted) }
             }
@@ -490,21 +490,21 @@ QtObject {
                 title: qsTranslate("PcView", "Saved Settings")
                 subtitle: root.prefs.activePresetName && root.prefs.activePresetName !== qsTranslate("StreamingPreferences", "Custom")
                           ? root.prefs.activePresetName
-                          : qsTranslate("PcView", "Keep setups for this host and switch between them.")
+                          : qsTranslate("PcView", "Save a set of choices to use again on this host.")
                 onTriggered: root.page.requestPresets(root.page.selectedHostUuid)
             }
             SettingRow {
                 controlId: "starlight.hosts.relearn-performance"
                 kind: "action"
                 title: qsTranslate("PcView", "Re-evaluate This Host")
-                subtitle: qsTranslate("PcView", "Forget measured limits. Pairing and your saved choices stay unchanged.")
+                subtitle: qsTranslate("PcView", "Clear what Moonwalk learned about performance for this host.")
                 onTriggered: root.page.resetLearnedPerformance()
             }
             SettingRow {
                 controlId: "starlight.hosts.restore-last-working"
                 kind: "action"
                 title: qsTranslate("PcView", "Restore Last Working Settings")
-                subtitle: qsTranslate("PcView", "Go back to the settings from the last healthy stream.")
+                subtitle: qsTranslate("PcView", "Use the settings from the last healthy stream.")
                 onTriggered: root.page.restoreSuccessfulSettings()
             }
         }

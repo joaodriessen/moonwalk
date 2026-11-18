@@ -161,7 +161,7 @@ TestCase {
         verify(stream.technicalFailure.indexOf("5") !== -1)
         verify(!stream.showTechnicalFailure)
         var videoFailure = stream.formatStageFailure("video stream establishment", -42, "")
-        verify(videoFailure.indexOf("video") !== -1)
+        verify(videoFailure.toLowerCase().indexOf("video") !== -1)
         verify(stream.technicalFailure.indexOf("-42") !== -1)
         var networkFailure = stream.formatStageFailure("RTSP handshake", -1, "47984")
         verify(networkFailure.indexOf("47984") !== -1)

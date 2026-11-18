@@ -1,12 +1,9 @@
-# Plasma adapter feasibility and validation
+# Plasma prototype validation
 
-Task 9 establishes an opt-in Plasma prototype. It is implementation-complete
-for continued testing, but it is **not approved as the default or as a release
-gate**. The legacy launcher remains the default, and the adaptive route still
-requires `STARLIGHT_ADAPTIVE_SHELL=1`.
-
-The prototype uses the desktop's selected widget style. It does not request,
-prefer, or hard-force Breeze.
+This report records the first opt-in Plasma adapter. It followed the desktop's
+selected widget style. Breeze was one of the styles tested. The adaptive
+launcher is now the default; see [Architecture](../ARCHITECTURE.md) for the
+current activation and fallback rules.
 
 ## Live isolated preview
 

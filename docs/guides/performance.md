@@ -1,52 +1,64 @@
-# Smoother streaming
+# Streaming performance
 
-A stream has three stages, and any of them can cause a stutter or delay: **the host** captures and compresses the screen, **the network** carries it, and **your computer** decompresses and shows it.
+Press **Ctrl+Alt+Shift+S** while streaming to see the video statistics. For a
+quick check, open **Stream Controls** with **Ctrl+Alt+Shift+O**.
 
-## What to try, in order
+When a moving picture looks uneven, compare the requested rate with the
+incoming and rendered frame rates. A still desktop may send fewer updates.
+Host processing, network round trip, decoding, and the queue before
+presentation measure different things. None of those counters measures the
+full time from pressing a key to seeing the result.
 
-1. **Leave Stream on Automatic.** Moonwalk targets your local display, considers lower bitrate before smaller pictures, and preserves the requested frame rate during size trials. It never reconnects a working stream to tune performance. It cannot make every host sustain every display mode.
-2. **Check the connection.** Ethernet is useful for distinguishing network problems from host or client limits. Wi-Fi can lose or delay packets even when its average speed is high.
-3. **Check video decoding and the stream statistics.** Hardware encoding on the host and hardware decoding on your computer are separate. Neither alone proves a smooth stream. See [hardware video decoding](troubleshooting.md#is-hardware-video-decoding-working).
-4. **Report persistent stutter.** Include whether the scene was moving, the actual received/rendered frame rates, and any reconnects or pauses. Lowering a setting does not by itself identify the bottleneck.
+## If the stream stutters
 
-Manual stream settings remain available if you want a deliberate override. A lower frame rate reduces motion smoothness; it is not something Automatic silently chooses to hide a struggling host.
+1. Start in **Automatic**. The host page shows the planned picture and rate.
+   Check the statistics during motion to see what the stream delivers.
+2. Try a wired connection if one is available. Wi-Fi can delay packets even
+   when an ordinary speed test looks fine.
+3. Check [hardware decoding](troubleshooting.md#is-hardware-video-decoding-working)
+   on the client. A host can be encoding in hardware while its capture rate,
+   the network, or the client's presentation is still limiting the stream.
 
-## Smoothness and delay
+A smaller stream may help when one of those stages is overloaded. If you try
+that manually, keep the frame rate the same so you can tell which change helped.
 
-Automatic pacing can briefly hold frames to avoid replacing them before the screen shows them. That trades some delay for steadier motion when arrivals bunch up. The statistics expose this tradeoff. Queuing, decode time and host processing time are separate measurements; none alone measures the delay from a key press to its visible result.
+## What Automatic changes
 
-## See what's happening
+Moonwalk starts with the local display's resolution and refresh rate, subject
+to known limits. It considers lowering bitrate before recommending a smaller
+picture and keeps the requested frame rate during those size trials. A bitrate
+target is a video encoder setting. Actual traffic varies with the picture and
+includes transport overhead.
 
-Press **Ctrl+Alt+Shift+S** during a stream to show frame rate and timing statistics, including how many frames never reached your screen and how long frames take to get there. Stream Controls (**Ctrl+Alt+Shift+O**) also shows the round trip, frame rate and whether the connection is healthy.
+- **Automatic** bitrate can change in place on suitable hosts after Moonwalk
+  sees sustained pressure or spare capacity. An encoder that may need to
+  restart is handled more conservatively.
+- **Recommended** is the starting estimate shown when live bitrate adjustment
+  is unavailable.
+- **Limited** uses the target you chose under **Stream → Manual → Limit bandwidth**.
 
-## About bitrate settings
+Moonwalk keeps a working stream connected. When it has enough evidence to
+suggest a different picture, it queues the change for the next connection.
+**Apply Now** in Stream Controls reconnects at your request. Moonwalk compares
+a new picture with the previous baseline. If the change doesn't improve
+delivery or latency, it queues a return to the previous picture. An actual
+connection failure can trigger recovery using the current picture.
 
-- **Automatic** is the one to use. It watches frame delivery and can lower the bitrate when sustained measurements show pressure. When there's room again, it climbs back. It remembers recent results for the same host build, codec, stream mode and route, so the next stream can start close to them. The bar shows the current encoder target; actual traffic depends on the picture.
-- **Recommended** appears instead on hosts that can't change bitrate during a stream. It picks a sensible amount for your resolution and frame rate, and stays there.
-- **Limited** reflects **Stream → Manual → Limit bandwidth**. It uses your chosen target; actual traffic and transport overhead differ from that target.
+Learned results depend on the host, route, codec, and viewing display. They
+expire and can be cleared under **Advanced → Re-evaluate This Host**. Use that
+after a hardware or network change if old results are getting in the way.
 
-On Moonwalk Host, Automatic adjusts the Mac's encoder directly. On Windows hosts with live bitrate control, each change can restart the host's encoder, so automatic targets are deferred unless that path has demonstrated live changes.
+## If text looks the wrong size
 
-## What Automatic learns
+Host text size, encoded resolution, and how the picture fits the local window
+are different settings. **Fit in Window** and **Actual Size** change the local
+view. They don't change how the host lays out its desktop. On Windows, desktop
+scaling is controlled by the host. See [Display settings](settings.md#display)
+and [which desktop you get](../compatibility.md#which-desktop-you-get).
 
-Automatic starts at the local display's resolution and refresh rate. Processing delay alone does not prove a host is short of frame rate, and a static desktop sending fewer updates does not demonstrate overload. Moonwalk measures delivered cadence and active picture data, supported by capture telemetry when available.
+## Reporting a problem
 
-A working stream stays connected. Supported quality controls adjust live; a host that might pause or rebuild its encoder is not probed automatically. Its estimated quality target is remembered for the next connection. Stream Controls shows the applied target and explains when changes are deferred.
-
-Sustained poor delivery can suggest one smaller picture, preserving frame rate. A long healthy stretch can suggest a larger picture. These suggestions apply on the next normal connection. They also appear quietly in Stream Controls with **Apply Now**, which explicitly reconnects; there are no countdowns or automatic acceptance. Recovery from a real connection failure preserves the current picture.
-
-A changed picture is checked against an independent baseline. An ineffective reduction or failed detail recovery queues the previous picture for the next connection, with the same optional Apply Now action. It never interrupts video to undo a trial. Failed measurements do not replace the baseline. A supported smaller picture must improve delivery or latency to be retained.
-
-Suggestions belong to the host, build, route, viewing display and codec, and expire after a day. They are not universal hardware ratings. Remembered capacity also expires. A recovered connection can withdraw an unnecessary reduction. **Re-evaluate This Host** in Advanced settings clears learned performance while preserving pairing, Manual choices, presets and last-working settings.
-
-On Sunshine-family hosts without desktop-scale negotiation, encoded-size adjustments keep the host desktop's geometry fixed. Hosts with scale negotiation use supported scales at or above the local logical desktop. Initial scale matching still depends on host capabilities and display policy. The FFmpeg decoder checks actual decoded dimensions; other paths currently use negotiated dimensions. An ignored size request stops further trials.
-
-Round trip, host processing, decoding, frame queuing and presentation measure different parts of the pipeline. They are not interchangeable and should not be added together as an input-to-screen latency measurement.
-
-## Reporting a performance problem
-
-Please include the host software, whether you're on Wi-Fi or a cable, your video settings, and what the statistics showed. That usually narrows it down quickly.
-
----
-
-Next: [Troubleshooting](troubleshooting.md) · [All guides](README.md)
+Include the host and client versions, the network type, the requested mode, and
+the incoming and rendered frame rates during motion. Note when the problem
+starts, for example only after maximizing a window or when another device is
+using Wi-Fi. Remove private information before sharing diagnostics.

@@ -48,7 +48,7 @@ QtObject {
                 shown: root.page.windowModeVisible
                 sensitive: root.page.windowModeSensitive
                 title: qsTranslate("SettingsView", "Streaming display mode")
-                subtitle: qsTranslate("SettingsView", "Fullscreen is usually fastest. Borderless windowed works better with Alt+Tab, screenshots and overlays.")
+                subtitle: qsTranslate("SettingsView", "Borderless windowed mode makes it easier to switch apps or use overlays.")
                 options: root.page.windowModeOptions
                 textRole: "text"
                 currentIndex: root.indexForValue(options, root.page.windowModeValue)
@@ -64,7 +64,7 @@ QtObject {
             SettingRow {
                 controlId: "starlight.settings.quit-app-after"
                 title: qsTranslate("SettingsView", "End games when you disconnect")
-                subtitle: qsTranslate("SettingsView", "Also ends the remote game or app; unsaved work may be lost. Desktop cleanup runs in the background.")
+                subtitle: qsTranslate("SettingsView", "Asks the host to close streamed apps. Unsaved work may be lost. Desktop sessions are handled separately.")
                 checked: root.page.quitAppAfterValue
                 sensitive: root.page.quitAppAfterSensitive
                 onToggled: function(wanted) { root.page.setQuitAppAfterEnabled(wanted) }
@@ -165,14 +165,14 @@ QtObject {
             SettingRow {
                 controlId: "starlight.settings.single-controller"
                 title: qsTranslate("SettingsView", "Force gamepad #1 always connected")
-                subtitle: qsTranslate("SettingsView", "The host always sees one gamepad, even when none is connected here.")
+                subtitle: qsTranslate("SettingsView", "The host sees a gamepad even when none is connected here.")
                 checked: root.page.singleControllerValue
                 sensitive: root.page.singleControllerSensitive
                 onToggled: function(wanted) { root.page.setSingleControllerEnabled(wanted) }
             }
             SettingRow {
                 controlId: "starlight.settings.gamepad-mouse"
-                title: qsTranslate("SettingsView", "Enable mouse control by holding Start")
+                title: qsTranslate("SettingsView", "Hold Start to control the mouse")
                 checked: root.page.gamepadMouseValue
                 sensitive: root.page.gamepadMouseSensitive
                 onToggled: function(wanted) { root.page.setGamepadMouseEnabled(wanted) }

@@ -1,14 +1,10 @@
-# Live accessibility validation: Hosts and Settings
+# Accessibility checks for Hosts and Preferences
 
-This is the release gate for the semantic-control work. Run it in a normal
-logged-in graphical session with the production-built Starlight binary. Do
-not use `QT_QPA_PLATFORM=offscreen`, the QML test runner, or synthetic
-controller-key tests as a substitute: those checks only prove QML routing,
-not the AT-SPI tree or what Orca announces.
-
-No package installation is required for this check. If Orca or an AT-SPI tree
-inspector such as Accerciser is unavailable, record that as an environment
-blocker rather than changing the machine.
+Run these steps in a logged-in graphical session with the Moonwalk build
+you're evaluating, Orca, and an AT-SPI inspector if available. Offscreen and
+synthetic controller tests help catch routing bugs. Check speech and the
+accessibility tree separately in the desktop session. If an accessibility
+tool is unavailable, record the gap.
 
 ## Setup
 
@@ -19,9 +15,9 @@ blocker rather than changing the machine.
    expose accessibility automatically in this desktop session, launch the
    test instance once with `QT_LINUX_ACCESSIBILITY_ALWAYS_ON=1`; do not make
    that setting persistent.
-3. Start Starlight normally, with no `offscreen` platform override. Open the
+3. Start Moonwalk normally, with no `offscreen` platform override. Open the
    AT-SPI tree inspector alongside it when available.
-4. Record the Starlight commit, Qt version, desktop/session type, Orca
+4. Record the Moonwalk commit, Qt version, desktop/session type, Orca
    version, and whether an inspector was available.
 
 ## Hosts landmark and selection

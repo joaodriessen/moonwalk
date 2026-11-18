@@ -1,33 +1,25 @@
-# Desktop-native release report
+# Desktop adapter migration results
 
-Task 11 began release validation from desktop-native architecture code base
-`17c2e268d427718ae4a971ac1e3355a97755199c`. The adaptive shell remains
-available for explicit opt-in testing, but it is not release-approved or
-approved as the default.
-Unset `STARLIGHT_ADAPTIVE_SHELL`, or set it to `0`, to retain the legacy
-launcher. Set it to exactly `1` only for a deliberate adaptive test.
+This report describes the release check based on
+`17c2e268d427718ae4a971ac1e3355a97755199c`. The adaptive launcher was opt-in
+at that point. It is the default in later Moonwalk builds. Use the
+[current release checklist](../releasing.md) when qualifying a new build.
 
-## Release decision
+## Decision at the time
 
-The legacy launcher remains the default. Automated behavior, AOT compilation,
-fallback, isolated compositor startup, and Flatpak gates pass, but several
-hard gates require a controlled physical or logged-in test environment that
-was not available. Task 11 keeps the legacy route as the default.
+The migration kept the legacy launcher as the default. Automated checks, AOT
+compilation, fallback tests, isolated compositor startup, and Flatpak checks
+passed. The report could not establish these remaining requirements:
 
-The blockers are:
+1. Page-wide GNOME and Plasma composition using their intended controls.
+2. Orca speech and accessibility tree behavior in a normal session.
+3. Physical controller focus, recovery, and latency.
+4. Visual checks in logged-in Plasma Wayland and X11, and GNOME X11.
+5. Real streams with both launchers, using an isolated paired profile to check
+   decode, first frame, audio, input, recovery, and return to the launcher.
 
-1. the host and settings pages still reuse characterized app-painted roots
-   instead of composing the intended page-wide GNOME/Plasma controls;
-2. normal-session Orca tree and spoken-output validation is not complete;
-3. no physical controller was available for focus, recovery, and latency;
-4. logged-in Plasma Wayland/X11 and real GNOME X11 visual checks are missing;
-5. no proven private host/credential clone was available for a legacy versus
-   adaptive stream comparison through SDL, decode, first frame, audio, input,
-   stop/error recovery, and return to the launcher; and
-6. GPU, first-frame, decoder, controller-latency, and stream-recovery metrics
-   therefore remain unmeasured.
-
-Synthetic and unit evidence does not override those blockers.
+The missing real-stream tests also left GPU behavior, first-frame timing,
+decoding, and recovery unmeasured.
 
 ## Automated, build, and fallback gates
 
@@ -49,8 +41,8 @@ A fresh Qt 6.11.1 test build ran the complete `make -j1 check` hierarchy:
 
 The same 207/207 hierarchy passed in a clean official Ubuntu Base 24.04.4
 environment with Ubuntu's Qt 6.4.2 packages, an AOT application build, and a
-managed X11/Openbox test display. This locally reproduces the intended CI
-compatibility floor; remote GitHub execution remains pending publication.
+managed X11/Openbox test display. This reproduced the intended Qt floor locally at the time. That run
+did not include hosted GitHub CI.
 
 Focused release slices also passed: accessibility semantics 15/15, Plasma QML
 15/15 in each of eight appearance rows, and GNOME QML 11/11 both offscreen
@@ -195,7 +187,7 @@ Task 11 commits newest first to remove those guards and the release handoff.
 The prior milestone reports retain the exact earlier executable rollback
 order.
 
-The sole release next action is to run the blocked normal-session,
+The remaining checks at the time were the normal-session,
 physical-controller, page-composition, and private real-stream gates in a
 controlled test environment. Until all of them pass, do not enable the
 adaptive shell by default.

@@ -91,7 +91,7 @@ TestCase {
         var scale = findChild(surface, "starlight.hosts.desktop-scale")
         compare(scale.visible, true, "on Manual, a limit of this host stays visible")
         compare(scale.enabled, false, "and cannot be changed")
-        verify(scale.Accessible.description.indexOf("does not support") >= 0)
+        verify(scale.Accessible.description.indexOf("controls its own text size") >= 0)
         surface.destroy()
     }
 
@@ -162,7 +162,7 @@ TestCase {
         compare(facts[0].value, "2880×1800", "not the stale saved size")
         compare(facts[0].note, "Matches this display")
         compare(facts[2].value, "20 Mbps", "the planned budget, not stale saved bitrate")
-        compare(facts[2].note, "Estimated budget")
+        compare(facts[2].note, "Planned bitrate budget")
         facade.streamPlan = Object.assign({}, facade.streamPlan, { fps: 30 })
         compare(surface.presentation.streamFacts[1].note, "Adjusted for this stream")
         verify(surface.presentation.streamSummary.indexOf("2880×1800") === 0)

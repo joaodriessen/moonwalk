@@ -72,7 +72,7 @@ SystemProperties::SystemProperties()
     m_DecoderProbeWatchdog.setInterval(DECODER_PROBE_TIMEOUT_MS);
     connect(&m_DecoderProbeWatchdog, &QTimer::timeout, this, [this] {
         if (!m_DecoderProbeRunning) return;
-        m_DecoderProbeError = tr("The video capability check has not finished. Return to hosts and try again once it completes.");
+        m_DecoderProbeError = tr("Moonwalk is still checking video support. Return to the host list and try again once the check finishes.");
         emit decoderProbeStateChanged();
     });
     const auto watchScreen = [this](QScreen* screen) {
@@ -185,7 +185,7 @@ void SystemProperties::updateDecoderProperties(bool usable, bool hasHardwareAcce
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     m_DecoderProbeReady = usable;
     m_DecoderProbeRunning = false;
-    m_DecoderProbeError = usable ? QString() : tr("No usable video decoder was found. Check the video driver and decoder settings, then try the video check again.");
+    m_DecoderProbeError = usable ? QString() : tr("Moonwalk couldn't find a usable video decoder. Check the graphics driver and run the video check again.");
     emit decoderProbeStateChanged();
     emit decoderProbeReadyChanged();
 }
@@ -237,7 +237,7 @@ void SystemProperties::startAsyncLoad()
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION,
                      "SDL_InitSubSystem(SDL_INIT_VIDEO) failed: %s",
                      SDL_GetError());
-        m_DecoderProbeError = tr("Video could not be initialized on this device. Check the video driver and try the video check again.");
+        m_DecoderProbeError = tr("Moonwalk couldn't start video on this computer. Check the graphics driver and run the video check again.");
         emit decoderProbeStateChanged();
         return;
     }
@@ -248,7 +248,7 @@ void SystemProperties::startAsyncLoad()
                      "Failed to create window for hardware decode test: %s",
                      SDL_GetError());
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
-        m_DecoderProbeError = tr("A video test window could not be created. Check the display connection and try the video check again.");
+        m_DecoderProbeError = tr("Moonwalk couldn't open the video test window. Check the display connection and run the video check again.");
         emit decoderProbeStateChanged();
         return;
     }

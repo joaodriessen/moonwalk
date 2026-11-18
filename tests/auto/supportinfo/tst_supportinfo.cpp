@@ -83,7 +83,7 @@ private slots:
 
     void noLogIsExplicit()
     {
-        QVERIFY(SupportInfo(QString()).summary().contains("No application log is available"));
+        QVERIFY(SupportInfo(QString()).summary().contains("This process has no application log"));
     }
 
     void consoleOnlyBuildRetainsBoundedRecentFacts()

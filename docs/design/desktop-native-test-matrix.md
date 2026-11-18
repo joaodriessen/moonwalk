@@ -1,24 +1,16 @@
-# Desktop-native test matrix — historical migration record
+# Desktop adapter migration test matrix
 
-> Superseded as the daily development policy by [Development](../development.md).
-> The native shell was subsequently merged and made the default, with automatic
-> legacy fallback. The Task 11 decisions below record that earlier migration
-> stage; they do not require repeating this matrix for ordinary changes. Use
-> current release requirements when preparing a distribution build.
+The following is the test plan and reasoning used before the adaptive shell
+became Moonwalk's default. Use [Development](../development.md) for routine
+changes and [Preparing a release](../releasing.md) for current release checks.
 
-This matrix is the release gate for the adaptive desktop work. Automated tests
-are necessary but cannot prove compositor, accessibility, decoder, or input
-behavior; the manual rows remain required before changing the legacy shell's
-default.
+## Decision at the time
 
-## Task 11 decision
-
-The adaptive shell remains available as an explicit opt-in, but the legacy
-shell remains the default. The automated, build, fallback, and isolated
-compositor gates pass. Release approval and the default switch are blocked by
-page-wide native composition, normal-session spoken accessibility,
-physical-controller validation, logged-in Plasma and real GNOME X11 visual
-checks, and a complete private real-stream comparison.
+The first migration candidate kept the legacy shell as the default. Automated
+checks, builds, fallback, and isolated compositor tests passed. The remaining
+checks covered native page composition, spoken accessibility, physical
+controllers, full GNOME and Plasma sessions, and real streaming through both
+launchers.
 
 ## Automated baseline
 
@@ -42,8 +34,8 @@ desktop-native test work.
 
 Task 11 reproduced this floor locally in a clean official Ubuntu Base 24.04.4
 environment using Ubuntu's Qt 6.4.2 packages. The AOT build and all 207 tests
-passed under a managed X11/Openbox display. The remote workflow remains
-pending until an explicitly authorized publication step.
+passed under a managed X11/Openbox display. This record covers the local Qt-floor run. See the GitHub workflow for
+current hosted results.
 
 ## Required manual matrix
 

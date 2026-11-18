@@ -243,7 +243,7 @@ QtObject {
         "stream-failure": function() {
             var segue = win.createStreamSegue(fakeSession, false, "mac", "Desktop")
             stack.push(segue, 1)
-            segue.lastFailure = "The video stream could not start. Check the host connection and try a different video decoder."
+            segue.lastFailure = "Video couldn't start. Check that the host is capturing a display, then try Safe Settings."
             segue.safeRetryRelevant = true
             segue.technicalFailure = "video stream establishment (error 11)"
             segue.showTerminalFailure()

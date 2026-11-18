@@ -1,10 +1,10 @@
 [Desktop Entry]
 Name=Moonwalk
 GenericName=Remote Desktop
-Comment=Remote desktop and game streaming client for Moonwalk Host, Sunshine, Apollo or GeForce Experience
+Comment=Stream and control another computer
 Exec=starlight %U
 Icon=starlight
 Terminal=false
 Type=Application
 Categories=Network;RemoteAccess;Utility;Qt;
-Keywords=remote desktop;remote play;streaming;moonwalk;starlight;sunshine;apollo;skylight;nvidia;gamestream;
+Keywords=remote desktop;remote play;streaming;moonwalk;starlight;sunshine;apollo;vibepollo;skylight;nvidia;gamestream;

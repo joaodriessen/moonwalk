@@ -470,31 +470,17 @@ int main(int argc, char *argv[])
     // These also ensure that our cache directory is named correctly. As such,
     // it is critical that these be called before Path::initialize().
     //
-    // Starlight owns its own config identity (2026-07-17, release decision D1):
-    // sharing Moonlight's namespace meant Starlight and a real Moonlight
-    // install would read AND WRITE the same conf -- pairings, host list, and
-    // Starlight's own migrations all landing in another app's store. A
-    // one-time, copy-only import below preserves existing pairings for users
-    // (and this project's owner) coming from Moonlight.
+    // Keep the original config identity so an upgrade finds existing
+    // pairings and preferences without sharing Moonlight's writable store.
     QCoreApplication::setOrganizationName("Starlight Project");
     QCoreApplication::setOrganizationDomain("joaodriessen.github.io");
     QCoreApplication::setApplicationName("Starlight");
 
     QGuiApplication::setApplicationDisplayName("Moonwalk");
 
-    // One-time Moonlight import. MUST run after the identity above and before
-    // Path::initialize()/any other QSettings use. Copy-only: the Moonlight
-    // config is never modified or removed, so a coexisting real Moonlight
-    // install is untouched. Skipped entirely in portable mode (cwd-relative
-    // stores, no shared namespace to collide with).
-    //
-    // POSIX-config-format only: QSettings::NativeFormat is registry-backed
-    // on Windows, so QFile::exists()/QFile::copy() against oldConfPath/
-    // newConfPath below never see any actual Moonlight data there -- this
-    // whole import is intentionally an inert no-op on Windows (this alpha is
-    // documented Linux-only in the README). A future maintainer targeting
-    // Windows would need a separate QSettings::NativeFormat registry-key
-    // copy, not an extension of this file-copy path.
+    // On POSIX, import the Moonlight settings file before opening Moonwalk's
+    // own store. Portable mode has its own location. Windows QSettings uses
+    // the registry, so this file-based import does not run there.
     if (!QFile(QDir::currentPath() + "/portable.dat").exists()) {
         QString newConfPath;
         {
@@ -511,16 +497,8 @@ int main(int argc, char *argv[])
             if (QFile::exists(oldConfPath)) {
                 QDir().mkpath(QFileInfo(newConfPath).absolutePath());
 
-                // Copy-then-rename instead of a direct QFile::copy() straight
-                // to newConfPath: a hard process kill mid-copy would
-                // otherwise leave a permanent partial/corrupt file at
-                // newConfPath, and since this whole import is gated on
-                // "!QFile::exists(newConfPath)" above, that partial file
-                // would never be retried on a later launch. QFile::rename()
-                // is atomic on POSIX for a same-filesystem move (this is
-                // always same-directory), so a crash here leaves either no
-                // destination (retried next launch) or a complete one --
-                // never a half-written one.
+                // Copy next to the destination and rename when complete.
+                // After an interrupted copy, the next launch can retry.
                 QString tempConfPath = newConfPath + QStringLiteral(".import-tmp");
                 QFile::remove(tempConfPath); // stale leftover from a previous crashed attempt
                 if (QFile::copy(oldConfPath, tempConfPath)) {

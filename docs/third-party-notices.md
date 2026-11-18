@@ -1,9 +1,8 @@
 # Third-party notices
 
-Moonwalk builds on Moonlight Qt and its streaming engine. Preserve upstream
-copyright headers and license texts when modifying or distributing the source.
-This inventory records notices present in the source tree; it is not a complete
-audit of every library in a downloadable build.
+Keep the upstream copyright headers and license texts when distributing
+Moonwalk. The table below covers notices installed from this source tree.
+Review a built package separately for its additional libraries and runtime.
 
 ## Notices installed with the Linux client
 
@@ -28,7 +27,7 @@ This installation rule applies to current source builds. Older downloaded alpha
 bundles may not contain these files. macOS/Windows client packaging is not covered
 by this Linux rule.
 
-## Remaining distribution review
+## Review before distributing a build
 
 The [Flatpak manifest](../flatpak/com.starlight.Starlight.yaml) also selects libraries
 such as FFmpeg, SDL, libplacebo, dav1d and desktop integration plugins. Qt and other
@@ -38,5 +37,4 @@ dependencies; the list above does not cover them all. Source availability and
 distribution obligations need review against that candidate.
 
 The application icon, screenshots and other artwork also need provenance review.
-Including the Lucide notices does not establish provenance for unrelated artwork
-or clear the Moonwalk name. See the [release checklist](releasing.md).
+Check the rights to distribute the artwork and use the name separately. See the [release checklist](releasing.md).

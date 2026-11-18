@@ -563,14 +563,15 @@ TestCase {
             return
         }
 
-        pcView.context.presentError("Unable to connect to the specified host.", "")
+        const errorMessage = "Couldn't reach the host at that address."
+        pcView.context.presentError(errorMessage, "")
         tryCompare(errorDialog, "visible", true)
         verify(errorDialog.accessibleItem !== null)
         compare(errorDialog.accessibleItem.Accessible.role, Accessible.Dialog)
         verifyStableAccessibleId(errorDialog.accessibleItem,
                                  errorDialog.objectName)
         compare(errorDialog.accessibleItem.Accessible.name, "Error")
-        verify(errorDialog.accessibleItem.Accessible.description.indexOf("Unable to connect") !== -1,
+        verify(errorDialog.accessibleItem.Accessible.description.indexOf(errorMessage) !== -1,
                "The dynamic error message must be available as the dialog description")
 
         stackViewAdapter.reset()

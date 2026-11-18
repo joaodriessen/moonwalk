@@ -1,13 +1,13 @@
-# GNOME adapter feasibility and validation
+# GNOME prototype validation
 
-Task 10 establishes an opt-in, deeply GNOME-integrated Qt prototype. It uses
-an app-owned, Adwaita-faithful control skin and optional Wayland window chrome.
-It does **not** use GTK or libadwaita widgets and must not be described as
-GTK-native.
+These results describe the GNOME adapter before it became part of the
+default client. At the time, testers opted in with
+`STARLIGHT_ADAPTIVE_SHELL=1` and some pages still used older components.
+Moonwalk now uses the adaptive route by default. See
+[Architecture](../ARCHITECTURE.md) for the current routing.
 
-The legacy launcher remains the default. The GNOME route is reachable only
-through the existing `STARLIGHT_ADAPTIVE_SHELL=1` gate, and page-wide
-composition remains incomplete.
+The prototype used Qt controls styled after Adwaita and optional Wayland
+decorations. The tests below cover that Qt implementation.
 
 ## Structural and live state
 

@@ -8,7 +8,7 @@ FileDialog {
     signal picked(url location)
     signal pickedFiles(var locations)
     fileMode: saving ? FileDialog.SaveFile : FileDialog.OpenFiles
-    title: saving ? qsTr("Save file from Mac") : qsTr("Send files to Mac")
+    title: saving ? qsTr("Save file from host") : qsTr("Send files to host")
     currentFolder: StandardPaths.writableLocation(StandardPaths.DownloadLocation)
     Component.onCompleted: if (saving && suggestion) selectedFile = currentFolder.toString() + "/" + encodeURIComponent(suggestion)
     onAccepted: { if (saving) picked(selectedFile); else pickedFiles(selectedFiles); destroy() }

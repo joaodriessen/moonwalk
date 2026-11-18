@@ -73,7 +73,7 @@ Item {
         retrying = false
         spinnerShown = false
         stageShown = true
-        stageText = trialOutcome ? qsTr("Safe settings trial finished")
+        stageText = trialOutcome ? qsTr("Safe settings test finished")
                                  : everEstablished || !hostName ? qsTr("Stream ended")
                                  : qsTr("Could Not Connect to %1").arg(hostName)
         window.visible = true
@@ -100,7 +100,7 @@ Item {
         var previous = session
         var next = previous.createRetrySession(safeSettings === true, automatic || everEstablished, !automatic, lastSuccessful === true)
         if (!next) {
-            lastFailure = qsTr("The remote session changed or is no longer available. Return to the host and connect explicitly.")
+            lastFailure = qsTr("The remote session changed or ended. Return to the host page and connect again.")
             showTerminalFailure()
             return false
         }
@@ -149,7 +149,7 @@ Item {
             safeRetryRelevant = false
             lastFailure = SystemProperties.decoderProbeError
             showTerminalFailure()
-            stageText = qsTr("Video check needs attention")
+            stageText = qsTr("Video check failed")
             return
         }
         if (!SystemProperties.decoderProbeReady) {
@@ -189,7 +189,7 @@ Item {
         if (stage.indexOf("audio") >= 0) return qsTr("Starting audio…")
         if (stage.indexOf("video") >= 0) return qsTr("Starting video…")
         if (stage.indexOf("input") >= 0) return qsTr("Connecting keyboard and mouse…")
-        return qsTr("Negotiating the stream…")
+        return qsTr("Setting up the stream…")
     }
     function stageStarting(stage)
     {
@@ -211,9 +211,9 @@ Item {
     {
         var advice
         if (stage === "name resolution") {
-            advice = qsTr("Check the computer address and that your network can find the host, then try again.")
+            advice = qsTr("Check the host address and make sure both computers can reach each other.")
         } else if (stage === "video stream establishment") {
-            advice = qsTr("The video stream could not start. Check the host connection and try a different video decoder.")
+            advice = qsTr("Video couldn't start. Check that the host is capturing a display, then try Safe Settings.")
         } else if (stage === "audio stream initialization" || stage === "audio stream establishment") {
             advice = qsTr("The audio stream could not start. Check the audio device and try again.")
         } else if (stage === "platform initialization") {
@@ -336,7 +336,7 @@ Item {
                 return
             }
             if (lastFailure || retrying || session.retryableTermination === true) {
-                if (!lastFailure) lastFailure = qsTr("Moonwalk could not restore the connection within its retry limit. Check the host and network, then retry.")
+                if (!lastFailure) lastFailure = qsTr("Moonwalk couldn't reconnect. Check that the host is running and both computers are online, then try again.")
                 showTerminalFailure()
                 return
             }
@@ -444,7 +444,7 @@ Item {
         function onConnectionDiagnosticReady(result) {
             if (root.failed && !root.diagnosticAdded && result !== 0 && result !== -1) {
                 root.diagnosticAdded = true
-                root.lastFailure += "\n\n" + qsTr("The network test found blocked Internet streaming ports. This may affect connections outside your local network.")
+                root.lastFailure += "\n\n" + qsTr("The port check found blocked ports for internet streaming.")
             }
         }
     }
@@ -499,7 +499,7 @@ Item {
             // in the hintText control itself to synchronize
             // with Session.exec() which requires no concurrent
             // gamepad usage.
-            streamHint = qsTr("Tip:") + " " + qsTr("Press %1 to disconnect your stream").arg(SdlGamepadKeyNavigation.getConnectedGamepads() > 0 ?
+            streamHint = qsTr("Tip:") + " " + qsTr("Press %1 to disconnect").arg(SdlGamepadKeyNavigation.getConnectedGamepads() > 0 ?
                                                   qsTr("Start+Select+L1+R1") : qsTr("Ctrl+Alt+Shift+Q"))
 
             // Stop GUI gamepad usage now
@@ -508,7 +508,7 @@ Item {
             // Initialize the session and probe for host/client capabilities
             if (!session.initialize(window)) {
                 if (!streamSegueErrorDialog.text && !lastFailure)
-                    displayLaunchError(qsTr("Moonwalk could not prepare video on this device. Check the video decoder settings and try again."))
+                    displayLaunchError(qsTr("Moonwalk couldn't prepare video on this computer. Check the graphics driver and run the video check again."))
                 sessionFinished(0);
                 sessionReadyForDeletion();
                 return;
@@ -531,7 +531,7 @@ Item {
                 for (var i = 0; i < session.launchWarnings.length; i++) {
                     console.warn(session.launchWarnings[i])
                 }
-                window.showToast((retainLaunchWarningsFn ? qsTr("Stream adjustments are saved in Host Details.") + "\n" : "")
+                window.showToast((retainLaunchWarningsFn ? qsTr("See Host Details for the adjustments made when this stream started.") + "\n" : "")
                                  + session.launchWarnings.join("\n"))
             }
 
@@ -584,7 +584,7 @@ Item {
         hostIcon: root.hostIcon
         hostDimmed: !root.trialOutcome
         title: root.stageText
-        message: root.trialOutcome ? qsTr("The temporary trial used 1920×1080, 60 FPS, 10 Mbps, stereo, SDR and automatic codec/decoder. Your saved preferences are unchanged.") : root.lastFailure
+        message: root.trialOutcome ? qsTr("This test used 1920×1080 at 60 FPS and 10 Mbps, with stereo, SDR, and automatic codec and decoder selection. Choose Keep Safe Settings to use them next time.") : root.lastFailure
 
         Button { objectName: "starlight.stream.retry-video-check"; text: SystemProperties.decoderProbeReady ? qsTr("Continue") : qsTr("Try Video Check Again"); highlighted: true; visible: root.decoderCheckFailed; enabled: !SystemProperties.decoderProbeRunning; onClicked: root.retryVideoCheck() }
         Button { objectName: "starlight.stream.retry"; text: qsTr("Retry"); highlighted: true; visible: !root.trialOutcome && !root.decoderCheckFailed; enabled: root.session && root.session.cleanupComplete === true; onClicked: root.retryWithSettings(false, false) }

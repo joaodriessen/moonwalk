@@ -1,121 +1,89 @@
-# Compatibility and current limits
+# Compatibility
 
-Moonwalk is a private alpha. **No combination is certified as a stable public
-release yet.** This matrix describes the current development line, not every
-older download. Check the version in About and the release notes.
+Moonwalk is a private alpha. This page covers the current source. Check
+**About Moonwalk** and the [changelog](../CHANGELOG.md) if you're using an older
+build.
 
-## Client and host scope
+## Where it runs
 
-| Area | Status | What that means |
-| --- | --- | --- |
-| Linux x86-64 Flatpak | Supported development target; experimental product | Primary packaging path. Hardware decoding still depends on GPU and driver support. |
-| GNOME and Plasma on Wayland | Experimental; controlled native checks performed | Both use the same settings model. Physical input, accessibility and hardware coverage remain incomplete. |
-| Hyprland and other desktops | Experimental | Generic layout and compositor-managed windows; some Hyprland checks exist, not qualification of every compositor. |
-| X11 | Experimental fallback | Not equivalent to full Wayland qualification. |
-| Native Linux builds | Contributor path | Qt-floor CI is distinct from the shipped Flatpak runtime. Fedora/Arch instructions are not certification of each distro release. |
-| Windows/macOS/mobile/ARM clients | Unsupported release targets | Inherited Moonlight code does not establish Moonwalk support. |
-| Moonwalk Host on Apple Silicon | Experimental companion | macOS 14 or later is the target; one Mac's results do not qualify every supported OS version. |
-| Vibepollo 2.0.1 on Windows | Limited real-stream checks | Pairing, streaming and cleanup have been exercised. Native-resolution smoothness on a constrained Intel host remains unresolved. |
-| Sunshine and Apollo | Protocol-compatible targets; current version matrix unverified | Standard streaming is intended; each optional extension needs its own capability and permission checks. |
-| Internet streaming, relays and multi-user hosting | Unsupported product scope | Local-network alpha. No built-in traversal or relay service; VPN routes are not a general WAN qualification. |
+| Setup | What we've checked |
+| --- | --- |
+| **Linux x86-64 Flatpak** | The primary package. Hardware decoding depends on your GPU and drivers. |
+| **GNOME and KDE Plasma on Wayland** | Both layouts have been exercised in controlled desktop tests. Physical input, accessibility, and GPU coverage are still limited. |
+| **Hyprland and other desktops** | Moonwalk uses the generic layout here. Some paths have been tried on Hyprland. Other compositors may behave differently. |
+| **X11** | Available as a fallback. Coverage is more limited than on Wayland. |
+| **Native Linux build** | CI builds on Ubuntu 24.04 with Qt 6.4.2. The Flatpak uses its own Qt runtime. See [build instructions](building.md) for other distributions. |
+| **Other client platforms** | Moonwalk targets x86-64 Linux. See [Moonlight](https://moonlight-stream.org/) for clients on other platforms. |
 
-## Optional features
+On the host side, Windows with Vibepollo and Apple Silicon with Moonwalk Host
+have had real streaming checks. We've exercised pairing, streaming, and
+disconnect cleanup, but full-rate streaming at native resolution remains
+unresolved on one Intel host. Sunshine and Apollo speak the underlying protocol.
+Their current releases and optional features still need more testing with
+Moonwalk. Moonwalk Host is a separate private alpha targeting macOS 14 or later.
 
-Standard streaming uses ordinary PIN pairing. Moonwalk does not require an
-additional administrator sign-in or a companion service beside an existing
-compatible host. Automatic display setup sends the standard launch request for
-the chosen mode; a hidden legacy game-optimization preference cannot disable it.
-GeForce Experience retains its supported-resolution guard. Explicit command-line
-options still take precedence for that connection.
+Most testing has been on a local network. Moonwalk has no built-in relay or
+internet setup. A private VPN can provide a route to the host, but we haven't
+qualified that setup.
 
-| Feature | Moonwalk Host | Apollo / Vibepollo | Other compatible hosts |
+## Features by host
+
+Standard video, audio, and input use the host's existing pairing and
+permissions. Optional features depend on what the installed host version
+advertises and allows for your paired device.
+
+| Feature | Moonwalk Host | Apollo and Vibepollo | Other compatible hosts |
 | --- | --- | --- | --- |
-| Standard desktop video, audio and input | Yes, within alpha scope | Subject to host permissions | Intended standard protocol path |
-| Automatic text clipboard | Extension supported | Compatible versions and permissions | Type/paste shortcut fallback |
-| Image clipboard and regular-file transfers | Extension supported | Not implemented by Moonwalk for these hosts | Not implemented |
-| Remote cursor shapes | Extension supported | No equivalent Moonwalk integration | Local cursor fallback |
-| Desktop UI scale negotiation | Supported 1×/2× modes | No generic effective Windows UI-DPI contract | Host-dependent |
-| Live bitrate control | Compatible host extension | Capability-gated; some encoders restart briefly | Not assumed |
-| Virtual display | Host extension | Host version, driver, policy and permissions | Host-dependent |
+| Automatic text clipboard | Yes | With the clipboard extension and permission | Type local clipboard text with Ctrl+Alt+Shift+V |
+| Image clipboard and file transfer | Yes | — | — |
+| Host cursor shapes | Yes | Local cursor | Local cursor |
+| Choose the size of text and UI on the host | 1× or 2× on supported modes | Use the host's display settings | Depends on the host |
+| Change bitrate in a stream | Yes | With the bitrate control extension | Depends on the host |
+| Virtual display | Yes | Depends on driver, policy, and permission | Depends on the host |
 
-Normal Connect targets the host's existing Desktop application. Automatic virtual
-display requests go through that application's display policy; they do not select
-an independent additional Monitor. An exclusive client-sized host display can
-bring the existing windows onto the streamed screen, with restoration performed
-by the host. That behavior depends on the host's supported policy, current session
-ownership and driver. A retained/shared Desktop cannot always be resized by a
-secondary client. Moonwalk must not silently terminate another client's game to
-force a display change.
+A host that accepts live bitrate changes can still pause video briefly to restart
+its encoder. HDR, 4:4:4, surround sound, high refresh rates, and gamepads depend on
+the whole chain from host to display. Moonwalk Host currently streams SDR and
+stereo, and maps gamepad input to keyboard and mouse.
 
-The UUID-identified Remote Monitor protocol remains supported for explicit role
-requests. Its client-scoped disconnect is kept separate from global application
-cancellation. When normal Connect encounters this client's retained auxiliary
-role, it releases that role and resolves the normal Desktop from a fresh,
-authenticated catalogue. Unknown hosts retain standard launch/resume behavior.
+## Which desktop you get
 
-For hosts advertising the UUID-identified running-session and Terminate controls,
-Moonwalk detects a Desktop retained by another device before opening video. It
-asks **Take Over Desktop?**, then uses the advertised host control, checks current
-paired identity/permissions and catalogue, handles at most one host confirmation,
-and checks that the prior session ended before launching a fresh main Desktop.
-It verifies ownership on hosts that project running state per paired client.
-Missing controls, unexpected replies or observed session changes stop the attempt;
-there is no fallback to an additional monitor or unguarded global cancellation.
-Ordinary Sunshine/GFE launch/resume semantics remain unchanged.
+Normal **Connect** opens the host's existing **Desktop** entry. Automatic mode
+asks for the client-sized mode and lets the host prepare that display. A ready
+virtual display may become the main screen for the session if the host's policy
+allows it. Moonwalk keeps the separate Remote Monitor role for explicit requests.
 
-This is a stock-host control sequence, not an atomic expected-target transaction.
-Approval can disconnect other viewers of the current streaming application, and
-legacy APIs cannot eliminate changes occurring between requests. Moonwalk never
-infers approval from the host advertising itself as free. Hosts without these
-controls may need their retained session ended from the original client. Host
-configuration/driver policy still determines exclusive display setup, UI scale
-and restoration. No host patches, SSH-per-connection action or service restart is
-part of this client flow.
+A shared or retained Desktop may still use the previous client's display. If
+the host advertises the controls needed to end that session, Moonwalk can offer
+**Take Over Desktop?** before connecting. Approving this can disconnect other
+viewers. Moonwalk rechecks the running session, uses the host's confirmation if
+required, and checks that the session ended before asking for a fresh Desktop.
+If a check fails or the session changes, the attempt stops. Hosts without those
+controls may need the original client to end the retained session. The host
+handles display preparation and restoration.
 
-The encoded frame size does not prove the host captured a desktop at that size:
-a host may resize a physical/shared/retained desktop before encoding. There is no
-universal Moonlight capture-size or Windows UI-DPI acknowledgement. Private-role
-support, legacy protocol tests and one host's field result do not certify every
-host/version, concurrent same-client process, driver or display topology.
+The stream resolution measures the encoded picture. The host may have scaled an
+existing desktop before encoding it, and Windows text size is a separate host
+setting. When available, the FFmpeg decoder can verify the picture dimensions
+received. There is no standard response that verifies the capture size or the
+effective Windows UI scale. A host may warn that it disabled the virtual
+display. Moonwalk shows the warning and continues with the picture the host
+provides.
 
-Text clipboard compatibility does not imply image/file compatibility. A host's
-brand or version string does not grant permissions or prove an extension exists.
-Host runtime-bitrate acknowledgements do not guarantee a pause-free encoder.
+## Performance and disconnect
 
-Automatic targets local geometry and refresh, prioritizes scaling and usable
-motion, and bounds tuning trials. It cannot guarantee native resolution at full
-refresh on every machine. On hosts without UI-scale negotiation, keeping desktop
-geometry fixed during tuning protects the starting layout; it cannot repair an
-initially incorrect host UI scale. Decoded-picture size verification currently
-uses the FFmpeg path; other decoders retain negotiated-size fallback. This does
-not verify the host's capture source or effective UI scale.
+Automatic starts with the client display's size and refresh rate, subject to
+host and decoder limits. It uses measured delivery to recommend changes and
+preserves the requested frame rate during resolution trials. It keeps a working
+stream connected. See [Performance](guides/performance.md) for what happens
+during the stream and on the next connection.
 
-Moonwalk reads the optional stock-host warning
-`virtual_display_disabled_by_client` on successful launch/resume responses and
-keeps it in the existing stream configuration warnings. It does not disconnect
-or retry in response. Older hosts that do not send this warning remain
-compatible; absence of a warning does not verify successful display setup.
+Disconnect closes the stream and returns to the host list while Moonwalk
+requests remote cleanup. If the network or host goes offline, the Desktop may
+stay resumable until the host can be reached or expires it. A crash can leave
+the same kind of retained session.
 
-Normal disconnect returns to the launcher while authenticated cleanup runs in
-the background. A crash or offline client can leave a target resumable until
-recovery. Universal host expiry, atomic multi-client ownership and display
-restoration are not yet guaranteed.
-
-HDR, 4:4:4, surround sound, high-refresh displays and controllers depend on the
-whole host/codec/driver/client path. They are not qualified simply because the
-engine contains support. Moonwalk Host currently offers SDR/stereo; its gamepad
-input maps to keyboard/mouse rather than a virtual gamepad.
-
-## Expanding support
-
-A useful report includes both build versions, client GPU/driver and desktop,
-host OS/GPU, display size/scale/refresh, connection type and the actual failure.
-Use the [bug form](https://github.com/joaodriessen/moonwalk/issues/new/choose)
-and review diagnostics for private information before sharing them.
-
-Qualification should cover representative Intel/AMD/NVIDIA clients, fractional
-scaling, external-display switching, permissions, keyboard layouts, audio-device
-changes, reconnects and clean installs. A passing unit test, nested compositor
-or single hardware pair is evidence for that case, not universal support.
-
-[Getting started](guides/getting-started.md) · [Release process](releasing.md)
+If a setup fails, [report it](https://github.com/joaodriessen/moonwalk/issues/new/choose)
+with both software versions, the client desktop and GPU, host OS and GPU,
+display size and refresh, and the symptom you see. Review diagnostics for
+private information before sharing.

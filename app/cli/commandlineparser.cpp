@@ -53,20 +53,8 @@ public:
             showInfo(SupportInfo(QCoreApplication::instance()->property("starlightLogPath").toString()).summary());
         }
         if (isSet("version")) {
-            // Print the Starlight product name and version rather than
-            // QCommandLineParser's default showVersion(): applicationVersion()
-            // is the upstream moonlight-qt engine version, not Starlight's own.
-            // (applicationName() is "Starlight" since the 2026-07-17 identity
-            // switch -- config lives in Starlight's own namespace with a
-            // one-time Moonlight import; see main.cpp.)
-            //
-            // Two lines: Starlight's own product version (independent of the
-            // engine it's built on, from the STARLIGHT_VERSION_STR macro
-            // derived off app.pro's VERSION variable), then the upstream
-            // moonlight-qt engine version this fork tracks, from the existing
-            // VERSION_STR macro (app.pro DEFINES, unchanged -- also used by
-            // autoupdatechecker.cpp to compare against upstream releases;
-            // deliberately not touched by the app.pro VERSION variable change).
+            // Qt's application version tracks the engine. Report Moonwalk's
+            // product version and source revision alongside it.
             showInfo(QString("Moonwalk %1\nSource: %2\n(moonlight-qt engine %3)").arg(STARLIGHT_VERSION_STR, STARLIGHT_BUILD_REVISION, VERSION_STR));
         }
     }
@@ -142,13 +130,13 @@ public:
 
     void addToggleOption(QString name, QString descriptiveName)
     {
-        addOption(QCommandLineOption(name, QString("Use %1.").arg(descriptiveName)));
-        addOption(QCommandLineOption("no-" + name, QString("Do not use %1.").arg(descriptiveName)));
+        addOption(QCommandLineOption(name, QString("Enable %1.").arg(descriptiveName)));
+        addOption(QCommandLineOption("no-" + name, QString("Disable %1.").arg(descriptiveName)));
     }
 
     void addValueOption(QString name, QString descriptiveName)
     {
-        addOption(QCommandLineOption(name, QString("Specify %1 to use.").arg(descriptiveName), name));
+        addOption(QCommandLineOption(name, QString("Specify %1.").arg(descriptiveName), name));
     }
 
     void addChoiceOption(QString name, QString descriptiveName, QStringList choices)
@@ -175,17 +163,17 @@ GlobalCommandLineParser::ParseResult GlobalCommandLineParser::parse(const QStrin
     parser.setupCommonOptions();
     parser.setApplicationDescription(
         "\n"
-        "Starts Moonwalk normally if no arguments are given.\n"
+        "Run without an action to open the Moonwalk launcher.\n"
         "\n"
         "Available actions:\n"
-        "  list            List the available apps on a host\n"
-        "  quit            Quit the currently running app\n"
-        "  stream          Start streaming an app\n"
-        "  pair            Pair a new host\n"
+        "  list            List the apps offered by a host\n"
+        "  quit            Ask the host to close its running app\n"
+        "  stream          Open a stream for a named app\n"
+        "  pair            Pair this computer with a host\n"
         "\n"
-        "See 'starlight <action> --help' for help of specific action."
+        "Run 'starlight <action> --help' for the options for that action."
     );
-    parser.addPositionalArgument("action", "Action to execute", "<action>");
+    parser.addPositionalArgument("action", "Action to run", "<action>");
     parser.parse(args);
     auto posArgs = parser.positionalArguments();
 
@@ -354,7 +342,7 @@ void StreamCommandLineParser::parse(const QStringList &args, StreamingPreference
     parser.setupCommonOptions();
     parser.setApplicationDescription(
         "\n"
-        "Starts directly streaming a given app."
+        "Stream a named app from a host."
     );
     parser.addPositionalArgument("stream", "Start stream");
 
@@ -366,30 +354,30 @@ void StreamCommandLineParser::parse(const QStringList &args, StreamingPreference
     parser.addFlagOption("1080", "1920x1080 resolution");
     parser.addFlagOption("1440", "2560x1440 resolution");
     parser.addFlagOption("4K", "3840x2160 resolution");
-    parser.addValueOption("resolution", "custom <width>x<height> resolution");
+    parser.addValueOption("resolution", "a resolution in WIDTHxHEIGHT format");
     parser.addToggleOption("vsync", "V-Sync");
     parser.addValueOption("fps", "FPS");
-    parser.addValueOption("bitrate", "bitrate in Kbps");
+    parser.addValueOption("bitrate", "the video bitrate in kbps");
     parser.addValueOption("packet-size", "video packet size");
     parser.addChoiceOption("display-mode", "display mode", m_WindowModeMap.keys());
-    parser.addChoiceOption("audio-config", "audio config", m_AudioConfigMap.keys());
+    parser.addChoiceOption("audio-config", "the audio channel layout", m_AudioConfigMap.keys());
     parser.addToggleOption("multi-controller", "multiple controller support");
-    parser.addToggleOption("quit-after", "quit app after session");
-    parser.addToggleOption("absolute-mouse", "remote desktop optimized mouse control");
-    parser.addToggleOption("mouse-buttons-swap", "left and right mouse buttons swap");
-    parser.addToggleOption("touchscreen-trackpad", "touchscreen in trackpad mode");
+    parser.addToggleOption("quit-after", "automatic app exit after disconnect");
+    parser.addToggleOption("absolute-mouse", "absolute pointer positioning");
+    parser.addToggleOption("mouse-buttons-swap", "left and right mouse button swapping");
+    parser.addToggleOption("touchscreen-trackpad", "trackpad mode for touchscreens");
     parser.addToggleOption("game-optimization", "game optimizations");
-    parser.addToggleOption("audio-on-host", "audio on host PC");
+    parser.addToggleOption("audio-on-host", "audio playback on the host");
     parser.addToggleOption("frame-pacing", "frame pacing");
-    parser.addToggleOption("mute-on-focus-loss", "mute audio when Moonwalk window loses focus");
+    parser.addToggleOption("mute-on-focus-loss", "audio muting when Moonwalk loses focus");
     parser.addToggleOption("background-gamepad", "background gamepad input");
     parser.addToggleOption("reverse-scroll-direction", "inverted scroll direction");
-    parser.addToggleOption("swap-gamepad-buttons", "swap A/B and X/Y gamepad buttons (Nintendo-style)");
-    parser.addToggleOption("keep-awake", "prevent display sleep while streaming");
-    parser.addToggleOption("performance-overlay", "show performance overlay");
+    parser.addToggleOption("swap-gamepad-buttons", "Nintendo-style gamepad button swapping");
+    parser.addToggleOption("keep-awake", "keeping the display awake during a stream");
+    parser.addToggleOption("performance-overlay", "the performance overlay");
     parser.addToggleOption("hdr", "HDR streaming");
     parser.addToggleOption("yuv444", "YUV 4:4:4 sampling, if supported");
-    parser.addChoiceOption("capture-system-keys", "capture system key combos", m_CaptureSysKeysModeMap.keys());
+    parser.addChoiceOption("capture-system-keys", "when to capture system shortcuts", m_CaptureSysKeysModeMap.keys());
     parser.addChoiceOption("video-codec", "video codec", m_VideoCodecMap.keys());
     parser.addChoiceOption("video-decoder", "video decoder", m_VideoDecoderMap.keys());
 
@@ -613,13 +601,13 @@ void ListCommandLineParser::parse(const QStringList &args)
     parser.setupCommonOptions();
     parser.setApplicationDescription(
         "\n"
-        "List the available apps on the given host."
+        "List the apps offered by a host."
     );
-    parser.addPositionalArgument("list", "list available apps");
+    parser.addPositionalArgument("list", "List host apps");
     parser.addPositionalArgument("host", "Host computer name, UUID, or IP address", "<host>");
 
-    parser.addFlagOption("csv",     "Print as CSV with additional information");
-    parser.addFlagOption("verbose", "Displays additional information");
+    parser.addFlagOption("csv",     "Print app details as CSV");
+    parser.addFlagOption("verbose", "Include app details");
 
     if (!parser.parse(args)) {
         parser.showError(parser.errorText());

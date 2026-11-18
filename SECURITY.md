@@ -1,33 +1,30 @@
 # Security
 
-Moonwalk is alpha software for connecting to computers you control. This page explains what it trusts and how to report a problem.
+Moonwalk is a private alpha for computers and networks you trust. During a
+stream, the host receives your input and sends video, audio, and any enabled
+clipboard or file data. Pair only with the host you intend to use. Moonwalk
+pins the host certificate during pairing and checks it on later paired
+requests.
 
-## What to keep in mind
+Video encryption depends on the host's policy and the negotiated connection.
+Open **Stream Controls** to check whether the video is encrypted. Keep host
+ports off the public internet. For remote access, use a private network route
+such as a VPN.
 
-- **Only pair with hosts you trust.** During a stream, a host sends Moonwalk video, audio and other data. A malicious host could send unexpected data on purpose.
-- **Pairing happens once, with a PIN.** After that, Moonwalk checks the host's certificate each time, and only a paired device can start a stream.
-- **Use a network you trust.** Whether video is encrypted depends on the host. Many hosts, Moonwalk Host included, leave it off on the local network by default.
-- **Don't open a host's ports to the internet.** If you need remote access, use a private tunnel such as a VPN.
-- **Your diagnostics are yours.** Moonwalk never uploads them. Read a diagnostic summary before sharing it.
-- **Nothing has been audited.** Neither Moonwalk nor the Moonlight Qt engine it uses has had an independent security audit.
+Moonwalk has no automatic diagnostic upload. Review copied diagnostics before
+sharing. Moonwalk and its Moonlight Qt engine have had no independent security
+audit for this release.
 
-## Report a problem
+## Report a vulnerability
 
-Do not put vulnerabilities, exploit details, credentials, certificates, keys, or
-unredacted diagnostics in public issues or pull requests.
+Use a private channel. While the repository is private, invited collaborators
+can report through its private issues. If you need a private contact, ask for
+one without describing the problem. Send the affected build, impact, and a
+minimal reproduction using synthetic data once you have the channel.
 
-While this repository is private, invited collaborators may report through its
-private issues. Before changing visibility, the maintainer must enable and verify
-GitHub's **Report a vulnerability** route under **Security → Advisories**, or
-publish a monitored private contact here. That public disclosure route is not
-established yet; this is a publication prerequisite, not a claim that reports
-are already accepted there.
+Before making the repository public, verify GitHub private vulnerability
+reporting or list a monitored private contact here. Keep vulnerability details,
+keys, certificates, and unredacted logs out of public issues and pull requests.
 
-If you cannot access a private reporting route, open an ordinary issue only to
-request one, without describing the vulnerability. Wait for a private channel
-before sending details.
-
-Include the affected version/build, impact, and a minimal reproduction using
-synthetic data. Reports are handled on a best-effort basis; there is no bug bounty
-or guaranteed response time. Only the current alpha development line is
-maintained; older private builds receive no separate security backports.
+Security fixes target the current alpha. Reports are handled on a best-effort
+basis.
