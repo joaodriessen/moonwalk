@@ -1,0 +1,70 @@
+name: Flatpak candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bundle:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Check source and history
+        run: |
+          test "$(git rev-list --max-parents=0 HEAD | wc -l)" -eq 1
+          for revision in $(git rev-list HEAD); do
+            python3 scripts/check-privacy.py --commit "$revision"
+          done
+      - name: Install Flatpak tooling
+        run: |
+          sudo apt-get -o Acquire::Retries=2 update
+          sudo apt-get -o Acquire::Retries=2 install --no-install-recommends -y flatpak ostree python3-yaml
+          mkdir -m 700 "$RUNNER_TEMP/moonwalk-runtime"
+          printf 'XDG_RUNTIME_DIR=%s\n' "$RUNNER_TEMP/moonwalk-runtime" >> "$GITHUB_ENV"
+      - name: Stage the exact candidate
+        run: |
+          python3 scripts/check-repository.py --check-flatpak-pin
+          python3 scripts/stage-flatpak-candidate.py \
+            --output "$RUNNER_TEMP/moonwalk-candidate" \
+            --workspace "$RUNNER_TEMP/moonwalk-build" > "$RUNNER_TEMP/moonwalk-stage.json"
+      - name: Install the SDK and builder
+        run: |
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          import yaml
+
+          manifest = yaml.safe_load(Path("flatpak/com.starlight.Starlight.yaml").read_text())
+          branch = manifest["runtime-version"]
+          subprocess.run(["flatpak", "install", "--user", "--noninteractive", "-y", "flathub",
+                          "org.flatpak.Builder", f"{manifest['runtime']}//{branch}",
+                          f"{manifest['sdk']}//{branch}"], check=True)
+          PY
+      - name: Build and verify the bundle
+        run: |
+          candidate="$RUNNER_TEMP/moonwalk-candidate"
+          workspace="$RUNNER_TEMP/moonwalk-build"
+          artifacts="$RUNNER_TEMP/moonwalk-artifacts"
+          mkdir -p "$artifacts"
+          dbus-run-session -- flatpak run org.flatpak.Builder --user --force-clean \
+            --disable-rofiles-fuse --jobs=3 --state-dir="$workspace/.flatpak-builder" \
+            --repo="$workspace/repo" "$workspace/build-dir" "$candidate/manifest.yaml"
+          bundle="$artifacts/Moonwalk-${GITHUB_SHA:0:12}.flatpak"
+          flatpak build-bundle "$workspace/repo" "$bundle" com.starlight.Starlight
+          python3 scripts/verify-flatpak-bundle.py "$candidate" "$bundle" > "$artifacts/verification.json"
+          cp "$candidate/provenance.json" "$artifacts/provenance.json"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: moonwalk-flatpak-${{ github.sha }}
+          path: ${{ runner.temp }}/moonwalk-artifacts/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7

@@ -35,6 +35,11 @@ tracks the inherited engine version.
 
 ## Build and test the candidate
 
+Run **Flatpak candidate** from GitHub Actions to build the selected revision on
+a fresh runner. On success the run has a bundle, a source manifest with hashes,
+and the verification report. These are candidate artifacts. Use the same
+release checks on the file you intend to distribute.
+
 1. Commit the candidate. Run the relevant [development checks](development.md),
    including the shipped runtime, AOT build, and desktop and streaming checks
    for the affected features. Use test data and isolated settings.

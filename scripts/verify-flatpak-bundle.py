@@ -70,7 +70,8 @@ def verify(candidate, bundle):
         require(metadata["Application"]["runtime"], runtime, "runtime ref")
 
         share = app / "files/share"
-        installed_data = ET.parse(share / "metainfo" / appdata)
+        metainfo = share / "metainfo" / f"{app_id}.metainfo.xml"
+        installed_data = ET.parse(metainfo if metainfo.is_file() else share / "metainfo" / appdata)
         require(installed_data.findtext("id"), app_id, "AppStream application ID")
         require(installed_data.find("releases/release").attrib["version"], version, "AppStream version")
         if not (share / "applications" / f"{app_id}.desktop").is_file():
