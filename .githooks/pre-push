@@ -1,0 +1,35 @@
+#!/bin/sh
+# Scan the objects being pushed, including intermediate commits and new tags.
+set -eu
+
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+temp=$(mktemp -d)
+trap 'rm -rf -- "$temp"' EXIT
+trap 'exit 1' HUP INT TERM
+
+while read -r local_ref local_oid remote_ref remote_oid; do
+    [ "$local_ref" = "(delete)" ] && continue
+    tip=$(git rev-parse --verify "$local_oid^{commit}") || {
+        echo "Push blocked: Moonwalk refs must point to a commit." >&2
+        exit 1
+    }
+    if [ "$(git rev-list --max-parents=0 "$tip" | wc -l)" -ne 1 ]; then
+        echo "Push blocked: transfer reviewed patches without merging outside history." >&2
+        exit 1
+    fi
+    if printf '%s\n' "$remote_oid" | grep -Eq '^0+$'; then
+        git rev-list "$tip" --not --remotes=origin > "$temp/commits"
+    else
+        git rev-list "$tip" "^$remote_oid" > "$temp/commits"
+    fi
+    while IFS= read -r commit; do
+        git show -s --format='%ae%n%ce' "$commit" > "$temp/addresses"
+        if grep -qvE '^([A-Za-z0-9._+-]+@users\.noreply\.github\.com|[A-Za-z0-9._+-]+@[A-Za-z0-9.-]+\.invalid)$' "$temp/addresses"; then
+            echo "Push blocked: use a GitHub no-reply address or a project .invalid address." >&2
+            exit 1
+        fi
+        GIT_INDEX_FILE="$temp/index" git read-tree "$commit"
+        GIT_INDEX_FILE="$temp/index" python3 scripts/check-privacy.py --show-paths
+    done < "$temp/commits"
+done

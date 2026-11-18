@@ -18,6 +18,12 @@ Moonwalk. Keep personal machine records in your own storage.
   and images yourself, including staged changes, commit messages and binary
   artifacts. Passing the check is one part of review.
 
+Maintainers can turn on the local push check with
+`git config --local core.hooksPath .githooks`. It scans each new commit you push
+from that checkout and checks its author and committer addresses. GitHub Actions
+checks the proposed tree again. Review GitHub issue and release attachments
+separately, as Git hooks have no access to them.
+
 Follow [Security](../SECURITY.md) for vulnerabilities. If private information
 reaches GitHub, contact a maintainer privately without copying it elsewhere.
 Removing it from the latest commit alone leaves older copies accessible.
