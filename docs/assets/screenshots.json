@@ -1,12 +1,12 @@
 {
-  "render_inputs_sha256": "2be4b2fa8496105d4461543636203d4fd9eb7b4a1c23047fd1432f22a8ffa9b9",
+  "render_inputs_sha256": "f74bea87555604fba444aae3519711233cb8a49a2527d26e7242fde738a130a9",
   "render_input_scope": [
     "app/",
     "tests/preview/",
     "tests/qml/"
   ],
   "qt": "6.12.0",
-  "renderer": "offscreen software; production QML with private synthetic test state",
+  "renderer": "Offscreen software rendering of production QML with synthetic hosts and temporary settings",
   "streaming_or_native_compositor_proof": false,
   "images": [
     {
@@ -14,7 +14,7 @@
       "scene": "first-run-empty",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "4d483201a95263faaccf80153fafcaf8f93d7f9d465cecc2c5e0ca040d02dfa8",
+      "sha256": "825c2d05d211fb1920cf53dc29f49695213217a6fc3c85d8bd0711e760104044",
       "dimensions": [
         1720,
         1440
@@ -25,7 +25,7 @@
       "scene": "hosts-ready",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "2652a4f5099bf4e7c85ae30e2e68b14243050f9277dba306e18ddcfec1f66714",
+      "sha256": "37d99b93f260e9f9f661261cc83f78e05ac9dcb92658da4b8bbce576be7b7a59",
       "dimensions": [
         1720,
         1440
@@ -36,7 +36,7 @@
       "scene": "hosts-unpaired",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "61d6ddcaea034f9750e9a0e3c01a98717f803acfdb6e4552d5347c809319fa16",
+      "sha256": "bf71cd4788021faf2572695bc0c95ec5a58857259eb8df8f1d461ea061b87743",
       "dimensions": [
         1720,
         1440
@@ -47,7 +47,7 @@
       "scene": "pairing",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "043a11ed86ccc5d0c08e3f9232e378b5d9eee6e224633346e0af23d017b13404",
+      "sha256": "15b6a7738f077f756b3ea10f8e76ea0edab9ec53fb94be9681a2f95048a5df0c",
       "dimensions": [
         1720,
         1440
@@ -58,7 +58,7 @@
       "scene": "settings",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "dd72c67ce303b09cbdbd33e05c17886417c0cbabf4c338540376a11529404420",
+      "sha256": "6ecd4a87804b4b03f6a4181faa9c346e24c9747accd155fb867893b68082fd88",
       "dimensions": [
         1720,
         1440
@@ -69,7 +69,7 @@
       "scene": "shortcuts",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "825f50786b06ac7e6698166081a59026af4d2c3bb39b8d29cefdb5f2e944032c",
+      "sha256": "9f81df1677f35e37b62884679693d567bef1f5402c45989d7115452185a7be4d",
       "dimensions": [
         1720,
         1960
@@ -80,7 +80,7 @@
       "scene": "first-run-empty",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "de6d2763bbda30dd9dd7de90b87d12fbf11315b9281170581cbfed06a21dfb62",
+      "sha256": "f1d2e86cedbeb32137ce9f3ea52d6b905b4b161c9bf2571ad492ae3c7fcae0ee",
       "dimensions": [
         1720,
         1440
@@ -91,7 +91,7 @@
       "scene": "hosts-ready",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "b3107457f4569a8ce7300b90783d4a5edc90f174f1a3b47429d89d1902832835",
+      "sha256": "a6dd7c539f4cae9debea1f728d2eb257ab79286be6a7c5e04907e7da49350643",
       "dimensions": [
         1720,
         1440
@@ -102,7 +102,7 @@
       "scene": "hosts-unpaired",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "03a8fa74454f96d84ccab027d46ccb6cc15dde18ef64fe6aeca46963e816c164",
+      "sha256": "8f6945751a424d4a4575bbc6aa46e96a947498efb543d04933552035f0d83478",
       "dimensions": [
         1720,
         1440
@@ -113,7 +113,7 @@
       "scene": "pairing",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "ac0e8b37831abbcfb6d7aa5c9c0a9b6d9df9545b2d2d29a928820919b05c7d91",
+      "sha256": "32fe566329913582602b5c38ff82474b9241d4db107e486afca931e696502249",
       "dimensions": [
         1720,
         1440
@@ -124,7 +124,7 @@
       "scene": "settings",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "8cbc2ddd0e6333e0881e6d90785142487f7cfc85b857cb58fa9eaa8da0bc88b5",
+      "sha256": "ea8a7cf3623e9004f705495d8821fae10793772ac459ba38bc1e5d43f19ce4dc",
       "dimensions": [
         1720,
         1440
@@ -135,7 +135,7 @@
       "scene": "shortcuts",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "2e378910fbaa83e50785fe4866f113d4ac00f6562f4cf60e2d87e2e2ae9acc80",
+      "sha256": "26840a87f27a7ce1f7cacb61c3d1f8f916331a84b27dd18004f5bfc0cbb91412",
       "dimensions": [
         1720,
         1960
@@ -146,7 +146,7 @@
       "scene": "hosts-ready",
       "desktop": "plasma",
       "scheme": "light",
-      "sha256": "28f6e6bec13dcf88d50201f1cb5bd1644fd6735cf1b63e10af32e8594dc07c8e",
+      "sha256": "3bc92dd8c4685a37ff07558cd10d9781f507993205cde179da688b80d0f698d5",
       "dimensions": [
         1720,
         1440
@@ -157,7 +157,7 @@
       "scene": "hosts-ready",
       "desktop": "plasma",
       "scheme": "dark",
-      "sha256": "5d52d85d6b20831ee54fab8138737ce9219bc568eeaf5319815657a633f57b0f",
+      "sha256": "cbabfab8f838b4c3b6e68ec7ac95037a7d81808cf047752cc8d121e9fab88915",
       "dimensions": [
         1720,
         1440
@@ -165,5 +165,5 @@
     }
   ],
   "scale_factor": 2,
-  "source_revision": "8295927adaf118921254e98e8b61e363cc08ac38"
+  "source_revision": "92b210fc5ff228eda8c6341b109b35f1e373e2e9"
 }

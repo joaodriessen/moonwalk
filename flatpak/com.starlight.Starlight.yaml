@@ -17,13 +17,9 @@ finish-args:
   # Let the focused stream adjust the client's physical screen backlight.
   - --system-talk-name=org.freedesktop.login1
   - --env=IGNORE_RFI_LATENCY_BUG=1
-  # Flatpak's reproducible builds normalize all file timestamps to epoch, which defeats
-  # Qt's QML disk-cache invalidation: after an app update, stale compiled QML from
-  # ~/.var/app/.../qmlcache is still considered valid and silently overrides the shipped
-  # QML (measured: a Theme.qml change was invisible until the cache was bypassed). QML is
-  # AOT-compiled into the binary instead (CONFIG+=qtquickcompiler below), which never
-  # touches the disk cache; this env var closes the residual interpreted-fallback path
-  # (e.g. after a runtime point-update invalidates the AOT units' version stamps).
+  # Reproducible builds normalize file times, so stale Qt QML disk-cache
+  # entries can survive updates. AOT handles the compiled path. Disable
+  # the disk cache for interpreted QML as well.
   - --env=QML_DISABLE_DISK_CACHE=1
   # Leave LIBVA_DRIVER_NAME UNSET (not set-empty) so libva auto-detects per GPU: on Haswell
   # it tries iHD, that fails, and it falls back to our bundled i965; modern Intel gets iHD,
@@ -265,7 +261,7 @@ modules:
             }
           }
 
-  # --- Moonwalk app (built LAST; submodules fetched from git) ---
+  # Moonwalk and its pinned Git submodules.
   - name: starlight
     buildsystem: qmake
     config-opts:
@@ -274,11 +270,7 @@ modules:
     build-options:
       config-opts:
         - CONFIG+=enable-cuda
-        # AOT-compile QML (upstream enables this only for win/mac "since they always
-        # ship with the matching build of the Qt runtime" -- which is exactly the
-        # Flatpak situation too: the app is pinned to the runtime's Qt). Faster QML
-        # startup, and sidesteps the broken-by-design QML disk cache (see the
-        # QML_DISABLE_DISK_CACHE finish-arg above).
+        # Compile QML against the Qt version shipped by this runtime.
         - CONFIG+=qtquickcompiler
       arch:
         x86_64:
@@ -292,13 +284,11 @@ modules:
         # helper described in docs/development.md.
       - type: git
         url: https://github.com/joaodriessen/moonwalk.git
-        commit: 9a79c07c9827a1d98f692e4507a9aa4c0dbec3bc
+        commit: 92b210fc5ff228eda8c6341b109b35f1e373e2e9
         disable-shallow-clone: true
 
-  # --- vainfo (libva-utils): a tiny, genuinely-useful VA-API diagnostic so a user or
-  # support can run `flatpak run --command=vainfo com.starlight.Starlight` to confirm their
-  # GPU's hardware decode is available inside the sandbox. Placed AFTER the app so its build
-  # doesn't invalidate the app module's flatpak-builder cache. ---
+  # Run vainfo inside the sandbox to check its VA-API setup. Building it
+  # after the client keeps a diagnostic tool update out of the app cache.
   - name: libva-utils
     buildsystem: meson
     config-opts: [-Ddrm=true, -Dtests=false]
