@@ -33,7 +33,7 @@ Plasma and stream settings you can save for each host.
 - A **host** on the computer you want to use. [Sunshine](https://github.com/LizardByte/Sunshine)
   runs on Windows and Linux. [Apollo](https://github.com/ClassicOldSong/Apollo)
   and [Vibepollo](https://github.com/Nonary/Vibepollo) are Windows options.
-  [Moonwalk Host](https://github.com/joaodriessen/Skylight) is a separate,
+  [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host) is a separate,
   private alpha for Apple Silicon Macs running macOS 14 or later.
 - A **local network** both machines can reach. Use a network and hosts you trust.
 

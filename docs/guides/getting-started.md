@@ -6,7 +6,7 @@ Install and start host software on the computer you want to control. Use
 [Sunshine](https://github.com/LizardByte/Sunshine) on Windows or Linux, or
 [Apollo](https://github.com/ClassicOldSong/Apollo) or
 [Vibepollo](https://github.com/Nonary/Vibepollo) on Windows. If you're testing the
-Mac companion, see [Moonwalk Host](https://github.com/joaodriessen/Skylight).
+Mac companion, see [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host).
 You'll need access to that separate private alpha.
 
 In the host's application list, look for **Desktop**. Moonwalk uses this entry
