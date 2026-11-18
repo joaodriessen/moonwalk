@@ -8,6 +8,11 @@ it did not have a published installer or GitHub Release. Older `v0.0.3`…`v6.1.
 tags are inherited from upstream moonlight-qt, not Starlight releases. Changes
 since that snapshot remain grouped under the current private tester version.
 
+## Unreleased
+
+- Accept valid host application lists on older Qt versions. This fixes desktop
+  selection and takeover when a valid response was rejected at the end of parsing.
+
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 
 - Automatic Display always enables the standard host display-mode request, even when an obsolete hidden game-optimization preference was disabled. GeForce Experience retains its supported-resolution guard.
