@@ -292,7 +292,7 @@ modules:
         # helper described in docs/development.md.
       - type: git
         url: https://github.com/joaodriessen/moonwalk.git
-        commit: 8295927adaf118921254e98e8b61e363cc08ac38
+        commit: 9a79c07c9827a1d98f692e4507a9aa4c0dbec3bc
         disable-shallow-clone: true
 
   # --- vainfo (libva-utils): a tiny, genuinely-useful VA-API diagnostic so a user or
