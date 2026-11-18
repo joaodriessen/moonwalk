@@ -27,6 +27,22 @@
 #define XML_NAME_EQUALS(x, y) ((x) == (u##y))
 #endif
 
+static QString requestLocation(const QUrl& url)
+{
+    // Pairing and launch arguments carry certificates and session keys.
+    return url.toString(QUrl::RemoveUserInfo | QUrl::RemoveQuery | QUrl::RemoveFragment);
+}
+
+static QString networkErrorDetail(const QNetworkReply& reply)
+{
+    const auto url = reply.url();
+    auto detail = reply.errorString();
+    const auto location = requestLocation(url);
+    detail.replace(url.toString(QUrl::FullyEncoded), location);
+    detail.replace(url.toString(), location);
+    return detail;
+}
+
 // Stock hosts may report a successful stream that uses an existing display
 // instead of their requested virtual display. This is observation only: never
 // turn a warning into a cancel, retry, or a different launch request.
@@ -343,7 +359,6 @@ NvHTTP::startApp(QString verb,
     auto requestStart = [&](const QString& requestVerb) {
         QString response = openConnectionToString(m_BaseUrlHttps, requestVerb,
                                                    arguments, LAUNCH_TIMEOUT_MS);
-        qInfo() << "Launch response:" << response;
         try {
             verifyResponseStatus(response);
         }
@@ -398,8 +413,6 @@ NvHTTP::quitApp()
                                    "cancel",
                                    nullptr,
                                    QUIT_TIMEOUT_MS);
-
-    qInfo() << "Quit response:" << response;
 
     // Throws if the request failed
     verifyResponseStatus(response);
@@ -525,7 +538,7 @@ NvHTTP::verifyResponseStatus(QString xml)
                 QString statusMessage = xmlReader.attributes().value("status_message").toString();
                 if (statusCode != 401) {
                     // 401 is expected for unpaired PCs when we fetch serverinfo over HTTPS
-                    qWarning() << "Request failed:" << statusCode << statusMessage;
+                    qWarning() << "Host request failed with status" << statusCode;
                 }
                 if (statusCode == -1 && statusMessage == "Invalid") {
                     // Special case handling an audio capture error which GFE doesn't
@@ -691,7 +704,7 @@ NvHTTP::openConnection(QUrl baseUrl,
         QTimer::singleShot(timeoutMs, &loop, &QEventLoop::quit);
     }
     if (logLevel >= NvLogLevel::NVLL_VERBOSE) {
-        qInfo() << "Executing request:" << url.toString();
+        qInfo() << "Executing request:" << requestLocation(url);
     }
     loop.exec(QEventLoop::ExcludeUserInputEvents);
 
@@ -699,7 +712,7 @@ NvHTTP::openConnection(QUrl baseUrl,
     if (!reply->isFinished())
     {
         if (logLevel >= NvLogLevel::NVLL_ERROR) {
-            qWarning() << "Aborting timed out request for" << url.toString();
+            qWarning() << "Aborting timed out request for" << requestLocation(url);
         }
         reply->abort();
     }
@@ -737,7 +750,7 @@ NvHTTP::openConnection(QUrl baseUrl,
             throw exception;
         }
         else {
-            QtNetworkReplyException exception(reply->error(), reply->errorString());
+            QtNetworkReplyException exception(reply->error(), networkErrorDetail(*reply));
             delete reply;
             throw exception;
         }
@@ -815,7 +828,7 @@ NvHTTP::openConnectionPost(QUrl baseUrl,
         });
     }
     if (logLevel >= NvLogLevel::NVLL_VERBOSE) {
-        qInfo() << "Executing POST request:" << url.toString();
+        qInfo() << "Executing POST request:" << requestLocation(url);
     }
     loop.exec(QEventLoop::ExcludeUserInputEvents);
 
@@ -823,7 +836,7 @@ NvHTTP::openConnectionPost(QUrl baseUrl,
     if (!reply->isFinished())
     {
         if (logLevel >= NvLogLevel::NVLL_ERROR) {
-            qWarning() << "Aborting timed out POST request for" << url.toString();
+            qWarning() << "Aborting timed out POST request for" << requestLocation(url);
         }
         reply->abort();
     }
@@ -867,7 +880,7 @@ NvHTTP::openConnectionPost(QUrl baseUrl,
             }
             GfeHttpResponseException exception(status.toInt(),
                 reply->rawHeader("Content-Type").startsWith("text/plain") && !response.isEmpty()
-                    ? QString::fromUtf8(response.left(512)) : reply->errorString());
+                    ? QString::fromUtf8(response.left(512)) : networkErrorDetail(*reply));
             delete reply;
             throw exception;
         }
@@ -883,7 +896,7 @@ NvHTTP::openConnectionPost(QUrl baseUrl,
             throw exception;
         }
         else {
-            QtNetworkReplyException exception(reply->error(), reply->errorString());
+            QtNetworkReplyException exception(reply->error(), networkErrorDetail(*reply));
             delete reply;
             throw exception;
         }
@@ -1033,7 +1046,7 @@ NvHTTP::openConnectionRaw(QUrl baseUrl,
         });
     }
     if (logLevel >= NvLogLevel::NVLL_VERBOSE) {
-        qInfo() << "Executing long-poll request:" << url.toString();
+        qInfo() << "Executing long-poll request:" << requestLocation(url);
     }
     loop.exec(QEventLoop::ExcludeUserInputEvents);
 
@@ -1042,7 +1055,7 @@ NvHTTP::openConnectionRaw(QUrl baseUrl,
     if (!reply->isFinished())
     {
         if (logLevel >= NvLogLevel::NVLL_ERROR) {
-            qWarning() << "Aborting timed out request for" << url.toString();
+            qWarning() << "Aborting timed out request for" << requestLocation(url);
         }
         reply->abort();
     }
@@ -1128,7 +1141,7 @@ NvHTTP::openConnectionRaw(QUrl baseUrl,
         throw exception;
     }
     else {
-        QtNetworkReplyException exception(reply->error(), reply->errorString());
+        QtNetworkReplyException exception(reply->error(), networkErrorDetail(*reply));
         delete reply;
         throw exception;
     }

@@ -42,6 +42,7 @@ private slots:
     void postHttpErrors();
     void cancellationAbortsStartedLaunch();
     void cancellationAbortsStartedPairing();
+    void requestLogsOmitProtocolArguments();
     void staleResumeRecovery_data();
     void staleResumeRecovery();
 };
@@ -72,6 +73,39 @@ static void respond(QTcpSocket* socket, const QByteArray& body)
     socket->write("HTTP/1.1 200 OK\r\nContent-Length: " + QByteArray::number(body.size()) +
                   "\r\nConnection: close\r\n\r\n" + body);
     socket->disconnectFromHost();
+}
+
+void NvPairingManagerTest::requestLogsOmitProtocolArguments()
+{
+    QTcpServer server;
+    QVERIFY(server.listen(QHostAddress::LocalHost));
+    int requestsWithArguments = 0;
+    connect(&server, &QTcpServer::newConnection, &server, [&] {
+        auto* socket = server.nextPendingConnection();
+        connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
+        connect(socket, &QTcpSocket::readyRead, socket, [&, socket] {
+            const auto request = socket->property("request").toByteArray() + socket->readAll();
+            socket->setProperty("request", request);
+            if (!request.contains("\r\n\r\n")) return;
+            requestsWithArguments += request.contains("clientcert=fixture-certificate");
+            respond(socket, "ok");
+        });
+    });
+
+    const auto port = server.serverPort();
+    const QString endpoint = QStringLiteral("http://127.0.0.1:%1").arg(port);
+    const QString command = QStringLiteral("pair");
+    const QString arguments = QStringLiteral("clientcert=fixture-certificate");
+    const auto loggedUrl = endpoint + "/" + command;
+    NvHTTP http(NvAddress("127.0.0.1", port), port, {}, true);
+    QTest::ignoreMessage(QtInfoMsg, qPrintable("Executing request: \"" + loggedUrl + "\""));
+    QCOMPARE(http.openConnectionToString(QUrl(endpoint), command, arguments, 2000), QString("ok"));
+    QTest::ignoreMessage(QtInfoMsg, qPrintable("Executing POST request: \"" + loggedUrl + "\""));
+    QCOMPARE(http.openConnectionPost(QUrl(endpoint), command, arguments, {}, "text/plain", 2000), QString("ok"));
+    QTest::ignoreMessage(QtInfoMsg, qPrintable("Executing long-poll request: \"" + loggedUrl + "\""));
+    QCOMPARE(http.openConnectionRaw(QUrl(endpoint), command, arguments, 2000, {}, NvHTTP::NVLL_VERBOSE).body,
+             QByteArray("ok"));
+    QCOMPARE(requestsWithArguments, 3);
 }
 
 void NvPairingManagerTest::challengeBounds_data()

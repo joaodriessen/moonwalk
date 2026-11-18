@@ -15,6 +15,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   where they occur.
 - Accept valid host application lists on Qt 6.4.2. The previous parser could
   reject a valid response at the end of the XML document.
+- Leave pairing and session parameters out of request logs and diagnostic
+  summaries. Logs still show the request endpoint and failure status.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

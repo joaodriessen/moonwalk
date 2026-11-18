@@ -72,6 +72,19 @@ private slots:
         QVERIFY(tail.contains("Stage: failed"));
     }
 
+    void removesOldRequestQueries()
+    {
+        const auto result = SupportInfo::redact(QStringLiteral(
+            "Executing request: \"https://example:placeholder@host.example:47984/pair?uniqueid=fixture&devicename=Example%20Mac\"\n"
+            "Stage: pairing\n"));
+        QVERIFY(result.contains("https://[credentials omitted]@host.example:47984/pair [query omitted]"));
+        QVERIFY(result.contains("Stage: pairing"));
+        QVERIFY(!result.contains("fixture"));
+        QVERIFY(!result.contains("Example%20Mac"));
+        QVERIFY(!result.contains("placeholder"));
+        QCOMPARE(SupportInfo::redact(result), result);
+    }
+
     void removesQuotedAndOAuthSecrets()
     {
         const auto result = SupportInfo::redact(QStringLiteral(

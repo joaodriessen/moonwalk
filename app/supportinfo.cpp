@@ -43,6 +43,8 @@ QString SupportInfo::redact(QString text)
                                             QRegularExpression::DotMatchesEverythingOption);
     static const QRegularExpression urlCredentials(QStringLiteral("(\\b[a-z][a-z0-9+.-]*://)[^/\\s@]+@"),
                                                    QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression urlQueries(QStringLiteral(R"((\b[a-z][a-z0-9+.-]*://[^\s"'<>?]+)\?[^\s"'<>]+)"),
+                                               QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression secrets(QStringLiteral("\\b(rikey|rikeyid|clientcert|password|passwd|pin|token|access_token|refresh_token|authorization)[\"']?\\s*[:=]\\s*[^\\r\\n]+"),
                                             QRegularExpression::CaseInsensitiveOption);
     static const QRegularExpression homes(QStringLiteral("/(?:home|Users)/[^/\\s]+"));
@@ -52,6 +54,7 @@ QString SupportInfo::redact(QString text)
     static const QRegularExpression addresses(QStringLiteral("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b"));
     text.replace(pem, QStringLiteral("[certificate omitted]"));
     text.replace(pemTail, QStringLiteral("[certificate omitted]"));
+    text.replace(urlQueries, QStringLiteral("\\1 [query omitted]"));
     text.replace(urlCredentials, QStringLiteral("\\1[credentials omitted]@"));
     text.replace(secrets, QStringLiteral("\\1=[omitted]"));
     text.replace(windowsHomes, QStringLiteral("[home]"));
