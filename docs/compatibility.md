@@ -9,8 +9,8 @@ build.
 | Setup | What we've checked |
 | --- | --- |
 | **Linux x86-64 Flatpak** | The primary package. Hardware decoding depends on your GPU and drivers. |
-| **GNOME and KDE Plasma on Wayland** | Both layouts have been exercised in controlled desktop tests. Physical input, accessibility, and GPU coverage are still limited. |
-| **Hyprland and other desktops** | Moonwalk uses the generic layout here. A nested Hyprland test exercised the stream, local cursor size at 2× scaling, and cleanup after closing the window. Other compositors may behave differently. |
+| **GNOME and KDE Plasma on Wayland** | The installed Flatpak streamed on both desktops. The GNOME test opened Settings through its accessibility menu and the Plasma test mapped the pointer across a 2× display. Physical input and GPU coverage are still limited. |
+| **Hyprland and other desktops** | Moonwalk uses the generic layout here. The installed Flatpak streamed under nested Hyprland. Its local cursor matched the desktop cursor in height at 2×, and closing the window ended the session. Other compositors may behave differently. |
 | **X11** | Available as a fallback. Coverage is more limited than on Wayland. |
 | **Native Linux build** | CI builds on Ubuntu 24.04 with Qt 6.4.2. The Flatpak uses its own Qt runtime. See [build instructions](building.md) for other distributions. |
 | **Other client platforms** | Moonwalk targets x86-64 Linux. See [Moonlight](https://moonlight-stream.org/) for clients on other platforms. |
@@ -25,6 +25,10 @@ build.
 Sunshine 2025.924.154138 also passed PIN pairing, 1280×720 H.264, ordinary
 reconnect and reconnect after the client was killed. That build could not
 create its virtual keyboard and mouse in the test environment.
+
+A separate stock Sunshine trial added delay and jitter in both directions.
+With a measured 24–25 ms round trip, graceful sessions rendered about 60 fps
+at 1280×720. Pairing and reconnect after a forced client exit also passed.
 
 Most testing has been on a local network. Moonwalk has no built-in relay or
 internet setup. A private VPN can provide a route to the host, but we haven't
