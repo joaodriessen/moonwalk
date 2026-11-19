@@ -42,6 +42,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   Flatpak.
 - Try a lower startup bitrate before reducing the picture on hosts that
   accept bitrate only at launch. Learn from the next normal connection.
+- Respect the automatic port-check preference after stream failures. Explain
+  whether video failed to arrive, arrived incomplete, or was stopped by the host.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

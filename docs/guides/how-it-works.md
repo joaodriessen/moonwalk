@@ -52,9 +52,9 @@ Moonwalk uses your network to find hosts, pair, and stream. It can also:
   certain stream failures.
 
 These services receive normal connection information, such as your public
-address. The **Detect blocked connections automatically** setting controls the
-check when you add a host manually. The other diagnostics have their own entry
-points. Moonwalk has no analytics service.
+address. **Detect blocked connections automatically** controls automatic port
+checks when adding a host manually or after a stream fails. You can still run
+**Test Internet Streaming Ports** yourself. Moonwalk has no analytics service.
 
 When you connect to a host, permissions and pairing determine which data is
 sent there. See [Security](../../SECURITY.md) for what to expect from encryption

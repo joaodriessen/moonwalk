@@ -138,20 +138,26 @@ void Session::clConnectionTerminated(int errorCode)
         char ports[128];
         SDL_assert(portFlags != 0);
         LiStringifyPortFlags(portFlags, ", ", ports, sizeof(ports));
-        emit s_ActiveSession->displayLaunchError(tr("No video received from host.") + "\n\n"+
-                                                 tr("Check the host firewall for port(s): %1. If you are connecting over the Internet, also check the host's port forwarding.").arg(ports));
+        emit s_ActiveSession->displayLaunchError(tr("No video arrived from the host.") + "\n\n" +
+                                                 tr("Check the host's streaming logs and whether the network allows traffic on %1.").arg(ports));
         break;
 
     case ML_ERROR_NO_VIDEO_FRAME:
         s_ActiveSession->m_UnexpectedTermination = true;
-        emit s_ActiveSession->displayLaunchError(tr("Your network connection isn't performing well. Reduce your video bitrate setting or try a faster connection."));
+        emit s_ActiveSession->displayLaunchError(tr("Video data arrived, but Moonwalk couldn't assemble a complete frame.") + "\n\n" +
+                                                 tr("Try a more stable connection or lower the bitrate before reconnecting."));
         break;
 
     case ML_ERROR_PROTECTED_CONTENT:
+        s_ActiveSession->m_UnexpectedTermination = true;
+        emit s_ActiveSession->displayLaunchError(tr("The host stopped the stream after detecting protected content.") + "\n\n" +
+                                                 tr("Close the protected content on the host, then reconnect."));
+        break;
+
     case ML_ERROR_UNEXPECTED_EARLY_TERMINATION:
         s_ActiveSession->m_UnexpectedTermination = true;
-        emit s_ActiveSession->displayLaunchError(tr("Something went wrong on the host when starting the stream.") + "\n\n" +
-                                                 tr("Check the host's streaming server logs. Close DRM-protected content on the host and try again."));
+        emit s_ActiveSession->displayLaunchError(tr("The host ended the stream before Moonwalk received a picture.") + "\n\n" +
+                                                 tr("Check the host's streaming logs for the reason."));
         break;
 
     case ML_ERROR_FRAME_CONVERSION:
@@ -184,7 +190,7 @@ void Session::clConnectionTerminated(int errorCode)
 
 void Session::requestConnectivityTest(unsigned int portFlags)
 {
-    if (!portFlags) return;
+    if (!portFlags || !m_Preferences->detectNetworkBlocking) return;
     // Callback callers still own their active Session until teardown finishes.
     // Queue onto that context; Qt drops this start if its owner is destroyed.
     QMetaObject::invokeMethod(this, [this, portFlags] {
