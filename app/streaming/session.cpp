@@ -711,11 +711,15 @@ void Session::planStream(SDL_Window* testWindow)
     input.performanceContext += m_ViewingContext;
     m_PerformanceContext = input.performanceContext;
     const auto initialPlan = ::planStream(input);
-    const auto eligible = StreamPlanning::ladder(input.nativeWidth, input.nativeHeight, initialPlan.fps,
-        false, input.displayScale, input.integerDesktopScale);
-    if (m_PlannedSizeAutomatically && !m_SafeSettingsTrial && !m_ConnectionRecovery && !m_Adaptation.pending) {
+    if ((m_PlannedSizeAutomatically || m_Preferences->autoAdjustBitrate) &&
+            !m_SafeSettingsTrial && !m_ConnectionRecovery && !m_Adaptation.pending) {
+        const auto eligible = m_PlannedSizeAutomatically
+            ? StreamPlanning::ladder(input.nativeWidth, input.nativeHeight, initialPlan.fps,
+                                     false, input.displayScale, input.integerDesktopScale)
+            : QVector<StreamPlanning::Rung> {{initialPlan.width, initialPlan.height, initialPlan.fps}};
         const auto saved = StreamRecommendation::load(m_Computer->uuid, m_PerformanceContext, initialPlan.codec);
-        if ((saved.bitrateKbps == 0 || m_Preferences->autoAdjustBitrate) &&
+        const bool permitted = saved.bitrateKbps > 0 ? m_Preferences->autoAdjustBitrate : m_PlannedSizeAutomatically;
+        if (permitted &&
                 saved.valid(eligible, m_PerformanceContext, initialPlan.codec, QDateTime::currentSecsSinceEpoch())) {
             m_Adaptation.baseline = saved.baseline;
             m_Adaptation.target = saved.target;
@@ -733,7 +737,7 @@ void Session::planStream(SDL_Window* testWindow)
         m_Adaptation.request({initialPlan.width, initialPlan.height, initialPlan.fps},
             StreamAdaptation::mode(input.capacity), input.capacity, LiGetMicroseconds() / 1000);
     }
-    if (m_PlannedSizeAutomatically && m_ConnectionRecovery) {
+    if (m_ConnectionRecovery && m_RecoveryMode.width > 0 && m_RecoveryMode.height > 0 && m_RecoveryMode.fps > 0) {
         // A real network recovery resumes the picture already chosen by the user.
         input.width = m_RecoveryMode.width;
         input.height = m_RecoveryMode.height;
@@ -809,12 +813,20 @@ HostCapacity Session::streamMeasurement(const HostLatencyMeter& latency) const
     return capacity;
 }
 
+QVector<StreamPlanning::Rung> Session::recommendationModes(int fps) const
+{
+    if (!m_PlannedSizeAutomatically)
+        return {{m_StreamConfig.width, m_StreamConfig.height, m_StreamConfig.fps}};
+    QReadLocker lock(&m_Computer->lock);
+    return StreamPlanning::ladder(m_Preferences->width, m_Preferences->height,
+        fps, false, m_LocalDisplayScale, m_Computer->desktopScaleSupported);
+}
+
 void Session::recommendStreamChange(StreamPlanning::Rung target, const HostCapacity& baseline, bool rollback, int bitrateKbps)
 {
     if (m_Recommendation.createdAt && (!rollback || m_Recommendation.rollback)) return;
     StreamRecommendation candidate {target, baseline, QDateTime::currentSecsSinceEpoch(), rollback, bitrateKbps};
-    const auto rungs = StreamPlanning::ladder(m_Preferences->width, m_Preferences->height,
-        m_ActiveVideoFrameRate, false, m_LocalDisplayScale, m_Computer->desktopScaleSupported);
+    const auto rungs = recommendationModes(m_ActiveVideoFrameRate);
     if (!candidate.valid(rungs, m_PerformanceContext, m_StreamPlan.codec, candidate.createdAt)) return;
     m_Recommendation = candidate;
     candidate.save(m_Computer->uuid, m_PerformanceContext, m_StreamPlan.codec);
@@ -1256,8 +1268,7 @@ void Session::controlAction(QString action, QVariant value)
     else if (action == "keepSafeSettings") keepSafeSettings();
     else if (action == "applyOptimization" && m_Recommendation.createdAt > 0 && !m_StartCancellation.isCancelled()) {
         const auto current = StreamPlanning::Rung {m_ActiveVideoWidth, m_ActiveVideoHeight, m_ActiveVideoFrameRate};
-        const auto rungs = StreamPlanning::ladder(m_Preferences->width, m_Preferences->height,
-            current.fps, false, m_LocalDisplayScale, m_Computer->desktopScaleSupported);
+        const auto rungs = recommendationModes(current.fps);
         if (!m_Recommendation.valid(rungs, m_PerformanceContext, m_StreamPlan.codec, QDateTime::currentSecsSinceEpoch())) {
             qWarning("Stream recommendation expired or no longer matches this session; no reconnect requested");
             return;
@@ -2786,8 +2797,7 @@ bool Session::startConnectionAsync()
                 emit controlsChanged();
             });
         }
-        else if (m_PlannedSizeAutomatically && m_Preferences->autoAdjustBitrate &&
-                 !m_SafeSettingsTrial && !m_ConnectionRecovery) {
+        else if (m_Preferences->autoAdjustBitrate && !m_SafeSettingsTrial && !m_ConnectionRecovery) {
             // Hosts without live bitrate control still accept an ordinary
             // launch bitrate. Keep these measurements separate from live ones.
             m_StartupBitrateContext = m_BitrateContext + QStringLiteral("/startup");
@@ -3250,6 +3260,9 @@ void Session::exec()
     // indicator and hides the launcher before native Wayland mapping can pump
     // its GLib events. Creation failures above leave the launcher visible.
     m_NegotiatedEncryption = StarlightGetEncryptionFlags();
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Negotiated media encryption: video=%s, audio=%s",
+        (m_NegotiatedEncryption & ENCFLG_VIDEO) ? "on" : "off",
+        (m_NegotiatedEncryption & ENCFLG_AUDIO) ? "on" : "off");
     m_ConnectionWasEstablished = true;
     emit connectionStarted();
     if (deferWindowShow) {
@@ -3649,7 +3662,7 @@ void Session::exec()
             std::lock_guard<std::mutex> lock(m_MeasurementLock);
             m_RecentHostLatency = {};
         }
-        else if (m_PlannedSizeAutomatically && !m_SafeSettingsTrial) {
+        else if ((m_PlannedSizeAutomatically || !m_StartupBitrateContext.isEmpty()) && !m_SafeSettingsTrial) {
             HostLatencyMeter latency;
             {
                 std::lock_guard<std::mutex> lock(m_MeasurementLock);
@@ -3721,13 +3734,10 @@ void Session::exec()
                     else SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,"Automatic stream: retained %dx%dx%d at %.1f FPS, host %.1f ms",
                         current.width,current.height,current.fps,evidence.deliveredFps,latency.averageMs());
                 }
-                bool integerScale;
-                { QReadLocker lock(&m_Computer->lock); integerScale = m_Computer->desktopScaleSupported; }
-                const auto rungs = StreamPlanning::ladder(m_Preferences->width,m_Preferences->height,
-                    current.fps,false,m_LocalDisplayScale,integerScale);
+                const auto rungs = recommendationModes(current.fps);
                 const auto capacity = streamMeasurement(latency);
                 // A long healthy interval may suggest a larger picture for next time.
-                if (!m_Adaptation.recoveryAttempted && m_StreamPlan.limitedByHost && stable >= 180000
+                if (m_PlannedSizeAutomatically && !m_Adaptation.recoveryAttempted && m_StreamPlan.limitedByHost && stable >= 180000
                         && healthyWindows >= 12 && capacityNetworkClean()) {
                     for (int i = 1; i < rungs.size(); ++i) {
                         if (!StreamAdaptation::same(rungs[i],current)) continue;
@@ -3776,12 +3786,12 @@ void Session::exec()
                                 floor, capacityNetworkClean(), latency, current.fps))
                             recommendStreamChange(current, capacity, false, target);
                     }
-                    if (evidence.canTrySize && QDateTime::currentSecsSinceEpoch() >= capacity.reductionRejectedUntil) {
-                        const auto sample = streamMeasurement(latency);
+                    if (m_PlannedSizeAutomatically && evidence.canTrySize &&
+                            QDateTime::currentSecsSinceEpoch() >= capacity.reductionRejectedUntil) {
                         for (const auto& next : rungs) {
                             if (next.width >= current.width * .97) continue;
                             if (m_Adaptation.mayChange() && !m_Recommendation.createdAt)
-                                recommendStreamChange(next, sample);
+                                recommendStreamChange(next, capacity);
                             break;
                         }
                     }

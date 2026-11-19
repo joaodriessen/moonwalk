@@ -36,7 +36,8 @@ includes transport overhead.
 - **Recommended** starts with an estimate when live bitrate adjustment is
   unavailable. If delivery slows under sustained network or encoder pressure,
   Moonwalk can try a lower bitrate at the same resolution the next time you
-  connect. It keeps the lower starting rate if delivery or latency improves.
+  connect. A manual picture size and frame rate can still use this bitrate
+  mode. Moonwalk keeps the lower starting rate if delivery or latency improves.
 - **Limited** uses the target you chose under **Stream → Manual → Limit bandwidth**.
 
 Moonwalk keeps a working stream connected. When it has enough evidence to

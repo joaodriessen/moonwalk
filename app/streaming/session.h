@@ -372,6 +372,7 @@ private:
     int m_RecoveryBitrateKbps = 0;
     StreamPlanning::Rung m_RecoveryMode {0, 0, 0};
     bool m_RejectTrialMeasurement = false;
+    QVector<StreamPlanning::Rung> recommendationModes(int fps) const;
     void recommendStreamChange(StreamPlanning::Rung target, const HostCapacity& baseline, bool rollback = false, int bitrateKbps = 0);
     QString m_BitrateCostContext;
     QString m_PerformanceHostContext, m_ViewingContext;
