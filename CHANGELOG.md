@@ -35,6 +35,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 - Keep IPv6 addresses out of diagnostic summaries when they end a sentence.
 - Honor `--no-frame-pacing` from the command line. On Wayland with EGL,
   pace swaps using the renderer’s own callback.
+- Keep the pointer automatic when importing older host profiles with only
+  display settings saved. Explicit Game pointer choices stay saved.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

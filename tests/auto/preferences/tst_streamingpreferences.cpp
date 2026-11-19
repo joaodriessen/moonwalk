@@ -47,6 +47,8 @@ private slots:
     void presetsAndLastWorkingSettingsLoadSanitised();
     void freshHostStartsAutomaticWhateverTheTemplateSays();
     void displayAndInputMigrateToAutomaticUnlessChosen();
+    void legacyDisplaySettingsDoNotSelectGamePointer_data();
+    void legacyDisplaySettingsDoNotSelectGamePointer();
     void freshHostDisplayAndInputStartAutomatic();
     void automaticDisplayAndInputWinInSessionsAndManualValuesStay();
     void presetsAndLastWorkingSettingsDeriveDisplayAndInputModes();
@@ -335,7 +337,7 @@ void StreamingPreferencesTest::migratesKnownHostsFromTheFlatTemplate()
 
     QSettings migrated(m_settingsPath, QSettings::IniFormat);
     migrated.setFallbacksEnabled(false);
-    QCOMPARE(migrated.value(QStringLiteral("starlightPrefsVersion")).toInt(), 5);
+    QCOMPARE(migrated.value(QStringLiteral("starlightPrefsVersion")).toInt(), 6);
     // Automatic bitrate becomes the mode for anyone who hadn't chosen a bitrate of their own.
     QVERIFY(migrated.value(QStringLiteral("hostsettings/recommended-host/adaptivebitrate")).toBool());
     QVERIFY(!migrated.value(QStringLiteral("hostsettings/manual-host/adaptivebitrate")).toBool());
@@ -393,7 +395,7 @@ void StreamingPreferencesTest::removedSettingsMigrateToAutomaticAndManualChoices
     StreamingPreferences::resetForTesting();
     QSettings migrated(m_settingsPath, QSettings::IniFormat);
     migrated.setFallbacksEnabled(false);
-    QCOMPARE(migrated.value(QStringLiteral("starlightPrefsVersion")).toInt(), 5);
+    QCOMPARE(migrated.value(QStringLiteral("starlightPrefsVersion")).toInt(), 6);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/automatic/manualstream")).toBool(), false);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/automatic/vsync")).toBool(), true);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/automatic/videodec")).toInt(), 0);
@@ -836,12 +838,41 @@ void StreamingPreferencesTest::displayAndInputMigrateToAutomaticUnlessChosen()
     StreamingPreferences::resetForTesting();
     QSettings migrated(m_settingsPath, QSettings::IniFormat);
     migrated.setFallbacksEnabled(false);
-    QCOMPARE(migrated.value(QStringLiteral("starlightPrefsVersion")).toInt(), 5);
+    QCOMPARE(migrated.value(QStringLiteral("starlightPrefsVersion")).toInt(), 6);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/plain/manualdisplay")).toBool(), false);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/plain/manualinput")).toBool(), false);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/physical/manualdisplay")).toBool(), true);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/game/manualinput")).toBool(), true);
     QCOMPARE(migrated.value(QStringLiteral("hostsettings/game/mouseacceleration")).toBool(), false);
+}
+
+void StreamingPreferencesTest::legacyDisplaySettingsDoNotSelectGamePointer_data()
+{
+    QTest::addColumn<int>("version");
+    QTest::newRow("old-display-only") << 2;
+    QTest::newRow("previously-migrated-display-only") << 5;
+}
+
+void StreamingPreferencesTest::legacyDisplaySettingsDoNotSelectGamePointer()
+{
+    QFETCH(int, version);
+    settings().setValue("starlightPrefsVersion", version);
+    settings().setValue("hostsettings/display-only/width", 1600);
+    settings().setValue("hostsettings/display-only/height", 1000);
+    if (version == 5) settings().setValue("hostsettings/display-only/manualinput", true);
+    settings().setValue("hostsettings/explicit-game/mouseacceleration", false);
+    if (version == 5) settings().setValue("hostsettings/explicit-game/manualinput", true);
+
+    auto* prefs = loadPreferences();
+    prefs->setCurrentHost("display-only");
+    QCOMPARE(prefs->width, 1600);
+    QVERIFY(!prefs->manualInput);
+    QVERIFY(prefs->cloneForSession()->automaticPointer);
+    prefs->setCurrentHost("explicit-game");
+    QVERIFY(prefs->manualInput);
+    const auto game = prefs->cloneForSession();
+    QVERIFY(!game->automaticPointer);
+    QVERIFY(!game->absoluteMouseMode);
 }
 
 void StreamingPreferencesTest::freshHostDisplayAndInputStartAutomatic()

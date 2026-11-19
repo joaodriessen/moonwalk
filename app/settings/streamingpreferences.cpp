@@ -612,7 +612,9 @@ void StreamingPreferences::reload()
 
     automaticResolution = settings.value("automaticresolution", false).toBool();
     automaticFrameRate = settings.value("automaticframerate", false).toBool();
-    automaticPointer = settings.value("automaticpointer", false).toBool();
+    // A saved legacy pointer mode still wins. An absent mode leaves the
+    // choice to the stream, even on a host with its own display settings.
+    automaticPointer = settings.value("automaticpointer", !settings.contains(SER_ABSMOUSEMODE)).toBool();
     displayTarget = settings.value("displaytarget", QStringLiteral("host")).toString();
     if (!QStringList({"host", "auto", "virtual", "physical"}).contains(displayTarget)) displayTarget = QStringLiteral("host");
     width = settings.value(SER_WIDTH, 1280).toInt();
@@ -797,16 +799,24 @@ void StreamingPreferences::reload()
         settings.setValue(SER_STARLIGHT_PREFS_VERSION, 4);
     }
 
-    // Display and Input became Automatic or Manual too. A host with a text size,
-    // view scale, host display, pointer or cursor of its own becomes Manual for
-    // that group, with those values kept. Keys it never stored read as the
-    // template, as they do when the host is selected.
-    if (settings.value(SER_STARLIGHT_PREFS_VERSION, 0).toInt() < 5) {
+    // Version 5 recorded the Display and Input modes for existing hosts.
+    // Version 6 clears a synthesized Manual input mode on display-only records.
+    const int groupVersion = settings.value(SER_STARLIGHT_PREFS_VERSION, 0).toInt();
+    if (groupVersion < 6) {
         settings.beginGroup(SER_HOSTSETTINGS_GROUP);
         const QStringList hosts = settings.childGroups();
         settings.endGroup();
         for (const QString& uuid : hosts) {
             const QString prefix = QString(SER_HOSTSETTINGS_GROUP) + '/' + uuid + '/';
+            const QString pointerKey = prefix + QStringLiteral("automaticpointer");
+            const bool hasPointerMode = settings.contains(prefix + SER_ABSMOUSEMODE);
+            const bool hasAutomaticPointer = settings.contains(pointerKey);
+            const bool hasInput = hasPointerMode || hasAutomaticPointer || settings.contains(prefix + SER_LOCALCURSOR);
+            const QString inputModeKey = prefix + QStringLiteral("manualinput");
+            if (hasPointerMode && !hasAutomaticPointer) settings.setValue(pointerKey, false);
+            if (!hasInput && settings.value(inputModeKey).toBool()) settings.remove(inputModeKey);
+            if (groupVersion >= 5) continue;
+
             QVariantMap values;
             bool stored = false;
             for (const PerHostKey& key : k_PerHostKeys) {
@@ -818,9 +828,9 @@ void StreamingPreferences::reload()
             }
             if (!stored) continue;
             settings.setValue(prefix + QStringLiteral("manualdisplay"), derivedManualDisplay(values));
-            settings.setValue(prefix + QStringLiteral("manualinput"), derivedManualInput(values));
+            if (hasInput) settings.setValue(inputModeKey, derivedManualInput(values));
         }
-        settings.setValue(SER_STARLIGHT_PREFS_VERSION, 5);
+        settings.setValue(SER_STARLIGHT_PREFS_VERSION, 6);
     }
     sanitizeLiveStreamValues();
 
