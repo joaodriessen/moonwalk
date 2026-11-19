@@ -23,7 +23,10 @@ tracks the inherited engine version.
 - Read every exposed branch, tag, issue, pull request, and release surface.
   Review screenshots, attachments, Actions logs, and downloadable artifacts.
   Follow [repository privacy](privacy.md) and rotate any exposed credentials.
-- Verify a monitored private [security reporting](../SECURITY.md) route.
+- Prepare a monitored private [security reporting](../SECURITY.md) route.
+  GitHub offers its form on public repositories. If using it, enable it and
+  verify it from a non-maintainer account as soon as the repository is public,
+  before announcing it. [GitHub setup guide](https://docs.github.com/en/code-security/how-tos/report-and-fix-vulnerabilities/configure-vulnerability-reporting/configure-for-a-repository)
 - Review corresponding source, package identity, dependency and artwork
   notices, and distribution rights. Check [third-party notices](third-party-notices.md)
   against the candidate and keep the upstream credits.

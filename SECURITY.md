@@ -38,9 +38,9 @@ can report through its private issues. If you need a private contact, ask for
 one without describing the problem. Send the affected build, impact, and a
 minimal reproduction using synthetic data once you have the channel.
 
-Before making the repository public, verify GitHub private vulnerability
-reporting or list a monitored private contact here. Keep vulnerability details,
-keys, certificates, and unredacted logs out of public issues and pull requests.
+If GitHub shows **Report a vulnerability** under **Security → Advisories**, use
+that form. Keep vulnerability details, keys, certificates, and unredacted logs
+out of public issues and pull requests.
 
 Security fixes target the current alpha. Reports are handled on a best-effort
 basis.
