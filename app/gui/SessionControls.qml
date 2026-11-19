@@ -33,7 +33,6 @@ ApplicationWindow {
     onActiveChanged: if (active && visible && session) session.prepareControlsClipboard()
     readonly property bool nativeStyle: typeof plasmaDesktopAdapterActive !== "undefined" && plasmaDesktopAdapterActive
     readonly property AdaptiveGnome.GnomeTokens tokens: AdaptiveGnome.GnomeTokens {}
-    readonly property color goodColor: tokens.success
     readonly property color warningColor: tokens.warning
     SystemPalette { id: nativePalette; colorGroup: SystemPalette.Active }
     palette.window: nativeStyle ? nativePalette.window : tokens.window
@@ -50,7 +49,13 @@ ApplicationWindow {
         source: "starlight/MaterialPaletteBridge.qml"
         onLoaded: { item.target = panel }
     }
-    onVisibleChanged: if (visible) {
+    onVisibleChanged: {
+        if (!visible) {
+            lastFrames = -1
+            lastFramesAt = 0
+            liveHealth = { rttMs: -1, fps: -1, networkPoor: false }
+            return
+        }
         x = Screen.virtualX + Math.max(0, (Screen.width - width) / 2)
         y = Screen.virtualY + Math.max(0, (Screen.height - height) / 3)
         requestActivate()
@@ -87,8 +92,8 @@ ApplicationWindow {
     }
     readonly property string healthText: {
         var parts = []
-        if (liveHealth.rttMs >= 0) parts.push(qsTr("%1 ms").arg(liveHealth.rttMs))
-        if (liveHealth.fps >= 0) parts.push(qsTr("%1 FPS").arg(liveHealth.fps))
+        if (liveHealth.rttMs >= 0) parts.push(qsTr("%1 ms RTT").arg(liveHealth.rttMs))
+        if (liveHealth.fps >= 0) parts.push(qsTr("%1 fps rendered").arg(liveHealth.fps))
         return parts.join(" · ")
     }
 
@@ -126,18 +131,20 @@ ApplicationWindow {
             // Live round trip and frame rate, with a plain word when the network struggles.
             ColumnLayout {
                 objectName: "starlight.controls.health"
-                visible: panel.healthText.length > 0
+                visible: panel.healthText.length > 0 || panel.liveHealth.networkPoor
                 spacing: 2
                 Accessible.role: Accessible.StaticText
-                Accessible.name: (panel.liveHealth.networkPoor ? qsTr("Slow connection") : qsTr("Good connection")) + ", " + panel.healthText
+                Accessible.name: [panel.liveHealth.networkPoor ? qsTr("Slow connection") : "", panel.healthText].filter(Boolean).join(", ")
                 Label {
                     Layout.alignment: Qt.AlignRight
-                    text: panel.liveHealth.networkPoor ? qsTr("Slow connection") : qsTr("Good connection")
+                    visible: panel.liveHealth.networkPoor
+                    text: qsTr("Slow connection")
                     font.bold: true
-                    color: panel.liveHealth.networkPoor ? panel.warningColor : panel.goodColor
+                    color: panel.warningColor
                 }
                 Label {
                     Layout.alignment: Qt.AlignRight
+                    visible: text.length > 0
                     text: panel.healthText
                     opacity: 0.7
                 }

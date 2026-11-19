@@ -320,9 +320,9 @@ inline QString statusText(const Status& status)
 {
     QStringList parts;
     if (status.poor) return text("Slow connection");
-    if (status.rttMs >= 0) parts << text("%1 ms").arg(status.rttMs);
+    if (status.rttMs >= 0) parts << text("%1 ms RTT").arg(status.rttMs);
     if (status.fps >= 0) parts << text("%1 fps").arg(status.fps);
-    if (status.kbps > 0) parts << text("%1 Mbps").arg(qRound(status.kbps / 1000.0));
+    if (status.kbps > 0) parts << text("%1 Mbps target").arg(qRound(status.kbps / 1000.0));
     return parts.isEmpty() ? text("Connected") : parts.join(QStringLiteral(" · "));
 }
 

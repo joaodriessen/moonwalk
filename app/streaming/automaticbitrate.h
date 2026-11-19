@@ -120,7 +120,7 @@ public:
         std::lock_guard<std::mutex> lock(m_Mutex);
         const uint64_t previousUs = m_LastArrivalUs;
         m_LastArrivalUs = std::max(m_LastArrivalUs, frame.firstArrivalUs);
-        if (m_ChangeAtUs && frame.firstArrivalUs >= m_ChangeAtUs) measureChange(frame, previousUs);
+        if (m_Measuring && frame.firstArrivalUs >= m_ChangeAtUs) measureChange(frame, previousUs);
         // What the host's own change did to its video says nothing about the link.
         if (frame.firstArrivalUs < m_IgnoreUntilUs) return;
         if (frame.dataPackets >= 8) {
@@ -397,7 +397,6 @@ private:
         const bool stalled = gapUs >= uint64_t(RebuildStallMs) * 1000;
         if (stalled && frame.firstArrivalUs - m_ChangeAtUs < 10000000)
             m_IgnoreUntilUs = std::max(m_IgnoreUntilUs, frame.firstArrivalUs + 2000000);
-        if (!m_Measuring) return;
         m_ChangeGapUs = std::max(m_ChangeGapUs, gapUs);
         m_ChangeKeyframe = m_ChangeKeyframe || frame.keyframe;
         // A stall ends with the first frame back; a change made in place shows within a second.

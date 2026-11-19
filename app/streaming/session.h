@@ -412,8 +412,8 @@ private:
     std::atomic<int> m_AutomaticBitrateKbps {0};
     qint64 m_RuntimeRequestedAt = 0;
     bool m_RuntimeRequestRaised = false;
-    bool m_RuntimeBitrateSupported = false;
-    int m_RuntimeBitrateKbps = 0;
+    std::atomic<bool> m_RuntimeBitrateSupported {false};
+    std::atomic<int> m_RuntimeBitrateKbps {0};
     int m_NormalStartupBitrateKbps = 0;
     bool m_StartupBitrateKnown = false;
     // How a mid-stream bitrate change lands on this host, as last measured.

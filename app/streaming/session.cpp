@@ -1005,10 +1005,12 @@ Session* Session::createRetrySession(bool safeSettings, bool resumeOnly, bool ma
         retry->m_ConnectionRecovery = !m_AdjustingForHost;
         retry->m_RejectTrialMeasurement = retry->m_ConnectionRecovery && m_RejectTrialMeasurement;
         retry->m_RecoveryMode = {m_StreamConfig.width, m_StreamConfig.height, m_StreamConfig.fps};
-        retry->m_RecoveryBitrateKbps = m_AutomaticBitrateKbps.load() > 0
-            ? RuntimeBitratePolicy::wireKbps(m_AutomaticBitrateKbps.load(),
+        const int automaticKbps = m_AutomaticBitrateKbps.load();
+        const int runtimeKbps = m_RuntimeBitrateKbps.load();
+        retry->m_RecoveryBitrateKbps = automaticKbps > 0
+            ? RuntimeBitratePolicy::wireKbps(automaticKbps,
                 CHANNEL_COUNT_FROM_AUDIO_CONFIGURATION(m_StreamConfig.audioConfiguration))
-            : m_RuntimeBitrateKbps > 0 ? m_RuntimeBitrateKbps : m_StreamConfig.bitrate;
+            : runtimeKbps > 0 ? runtimeKbps : m_StreamConfig.bitrate;
     }
     retry->m_ManualAudioMuted = m_ManualAudioMuted;
     retry->m_AudioMuted = m_ManualAudioMuted;
@@ -1101,8 +1103,9 @@ QVariantMap Session::controlState() const
 {
     QString hostName;
     { QReadLocker lock(&m_Computer->lock); hostName = m_Computer->name; }
+    const int runtimeKbps = m_RuntimeBitrateKbps.load();
     return {{"host", hostName}, {"app", m_App.name},
-            {"format", tr("%1 × %2 · %3 fps · %4 Mbps launch budget").arg(m_StreamConfig.width).arg(m_StreamConfig.height)
+            {"format", tr("%1 × %2 · %3 fps target · %4 Mbps launch budget").arg(m_StreamConfig.width).arg(m_StreamConfig.height)
                        .arg(m_StreamConfig.fps).arg(m_StreamConfig.bitrate / 1000.0, 0, 'f', 1)},
             {"mediaProtection", m_NegotiatedEncryption < 0 ? QString()
                 : (m_NegotiatedEncryption & ENCFLG_VIDEO) ? tr("Video encrypted") : tr("Video is not encrypted")},
@@ -1115,7 +1118,7 @@ QVariantMap Session::controlState() const
             {"clipboardReadAllowed", m_HostCapabilities.allows(HostCapabilities::ClipboardRead)},
             {"clipboardWriteAllowed", m_HostCapabilities.allows(HostCapabilities::ClipboardWrite)},
             {"liveBitrateSupported", m_RuntimeBitrateSupported && !m_AutomaticBitrate},
-            {"liveBitrateKbps", m_RuntimeBitrateKbps > 0 ? m_RuntimeBitrateKbps : m_StreamConfig.bitrate},
+            {"liveBitrateKbps", runtimeKbps > 0 ? runtimeKbps : m_StreamConfig.bitrate},
             // Unless it's known to change in place, each new value may freeze the picture.
             {"liveBitrateRebuilds", m_BitrateChange != HostCapacity::BitrateChange::Live},
             {"automaticBitrate", m_AutomaticBitrate != nullptr},
@@ -2765,8 +2768,9 @@ bool Session::startConnectionAsync()
                     // Over HTTP, and the host may rebuild its encoder for each change.
                     if (!m_RuntimeBitrate || !m_RuntimeBitrateSupported ||
                         !mayApply) return;
+                    const int runtimeKbps = m_RuntimeBitrateKbps.load();
                     const int current = RuntimeBitratePolicy::encoderKbps(
-                        m_RuntimeBitrateKbps > 0 ? m_RuntimeBitrateKbps : m_StreamConfig.bitrate, channels);
+                        runtimeKbps > 0 ? runtimeKbps : m_StreamConfig.bitrate, channels);
                     const qint64 now = QDateTime::currentMSecsSinceEpoch();
                     if (AutomaticBitrate::worthAsking(decision.targetKbps, current,
                                                       uint64_t(now - m_RuntimeRequestedAt) * 1000, m_HasVideoFrame.load())) {
@@ -3496,7 +3500,6 @@ void Session::exec()
     });
     m_ClipboardSync->setFocused((SDL_GetWindowFlags(m_Window) & SDL_WINDOW_INPUT_FOCUS) != 0);
     m_ClipboardSync->start();
-    if (m_AutomaticBitrate) m_AutomaticBitrate->start();
     if (m_HostCapabilities.apollo && !m_CaptureHealthSupported) {
         m_RuntimeBitrate = new RuntimeBitrate(m_Computer, m_StreamConfig.bitrate, m_Preferences->adaptiveBitrate && !m_AutomaticBitrate && m_BitrateChange == HostCapacity::BitrateChange::Live, [this] {
             return RuntimeBitrate::Observation {m_NetworkPoor.load(), m_HasVideoFrame.load() &&
@@ -3519,6 +3522,9 @@ void Session::exec()
         });
         m_RuntimeBitrate->start();
     }
+    // The controller can call the HTTP worker directly. Publish it before starting
+    // the controller and join the controller before deleting the worker.
+    if (m_AutomaticBitrate) m_AutomaticBitrate->start();
 
     // Keep a snapshot across the focus edge: an in-flight host response must not
     // replace clipboard text copied in another local application after alt-tab.

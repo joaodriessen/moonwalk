@@ -279,10 +279,12 @@ TestCase {
         verify(health !== null)
         compare(health.visible, false, "a session without figures shows no invented ones")
         panel.liveHealth = { rttMs: 8, fps: 60, networkPoor: false }
-        compare(panel.healthText, "8 ms · 60 FPS")
+        compare(panel.healthText, "8 ms RTT · 60 fps rendered")
         compare(health.visible, true)
-        panel.liveHealth = { rttMs: 80, fps: -1, networkPoor: true }
-        verify(health.Accessible.name.indexOf("Slow") === 0)
+        compare(health.Accessible.name, panel.healthText)
+        panel.liveHealth = { rttMs: -1, fps: -1, networkPoor: true }
+        compare(health.Accessible.name, "Slow connection")
+        compare(health.visible, true)
         panel.liveHealth = { rttMs: -1, fps: -1, networkPoor: false }
     }
 

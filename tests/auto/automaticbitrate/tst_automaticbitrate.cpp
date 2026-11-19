@@ -497,6 +497,39 @@ private slots:
         QVERIFY(continuousChanges(false, status.changeStallMs < RebuildStallMs));
     }
 
+    void completedChangeDoesNotHideLaterPacketLoss()
+    {
+        Controller controller(20000, 20000, 60);
+        uint64_t now = 0;
+        const auto frames = [&](int count, uint32_t lostPackets) {
+            for (int index = 0; index < count; ++index) {
+                now += 16667;
+                FrameSample frame;
+                frame.firstArrivalUs = now;
+                frame.lastArrivalUs = now + 1000;
+                frame.sentUs = now - 2000;
+                frame.payloadBytes = 30000;
+                frame.dataPackets = 22;
+                frame.lostPackets = lostPackets;
+                controller.onFrame(frame);
+                if (index % 6 == 5) controller.tick(now + 1000);
+            }
+        };
+        frames(120, 0);
+        controller.changeApplied(now);
+        frames(180, 0);
+        QCOMPARE(controller.status().changesMeasured, 1u);
+        QVERIFY(controller.status().changeStallMs < RebuildStallMs);
+        QCOMPARE(controller.status().targetKbps, 20000);
+
+        // A new outage starts three seconds after ACK, after normal delivery resumed.
+        now += 250000;
+        frames(24, 10);
+        QCOMPARE(controller.status().changesMeasured, 1u);
+        QVERIFY(controller.status().cutForLoss);
+        QVERIFY(controller.status().targetKbps < 20000);
+    }
+
     void lossStopsAtAFloorForThePictureSize()
     {
         // ceiling/20 left 2650 kbps for 2880×1800 at 60 fps: a blur, not a stream.

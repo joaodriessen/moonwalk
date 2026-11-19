@@ -5,9 +5,11 @@ quick check, open **Stream Controls** with **Ctrl+Alt+Shift+O**.
 
 When a moving picture looks uneven, compare the requested rate with the
 incoming and rendered frame rates. A still desktop may send fewer updates.
-Host processing, network round trip, decoding, and the queue before
-presentation measure different things. None of those counters measures the
-full time from pressing a key to seeing the result.
+Stream Controls shows the requested frame rate in the stream details.
+The live rate counts frames the client renders. RTT is the network round trip.
+Host processing, decoding, and the queue before presentation have separate
+counters. Measuring from a key press to a change on the panel requires
+additional timing from both ends.
 
 ## If the stream stutters
 

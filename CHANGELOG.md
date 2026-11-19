@@ -46,6 +46,9 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   whether video failed to arrive, arrived incomplete, or was stopped by the host.
 - Keep a chosen resolution and frame rate while learning a recommended bitrate.
   Report the negotiated audio and video encryption in the stream log.
+- Keep live bitrate control responsive to packet loss after a previous change
+  has settled. Distinguish the frame-rate target from rendered fps in Stream
+  Controls, and label network round trip and bitrate targets.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

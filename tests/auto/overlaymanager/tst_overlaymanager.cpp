@@ -247,7 +247,7 @@ void OverlayManagerTest::toolbarRasterFollowsDpiPaletteAndState()
     QVERIFY(StreamToolbar::showsStatus(900));
     QVERIFY(!StreamToolbar::showsStatus(759));
     StreamToolbar::Status status; status.host = QStringLiteral("Studio-PC"); status.rttMs = 8; status.fps = 60;
-    QCOMPARE(StreamToolbar::statusText(status), StreamToolbar::text("%1 ms").arg(8) + QStringLiteral(" · ") + StreamToolbar::text("%1 fps").arg(60));
+    QCOMPARE(StreamToolbar::statusText(status), StreamToolbar::text("%1 ms RTT").arg(8) + QStringLiteral(" · ") + StreamToolbar::text("%1 fps").arg(60));
     status.poor = true;
     QCOMPARE(StreamToolbar::statusText(status), StreamToolbar::text("Slow connection"));
     QCOMPARE(StreamToolbar::statusText({}), StreamToolbar::text("Connected"));
