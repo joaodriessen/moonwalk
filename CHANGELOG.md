@@ -54,6 +54,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   an older pending update.
 - Skip unnecessary HEVC and AV1 renderer probes when the host does not offer
   those codecs for an Automatic connection.
+- Keep showing live video if Moonwalk Host's optional capture status becomes
+  unavailable. A confirmed capture failure still gets a startup error.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

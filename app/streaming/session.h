@@ -149,8 +149,16 @@ public:
     bool retryableTermination() const { return m_RetryableTermination.load() && !m_StartCancellation.isCancelled(); }
     bool cleanupComplete() const { return m_CleanupComplete; }
     bool safeSettingsTrial() const { return m_SafeSettingsTrial; }
-    bool hasVideoFrame() const { return m_HasVideoFrame.load() && (!m_CaptureHealthSupported || sourceHealthy()); }
-    bool sourceHealthy() const { return m_SourceHealthy.load() && Uint32(SDL_GetTicks()-m_SourceHealthAt.load())<=5000; }
+    bool hasVideoFrame() const {
+        return m_HasVideoFrame.load() && (!m_CaptureHealthSupported || sourceHealthy() ||
+            (m_CaptureStatusGraceElapsed.load() && !hasFreshCaptureStatus() &&
+             Uint32(SDL_GetTicks() - m_LastFrameAt.load()) <= 2000));
+    }
+    bool hasFreshCaptureStatus() const {
+        const auto observedAt = m_SourceHealthAt.load();
+        return observedAt && Uint32(SDL_GetTicks() - observedAt) <= 5000;
+    }
+    bool sourceHealthy() const { return m_SourceHealthy.load() && hasFreshCaptureStatus(); }
     static void notifyFramePresented();
     // Each decoded frame on its way to the screen, from the decoder's thread.
     static void notifyFrameArrived(quint64 arrivalUs, bool windowVisible);
@@ -384,6 +392,7 @@ private:
     std::atomic<Uint32> m_StableVideoMs {0};
     PresentationHealth m_PresentationHealth;
     bool m_CaptureHealthSupported = false;
+    std::atomic<bool> m_CaptureStatusGraceElapsed {false};
     quint64 m_CaptureBaseline = 0;
     bool m_CaptureBaselineActive = false;
     std::atomic<bool> m_SourceHealthy {false};

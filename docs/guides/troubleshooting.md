@@ -76,8 +76,10 @@ some shortcuts.
 
 ## Paste doesn't work
 
-Check the clipboard direction in Stream Controls. On Wayland, click in the
-stream before you copy or in Moonwalk after you disconnect. See
+Check the clipboard direction in Stream Controls. After another local app
+changes the clipboard, Wayland may wait for your next click or keystroke in
+the stream. If paste stops working after disconnect, click the Moonwalk
+window and try again. See
 [Copy and paste](while-streaming.md#copy-and-paste).
 
 ## The window doesn't look right on GNOME

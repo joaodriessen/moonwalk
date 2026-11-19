@@ -2466,7 +2466,7 @@ void Session::refreshStreamStatus()
         textInput += "\n" + m_TextInputNotice;
     QString hostName;
     { QReadLocker lock(&m_Computer->lock); hostName = m_Computer->name; }
-    const QString sessionNotice = !m_HasVideoFrame.load() || (m_CaptureHealthSupported && !sourceHealthy())
+    const QString sessionNotice = !hasVideoFrame()
         ? tr("Preparing the remote desktop…") : !m_RemoteInputAvailable.load()
         ? (m_CaptureHealthSupported ? tr("Viewing only. Allow control in Moonwalk Host on the Mac.")
                                     : tr("Viewing only. %1 hasn't allowed this device to control it.").arg(hostName)) :
@@ -3604,22 +3604,33 @@ void Session::exec()
             Uint32 previousAt = 0;
             while (!healthCancellation.isCancelled()) {
                 try {
-                    const QString info = http.getServerInfo(NvHTTP::NVLL_NONE, true);
-                    m_SourceHealthAt=SDL_GetTicks();
+                    const QString info = http.getAuthenticatedServerInfo(NvHTTP::NVLL_NONE, true);
                     const QString state = NvHTTP::getXmlString(info, "CaptureState");
-                    const quint64 generation = NvHTTP::getXmlString(info, "CaptureGeneration").toULongLong();
-                    const quint64 frames = NvHTTP::getXmlString(info, "CaptureFrames").toULongLong();
+                    bool generationKnown, frameCountKnown;
+                    const auto generation = NvHTTP::getXmlString(info, "CaptureGeneration").toULongLong(&generationKnown);
+                    const auto frames = NvHTTP::getXmlString(info, "CaptureFrames").toULongLong(&frameCountKnown);
                     const Uint32 now = SDL_GetTicks();
-                    m_CapturedFps = previousAt && generation == previousGeneration && frames >= previousFrames && now != previousAt
-                        ? double(frames - previousFrames) * 1000 / Uint32(now - previousAt) : 0;
-                    previousFrames = frames; previousGeneration = generation; previousAt = now;
-                    m_RemoteInputAvailable = NvHTTP::getXmlString(info, "AccessibilityGranted") != "0" &&
-                        (NvHTTP::getXmlString(info, "KeyboardEnabled") != "0" || NvHTTP::getXmlString(info, "MouseEnabled") != "0");
-                    m_SourceHealthy = (generation>m_CaptureBaseline ||
-                        (m_CaptureBaselineActive && generation==m_CaptureBaseline)) && frames>0 &&
-                        (state == "complete" || state == "idle");
-                } catch (...) { m_SourceHealthy = false; m_CapturedFps = 0; }
-                const int waits=m_SourceHealthy.load() ? 40 : 5;
+                    const bool reportsCapture = state == "complete" || state == "idle";
+                    static const QStringList waitingOrFailed { "starting", "blank", "suspended", "started",
+                                                               "stopped", "recovering", "failed" };
+                    if (generationKnown && frameCountKnown && (reportsCapture || waitingOrFailed.contains(state))) {
+                        const Uint32 elapsed = now - previousAt;
+                        m_CapturedFps = previousAt && generation == previousGeneration && frames >= previousFrames &&
+                            elapsed > 0 && elapsed <= 5000 ? double(frames - previousFrames) * 1000 / elapsed : 0;
+                        previousFrames = frames; previousGeneration = generation; previousAt = now;
+                        m_SourceHealthy = (generation > m_CaptureBaseline ||
+                            (m_CaptureBaselineActive && generation == m_CaptureBaseline)) && frames > 0 && reportsCapture;
+                        m_SourceHealthAt = now;
+                    } else {
+                        m_CapturedFps = 0;
+                    }
+                    const QString inputPermission = NvHTTP::getXmlString(info, "AccessibilityGranted");
+                    if (!inputPermission.isEmpty()) {
+                        m_RemoteInputAvailable = inputPermission != "0" &&
+                            (NvHTTP::getXmlString(info, "KeyboardEnabled") != "0" || NvHTTP::getXmlString(info, "MouseEnabled") != "0");
+                    }
+                } catch (...) { m_CapturedFps = 0; }
+                const int waits = sourceHealthy() ? 40 : 5;
                 for (int i=0;i<waits && !healthCancellation.isCancelled();++i) QThread::msleep(50);
             }
         });
@@ -3681,8 +3692,16 @@ void Session::exec()
     int slowWindows = 0, activeWindows = 0, healthyWindows = 0;
     bool qualityRecovered = false;
     for (;;) {
+        const Uint32 presentationAge = SDL_GetTicks() - presentationStartedAt;
+        if (m_CaptureHealthSupported && !m_CaptureStatusGraceElapsed.load() && presentationAge >= 5000) {
+            m_CaptureStatusGraceElapsed = true;
+        }
         if (hasVideoFrame() && !m_FirstFrameNotified) {
             m_FirstFrameNotified = true;
+            if (m_CaptureHealthSupported && !hasFreshCaptureStatus()) {
+                SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+                            "Showing delivered video while host capture status is unavailable");
+            }
             const int decodedWidth = m_DecodedWidth.load(), decodedHeight = m_DecodedHeight.load();
             if (decodedWidth > 0 && decodedHeight > 0) {
                 m_ActiveVideoWidth = decodedWidth;
@@ -3869,9 +3888,10 @@ void Session::exec()
             m_SuccessfulSettingsRemembered = true;
             if (!m_SafeSettingsTrial) m_Preferences->rememberSuccessfulSettings();
         }
-        if (m_CaptureHealthSupported && !m_FirstFrameNotified &&
-                Uint32(SDL_GetTicks()-presentationStartedAt)>15000) {
-            emit displayLaunchError(tr("Moonwalk Host didn't send a usable desktop picture. Check its Screen Recording permission on the Mac and try again."));
+        if (m_CaptureHealthSupported && !m_FirstFrameNotified && presentationAge > 15000) {
+            emit displayLaunchError(sourceHealthy()
+                ? tr("Moonwalk Host reports a working desktop capture, but this device did not display a video frame.")
+                : tr("Moonwalk could not confirm a usable desktop picture. Check the capture status in Moonwalk Host on the Mac."));
             m_RetryableTermination = false;
             m_UnexpectedTermination = true;
             goto DispatchDeferredCleanup;
