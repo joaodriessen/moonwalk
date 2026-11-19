@@ -271,6 +271,10 @@ inline bool supportsPng()
 {
     return Detail::onMainThread() && (Detail::qtOnly() || Detail::rich());
 }
+inline bool ownsSelection()
+{
+    return Detail::onMainThread() && (Detail::ownedPayload() || qtOwnedMimeData());
+}
 inline bool needsQtEvents()
 {
     return Detail::onMainThread() && (!QGuiApplication::platformName().startsWith(QStringLiteral("wayland")) || Detail::rich());

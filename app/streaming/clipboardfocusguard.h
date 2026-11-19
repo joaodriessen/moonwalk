@@ -10,9 +10,11 @@ public:
     explicit ClipboardFocusGuard(const QByteArray &initialHash) :
         m_LastFocusedHash(initialHash) {}
 
-    void focusedClipboardChanged(const QByteArray &hash)
+    bool focusedClipboardChanged(const QByteArray &hash)
     {
+        const bool changed = m_LastFocusedHash != hash;
         m_LastFocusedHash = hash;
+        return changed;
     }
 
     void focusLost(const QByteArray &currentHash)

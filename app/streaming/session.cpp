@@ -6,6 +6,7 @@
 #include "streaming/runtimebitrate.h"
 #include "streaming/automaticbitratedriver.h"
 #include <QDateTime>
+#include <utility>
 #include "streaming/clipboardfocusguard.h"
 #include "streaming/cursorsync.h"
 #include "streaming/cursorsizepolicy.h"
@@ -3536,6 +3537,54 @@ void Session::exec()
         return QCryptographicHash::hash(NativeClipboard::readText(), QCryptographicHash::Sha256);
     };
     ClipboardFocusGuard clipboardFocusGuard(currentClipboardHash());
+    const bool waylandClipboard = QGuiApplication::platformName().startsWith(QStringLiteral("wayland"));
+    struct RemoteClipboard {
+        QByteArray bytes;
+        quintptr generation = 0;
+        bool image = false;
+    };
+    RemoteClipboard pendingClipboard;
+    bool clipboardNeedsInput = false;
+    auto noteClipboardChange = [&](const QByteArray &hash) {
+        if (clipboardFocusGuard.focusedClipboardChanged(hash) && waylandClipboard && !NativeClipboard::ownsSelection()) {
+            // An external selection can be newer than SDL's last Wayland input
+            // serial. SDL can report success even when the compositor ignores it.
+            clipboardNeedsInput = true;
+            pendingClipboard = {};
+        }
+    };
+    auto applyClipboard = [&](RemoteClipboard change) {
+        if (change.bytes.isEmpty() || !m_ClipboardSync->canApplyRemote(change.generation) ||
+                !clipboardFocusGuard.mayApply(currentClipboardHash(), change.generation)) {
+            return;
+        }
+        if (clipboardNeedsInput && !m_ControlsOpen) {
+            pendingClipboard = std::move(change);
+            return;
+        }
+        const bool applied = change.image
+            ? ClientClipboardImage::publish(change.bytes, m_ControlsOpen)
+            : NativeClipboard::publishText(change.bytes, m_ControlsOpen);
+        if (applied) {
+            clipboardFocusGuard.applied(change.image
+                ? ClipboardSync::imageHash(change.bytes)
+                : QCryptographicHash::hash(change.bytes, QCryptographicHash::Sha256));
+            return;
+        }
+        m_ClipboardSync->reportRemoteApplyFailure(change.generation, change.bytes, change.image);
+        if (change.image) {
+            m_TextInputNotice = tr("Could not apply the clipboard image. Try copying it again.");
+            m_TextInputNoticeAt = SDL_GetTicks();
+        } else {
+            SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION, "Failed to apply host clipboard: %s", SDL_GetError());
+        }
+    };
+    auto refreshClipboardInput = [&] {
+        if (clipboardNeedsInput) {
+            clipboardNeedsInput = false;
+            applyClipboard(std::exchange(pendingClipboard, {}));
+        }
+    };
     // Qt also owns text copied by the controls and X11 publications. Keep its
     // ownership cache current even when the host supports text only.
     const bool qtClipboardEvents = NativeClipboard::needsQtEvents();
@@ -4011,7 +4060,7 @@ void Session::exec()
             if (m_ImageClipboardSupported && (SDL_GetWindowFlags(m_Window) & SDL_WINDOW_INPUT_FOCUS)) {
                 const auto value = ClientClipboardImage::read();
                 if (value.image) {
-                    clipboardFocusGuard.focusedClipboardChanged(value.hash);
+                    noteClipboardChange(value.hash);
                     if (!value.png.isEmpty()) m_ClipboardSync->enqueueLocalImage(value.png);
                     else {
                         m_TextInputNotice = tr("Image not copied. Use a PNG up to 4 MiB and 4096 pixels per side.");
@@ -4037,7 +4086,7 @@ void Session::exec()
             // this gate a copy made in a different, unrelated app while the stream
             // window is backgrounded would leak to the host.
             if ((SDL_GetWindowFlags(m_Window) & SDL_WINDOW_INPUT_FOCUS) != 0) {
-                clipboardFocusGuard.focusedClipboardChanged(currentClipboardHash());
+                noteClipboardChange(currentClipboardHash());
             }
             if ((SDL_GetWindowFlags(m_Window) & SDL_WINDOW_INPUT_FOCUS) != 0) {
                 const auto text = NativeClipboard::readText();
@@ -4082,18 +4131,7 @@ void Session::exec()
                 break;
             case SDL_CODE_CLIPBOARD_IMAGE_APPLY: {
                 std::unique_ptr<QByteArray> png(static_cast<QByteArray*>(event.user.data1));
-                const auto epoch = reinterpret_cast<quintptr>(event.user.data2);
-                if (png && m_ClipboardSync->canApplyRemote(epoch) &&
-                        clipboardFocusGuard.mayApply(currentClipboardHash(), epoch)) {
-                    if (ClientClipboardImage::publish(*png, m_ControlsOpen)) {
-                        clipboardFocusGuard.applied(ClipboardSync::imageHash(*png));
-                    }
-                    else {
-                        m_ClipboardSync->reportRemoteApplyFailure(epoch, *png, true);
-                        m_TextInputNotice = tr("Could not apply the clipboard image. Try copying it again.");
-                        m_TextInputNoticeAt = SDL_GetTicks();
-                    }
-                }
+                if (png) applyClipboard({std::move(*png), reinterpret_cast<quintptr>(event.user.data2), true});
                 break;
             }
             case SDL_CODE_CLIPBOARD_APPLY:
@@ -4102,20 +4140,8 @@ void Session::exec()
                 // Clipboard publication belongs to this GUI/SDL thread.
                 // data1 is an SDL_malloc'd null-terminated UTF-8 copy that we own
                 // and must SDL_free().
-                if (m_ClipboardSync->canApplyRemote(reinterpret_cast<quintptr>(event.user.data2)) &&
-                    clipboardFocusGuard.mayApply(currentClipboardHash(),
-                        reinterpret_cast<quintptr>(event.user.data2))) {
-                    if (NativeClipboard::publishText(QByteArray((const char *)event.user.data1), m_ControlsOpen)) {
-                        clipboardFocusGuard.applied(QCryptographicHash::hash(
-                            QByteArray((const char *)event.user.data1), QCryptographicHash::Sha256));
-                    }
-                    else {
-                        m_ClipboardSync->reportRemoteApplyFailure(
-                            reinterpret_cast<quintptr>(event.user.data2), QByteArray((const char *)event.user.data1));
-                        SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
-                                    "Failed to apply host clipboard: %s", SDL_GetError());
-                    }
-                }
+                applyClipboard({QByteArray(static_cast<const char*>(event.user.data1)),
+                                reinterpret_cast<quintptr>(event.user.data2), false});
                 SDL_free(event.user.data1);
                 // This will cause SDL to enqueue SDL_CLIPBOARDUPDATE, re-entering
                 // the case above on a later loop iteration; the clip thread's loop
@@ -4150,6 +4176,7 @@ void Session::exec()
                 m_InputHandler->notifyFocusLost();
                 updateLocalTextInput();
                 clipboardFocusGuard.focusLost(currentClipboardHash());
+                pendingClipboard = {};
                 // Publish the focus transition first so the clip thread knows to
                 // park (no host reads while backgrounded - design §5), then poke
                 // it for one short-budget edge pull before it parks: the common
@@ -4174,6 +4201,7 @@ void Session::exec()
                 // focused it's subsumed by the normal steady-state loop.
                 m_ClipboardSync->setFocused(!m_ClipboardPaused);
                 clipboardFocusGuard.focusGained(currentClipboardHash(), m_ClipboardSync->focusGeneration());
+                refreshClipboardInput();
                 m_ClipboardSync->requestFocusEdgePull();
                 if (m_CursorSync) {
                     m_CursorSync->setFocused(m_CursorPolicy.syncShapes(m_InputHandler->isAbsoluteMouseMode()));
@@ -4429,11 +4457,13 @@ void Session::exec()
 #endif
         case SDL_KEYUP:
         case SDL_KEYDOWN:
+            if (!event.key.repeat) refreshClipboardInput();
             presence.runCallbacks();
             m_InputHandler->handleKeyEvent(&event.key);
             break;
         case SDL_MOUSEBUTTONDOWN:
         case SDL_MOUSEBUTTONUP:
+            refreshClipboardInput();
             presence.runCallbacks();
             if (event.button.button == SDL_BUTTON_LEFT && !SDL_GetRelativeMouseMode()) {
                 const QPoint point=toolbarMetrics.point(event.button.x,event.button.y);
@@ -4526,6 +4556,8 @@ void Session::exec()
             m_InputHandler->handleJoystickArrivalEvent(&event.jdevice);
             break;
         case SDL_FINGERDOWN:
+            refreshClipboardInput();
+            [[fallthrough]];
         case SDL_FINGERMOTION:
         case SDL_FINGERUP:
             m_InputHandler->handleTouchFingerEvent(&event.tfinger);

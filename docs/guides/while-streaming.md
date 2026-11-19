@@ -68,9 +68,11 @@ Choose both directions, one direction, or **Paused**.
 Image clipboard sync uses PNG, with limits of 4 MiB and 4096 pixels per side.
 Larger images leave the clipboard as it was.
 
-On Wayland, your desktop may require an interaction before accepting a
-clipboard change. Click the stream before copying. If paste stops working just
-after disconnect, click the Moonwalk window and try again.
+On Wayland, the desktop can require fresh input in the stream window after
+another local app changes the clipboard. Moonwalk keeps the latest incoming
+copy for your next click or keystroke in the stream. A newer local copy takes
+priority. If paste stops working just after disconnect, click the Moonwalk
+window and try again.
 
 ## Copying files
 
