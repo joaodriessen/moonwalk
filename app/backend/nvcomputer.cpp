@@ -290,7 +290,10 @@ NvComputer::NvComputer(NvHTTP& http, QString serverInfo)
     this->activeAddress = http.address();
     this->state = NvComputer::CS_ONLINE;
     this->pendingQuit = false;
-    this->isSupportedServerVersion = CompatFetcher::isGfeVersionSupported(this->gfeVersion);
+    // Compatible hosts often send a GeForce Experience version for protocol negotiation.
+    // NVIDIA's compatibility list only describes NVIDIA's own server.
+    this->isSupportedServerVersion = !this->isNvidiaServerSoftware ||
+        CompatFetcher::isGfeVersionSupported(this->gfeVersion);
 }
 
 bool NvComputer::wake() const

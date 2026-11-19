@@ -5,6 +5,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 
 ## Unreleased
 
+- Apply the GeForce Experience compatibility check only to NVIDIA hosts. Its
+  version list can no longer block Sunshine and other compatible hosts.
 - Pin every Flatpak Git dependency to a commit, keep local build paths out of
   staged provenance, and check the exported bundle against the source revision.
   Include the package's actual sandbox permissions in the verification report.
