@@ -108,7 +108,7 @@ private slots:
         const auto evidence=StreamPlanning::adaptationEvidence(meter,2160,1350,60,false,0,false,true);
         QVERIFY(evidence.active);
         QVERIFY(evidence.slow);
-        QVERIFY(evidence.canTrySize);
+        QVERIFY(evidence.hostSlow);
     }
     void identicalModesAndFrameRateChangesCannotSpendAReconnect() {
         StreamAdaptation episode;
@@ -198,12 +198,25 @@ private slots:
         QVERIFY(!observed.slow);
         QCOMPARE(meter.averageMs(),40.0);
     }
-    void deliveryLossGetsAQualityTrialEvenWhenTheHostProducesFullCadence() {
+    void deliveryLossIsNotEvidenceOfHostPressure() {
         HostLatencyMeter meter;
         for(int i=0;i<120;++i) meter.addFrame(1000000+quint64(i)*66667,100,20000,i*4+1);
         const auto observed=StreamPlanning::adaptationEvidence(meter,2880,1800,60,false,0,false,false);
-        QVERIFY(observed.slow);
-        QVERIFY(!observed.canTrySize); // First reduce bytes; host pipeline is fast.
+        QVERIFY(observed.slow); // Hosts without live feedback can still queue a quality trial.
+        QVERIFY(!observed.hostSlow);
+        // A five-second evidence window can still contain gaps after loss drops
+        // out of the network controller's shorter sample.
+        const auto justRecovered=StreamPlanning::adaptationEvidence(meter,2880,1800,60,false,0,false,true);
+        QVERIFY(justRecovered.slow);
+        QVERIFY(!justRecovered.hostSlow);
+    }
+    void networkPressureDefersHostTrialsEvenWhenHostDelayIsHigh() {
+        HostLatencyMeter meter;
+        for (int i=0;i<180;++i) meter.addFrame(1000000+quint64(i)*33333,420,20000,i+1);
+        const auto congested=StreamPlanning::adaptationEvidence(meter,2880,1800,60,false,0,false,false);
+        QVERIFY(congested.slow);
+        QVERIFY(!congested.hostSlow);
+        QVERIFY(StreamPlanning::adaptationEvidence(meter,2880,1800,60,false,0,false,true).hostSlow);
     }
     void legacyHostSlowActiveVideoCanOptimizeWithoutCaptureExtension() {
         HostLatencyMeter meter;
@@ -211,7 +224,7 @@ private slots:
         const auto observed=StreamPlanning::adaptationEvidence(meter,2880,1800,60,false,0,false,true);
         QVERIFY(observed.active);
         QVERIFY(observed.slow);
-        QVERIFY(observed.canTrySize);
+        QVERIFY(observed.hostSlow);
     }
     void highDelayAtFullCadenceAndSparseIdleVideoDoNotAdapt() {
         HostLatencyMeter full,idle;
@@ -223,7 +236,7 @@ private slots:
     void slowCaptureWithHostPressureCanOptimizeButStaleCaptureCannot() {
         HostLatencyMeter meter;
         for (int i = 0; i < 120; ++i) meter.addFrame(1000000 + quint64(i) * 66667, 420, 20000, i + 1);
-        QVERIFY(StreamPlanning::adaptationEvidence(meter,2880,1800,60,true,15,true,true).canTrySize);
+        QVERIFY(StreamPlanning::adaptationEvidence(meter,2880,1800,60,true,15,true,true).hostSlow);
         QVERIFY(!StreamPlanning::adaptationEvidence(meter,2880,1800,60,true,15,false,true).active);
         QVERIFY(!StreamPlanning::adaptationEvidence(meter,2880,1800,60,true,0,true,true).active);
     }

@@ -3740,11 +3740,15 @@ void Session::exec()
                 latency = m_RecentHostLatency;
             }
             if (latency.enoughToJudge()) {
+                const bool networkClean = capacityNetworkClean();
                 const auto evidence = StreamPlanning::adaptationEvidence(latency, m_ActiveVideoWidth, m_ActiveVideoHeight,
-                    m_ActiveVideoFrameRate, m_CaptureHealthSupported, m_CapturedFps.load(), sourceHealthy(), capacityNetworkClean());
+                    m_ActiveVideoFrameRate, m_CaptureHealthSupported, m_CapturedFps.load(), sourceHealthy(), networkClean);
                 const bool active = evidence.active;
-                const bool slow = evidence.slow;
-                healthyWindows = active && evidence.deliveredFps >= m_ActiveVideoFrameRate * .97 && capacityNetworkClean()
+                const bool liveBitrate = m_AutomaticBitrate && m_BitrateChange == HostCapacity::BitrateChange::Live;
+                // Live bitrate feedback already handles delivery loss. A second
+                // ceiling would keep the connection at low quality after it recovers.
+                const bool slow = liveBitrate ? evidence.hostSlow : evidence.slow;
+                healthyWindows = active && evidence.deliveredFps >= m_ActiveVideoFrameRate * .97 && networkClean
                     ? healthyWindows + 1 : 0;
                 activeWindows = active ? activeWindows + 1 : 0;
                 if (active && activeWindows >= 2 && activeWindows % 2 == 0) {
@@ -3809,7 +3813,7 @@ void Session::exec()
                 const auto capacity = streamMeasurement(latency);
                 // A long healthy interval may suggest a larger picture for next time.
                 if (m_PlannedSizeAutomatically && !m_Adaptation.recoveryAttempted && m_StreamPlan.limitedByHost && stable >= 180000
-                        && healthyWindows >= 12 && capacityNetworkClean()) {
+                        && healthyWindows >= 12) {
                     for (int i = 1; i < rungs.size(); ++i) {
                         if (!StreamAdaptation::same(rungs[i],current)) continue;
                         m_Adaptation.recoveryAttempted = true;
@@ -3821,13 +3825,11 @@ void Session::exec()
                 if (slowWindows >= 2) {
                     // Costly encoder changes are not forced by the outer policy.
                     // Unknown or costly changes are learned for the next connection.
-                    if (m_AutomaticBitrate && m_BitrateChange == HostCapacity::BitrateChange::Live &&
-                            m_Adaptation.mayTryQuality(m_BitrateChange)) {
+                    if (liveBitrate && m_Adaptation.mayTryQuality(m_BitrateChange)) {
                         const auto rate = m_AutomaticBitrate->status();
                         if (rate.targetKbps > rate.floorKbps * 1.15) {
                             ++m_Adaptation.qualityTrials;
-                            const int target = qMax(rate.floorKbps,rate.targetKbps *
-                                (m_BitrateChange == HostCapacity::BitrateChange::Live ? 7 : 5) / 10);
+                            const int target = qMax(rate.floorKbps, rate.targetKbps * 7 / 10);
                             m_Adaptation.encoderCeilingKbps = target;
                             SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
                                 "Automatic stream: trying encoder target %d kbps after %.1f/%d FPS, host %.1f ms (episode trial %d)",
@@ -3854,10 +3856,10 @@ void Session::exec()
                         const int channels = CHANNEL_COUNT_FROM_AUDIO_CONFIGURATION(m_StreamConfig.audioConfiguration);
                         const int floor = RuntimeBitratePolicy::encoderKbps(m_StreamPlan.floorKbps, channels);
                         if (const int target = StreamPlanning::lowerStartupBitrate(m_NormalStartupBitrateKbps,
-                                floor, capacityNetworkClean(), latency, current.fps))
+                                floor, networkClean, latency, current.fps))
                             recommendStreamChange(current, capacity, false, target);
                     }
-                    if (m_PlannedSizeAutomatically && evidence.canTrySize &&
+                    if (m_PlannedSizeAutomatically && evidence.hostSlow &&
                             QDateTime::currentSecsSinceEpoch() >= capacity.reductionRejectedUntil) {
                         for (const auto& next : rungs) {
                             if (next.width >= current.width * .97) continue;

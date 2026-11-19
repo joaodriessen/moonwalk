@@ -50,7 +50,7 @@ namespace StreamPlanning {
 struct AdaptationEvidence {
     bool active = false;
     bool slow = false;
-    bool canTrySize = false;
+    bool hostSlow = false;
     double deliveredFps = 0;
 };
 
@@ -72,9 +72,9 @@ inline AdaptationEvidence adaptationEvidence(const HostLatencyMeter& meter, int 
     // Sequence cadence distinguishes that producer limit from missing wire frames.
     const bool sourceLimited = meter.sourceFps() < fps * .85;
     result.slow = result.active && lostCadence && (hostDelay || sourceLimited || missingFrames || !networkClean);
-    // Quality is the first remedy for missing delivery. Pixel work is tried
-    // when timing or the producer's own cadence also supports that hypothesis.
-    result.canTrySize = result.slow && (hostDelay || sourceLimited);
+    // A delivery gap can outlast the network controller's current loss sample.
+    // Require independent evidence about the host before capping its encoder.
+    result.hostSlow = result.slow && networkClean && (hostDelay || sourceLimited);
     return result;
 }
 
