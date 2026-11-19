@@ -48,7 +48,7 @@ modules:
         commit: c69278340ab1d5559c7d7bf0edf615dc33ddbba7
     cleanup: ['*']
 
-  # --- libplacebo (Vulkan) — verbatim from flathub moonlight ---
+  # --- libplacebo (Vulkan) ---
   - name: libplacebo
     buildsystem: meson
     build-options:
@@ -60,7 +60,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/haasn/libplacebo.git
-        commit: d4624cbfb37fdef337a7da5794b66202671a89cd
+        tag: v7.387.0
+        commit: 275f7dea27924cdd34ab2e6c20e448b6bc4fab65
     cleanup: [/include, /lib/pkgconfig]
 
   - name: libdecor
@@ -338,5 +339,5 @@ modules:
         # helper described in docs/development.md.
       - type: git
         url: https://github.com/joaodriessen/moonwalk.git
-        commit: 29793fbced4a785c7cef9d158d9b9639753e5705
+        commit: ebe08e5ad94fdb644fd88b61fa6d21a612f21aff
         disable-shallow-clone: true
