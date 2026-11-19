@@ -1,5 +1,4 @@
 #include "compatfetcher.h"
-#include "path.h"
 
 #include <QNetworkReply>
 #include <QSettings>
@@ -10,25 +9,22 @@
 CompatFetcher::CompatFetcher(QObject *parent) :
     QObject(parent)
 {
+}
+
+void CompatFetcher::start()
+{
+    if (m_Requested) return;
+    m_Requested = true;
     m_Nam = new QNetworkAccessManager(this);
 
     // Never communicate over HTTP
     m_Nam->setStrictTransportSecurityEnabled(true);
 
-    // Allow HTTP redirects
+    // Keep HTTPS when following a redirect.
     m_Nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
 
     connect(m_Nam, &QNetworkAccessManager::finished,
             this, &CompatFetcher::handleCompatInfoFetched);
-}
-
-void CompatFetcher::start()
-{
-    if (!m_Nam) {
-        Q_ASSERT(m_Nam);
-        return;
-    }
-
 #if QT_VERSION >= QT_VERSION_CHECK(5, 14, 0) && QT_VERSION < QT_VERSION_CHECK(5, 15, 1) && !defined(QT_NO_BEARERMANAGEMENT)
     // HACK: Set network accessibility to work around QTBUG-80947 (introduced in Qt 5.14.0 and fixed in Qt 5.15.1)
     QT_WARNING_PUSH

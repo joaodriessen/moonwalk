@@ -190,9 +190,6 @@ ComputerManager::ComputerManager(StreamingPreferences* prefs)
     }
     settings.endArray();
 
-    // Fetch latest compatibility data asynchronously
-    m_CompatFetcher.start();
-
     // Start the delayed flush thread to handle saveHosts() calls
     m_DelayedFlushThread = new DelayedFlushThread(this);
     m_DelayedFlushThread->start();
@@ -499,6 +496,12 @@ void ComputerManager::handleComputerStateChanged(NvComputer* computer)
         }
     }
     if (!owner) return;
+    bool pairedNvidiaHost;
+    {
+        QReadLocker lock(&computer->lock);
+        pairedNvidiaHost = computer->isNvidiaServerSoftware && !computer->serverCert.isNull();
+    }
+    if (pairedNvidiaHost) m_CompatFetcher.start();
     emit computerStateChanged(computer);
 
     if (computer->pendingQuit && computer->currentGameId == 0) {

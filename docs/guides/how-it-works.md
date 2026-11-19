@@ -43,8 +43,8 @@ for the full list.
 
 Moonwalk uses your network to find hosts, pair, and stream. It can also:
 
-- Download controller mappings and host compatibility information from
-  `moonlight-stream.org`.
+- Download controller mappings from `moonlight-stream.org`. A paired NVIDIA
+  host can also trigger a GeForce Experience compatibility update.
 - Look up a fallback public IPv4 address through `stun.moonlight-stream.org`
   after some IPv4 host additions. Local pairing can proceed during the lookup.
 - Check streaming ports using `qt.conntest.moonlight-stream.org`. This can
