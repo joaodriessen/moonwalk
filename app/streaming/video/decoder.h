@@ -9,11 +9,11 @@
 #define MAX_SLICES 4
 
 typedef struct _VIDEO_STATS {
-    uint32_t receivedFrames;
+    uint32_t submittedFrames;
     uint32_t decodedFrames;
     uint32_t renderedFrames;
     uint32_t totalFrames;
-    uint32_t networkDroppedFrames;
+    uint32_t framesMissingBeforeDecode;
     uint32_t pacerDroppedFrames;
     uint16_t minHostProcessingLatency;         // low-res from RTP
     uint16_t maxHostProcessingLatency;         // low-res from RTP
@@ -26,7 +26,7 @@ typedef struct _VIDEO_STATS {
     uint32_t lastRtt;                          // low-res from enet (1ms)
     uint32_t lastRttVariance;                  // low-res from enet (1ms)
     double totalFps;                           // high-res
-    double receivedFps;                        // high-res
+    double submittedFps;                        // high-res
     double decodedFps;                         // high-res
     double renderedFps;                        // high-res
     double videoMegabitsPerSec;                // current video bitrate in Mbps, not including FEC overhead

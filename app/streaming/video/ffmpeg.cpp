@@ -758,11 +758,11 @@ bool FFmpegVideoDecoder::completeInitialization(const AVCodec* decoder, enum AVP
 
 void FFmpegVideoDecoder::addVideoStats(VIDEO_STATS& src, VIDEO_STATS& dst)
 {
-    dst.receivedFrames += src.receivedFrames;
+    dst.submittedFrames += src.submittedFrames;
     dst.decodedFrames += src.decodedFrames;
     dst.renderedFrames += src.renderedFrames;
     dst.totalFrames += src.totalFrames;
-    dst.networkDroppedFrames += src.networkDroppedFrames;
+    dst.framesMissingBeforeDecode += src.framesMissingBeforeDecode;
     dst.pacerDroppedFrames += src.pacerDroppedFrames;
     dst.totalReassemblyTimeUs += src.totalReassemblyTimeUs;
     dst.totalDecodeTimeUs += src.totalDecodeTimeUs;
@@ -799,7 +799,7 @@ void FFmpegVideoDecoder::addVideoStats(VIDEO_STATS& src, VIDEO_STATS& dst)
 
     double timeDiffSecs = (double)(LiGetMicroseconds() - dst.measurementStartUs) / 1000000.0;
     dst.totalFps        = (double)dst.totalFrames / timeDiffSecs;
-    dst.receivedFps     = (double)dst.receivedFrames / timeDiffSecs;
+    dst.submittedFps     = (double)dst.submittedFrames / timeDiffSecs;
     dst.decodedFps      = (double)dst.decodedFrames / timeDiffSecs;
     dst.renderedFps     = (double)dst.renderedFrames / timeDiffSecs;
 }
@@ -881,7 +881,7 @@ void FFmpegVideoDecoder::stringifyVideoStats(VIDEO_STATS& stats, char* output, i
         break;
     }
 
-    if (stats.receivedFps > 0) {
+    if (stats.submittedFps > 0) {
         if (m_VideoDecoderCtx != nullptr) {
 #ifdef DISPLAY_BITRATE
             double avgVideoMbps = m_BwTracker.GetAverageMbps();
@@ -916,10 +916,10 @@ void FFmpegVideoDecoder::stringifyVideoStats(VIDEO_STATS& stats, char* output, i
 
         ret = snprintf(&output[offset],
                        length - offset,
-                       "Incoming frame rate from network: %.2f FPS\n"
+                       "Frame rate submitted for decoding: %.2f FPS\n"
                        "Decoding frame rate: %.2f FPS\n"
                        "Rendering frame rate: %.2f FPS\n",
-                       stats.receivedFps,
+                       stats.submittedFps,
                        stats.decodedFps,
                        stats.renderedFps);
         if (ret < 0 || ret >= length - offset) {
@@ -957,13 +957,13 @@ void FFmpegVideoDecoder::stringifyVideoStats(VIDEO_STATS& stats, char* output, i
 
         ret = snprintf(&output[offset],
                        length - offset,
-                       "Frames dropped by your network connection: %.2f%%\n"
+                       "Frames missing before decoding: %.2f%%\n"
                        "Frames skipped to catch up with the display: %.2f%%\n"
                        "Average network latency: %s\n"
                        "Average decoding time: %.2f ms\n"
                        "Average frame queue delay: %.2f ms\n"
                        "Average rendering time (including monitor V-sync latency): %.2f ms\n",
-                       (float)stats.networkDroppedFrames / stats.totalFrames * 100,
+                       (float)stats.framesMissingBeforeDecode / stats.totalFrames * 100,
                        (float)stats.pacerDroppedFrames / stats.decodedFrames * 100,
                        rttString,
                        (double)(stats.totalDecodeTimeUs / 1000.0) / stats.decodedFrames,
@@ -2027,8 +2027,8 @@ int FFmpegVideoDecoder::submitDecodeUnit(PDECODE_UNIT du)
         m_LastFrameNumber = du->frameNumber;
     }
     else {
-        // Any frame number greater than m_LastFrameNumber + 1 represents a dropped frame
-        m_ActiveWndVideoStats.networkDroppedFrames += du->frameNumber - (m_LastFrameNumber + 1);
+        // Gaps can come from incomplete network frames or a full client decode queue.
+        m_ActiveWndVideoStats.framesMissingBeforeDecode += du->frameNumber - (m_LastFrameNumber + 1);
         m_ActiveWndVideoStats.totalFrames += du->frameNumber - (m_LastFrameNumber + 1);
         m_LastFrameNumber = du->frameNumber;
     }
@@ -2070,7 +2070,7 @@ int FFmpegVideoDecoder::submitDecodeUnit(PDECODE_UNIT du)
     m_ActiveWndVideoStats.maxHostProcessingLatency = qMax(m_ActiveWndVideoStats.maxHostProcessingLatency, du->frameHostProcessingLatency);
     m_ActiveWndVideoStats.totalHostProcessingLatency += du->frameHostProcessingLatency;
 
-    m_ActiveWndVideoStats.receivedFrames++;
+    m_ActiveWndVideoStats.submittedFrames++;
     m_ActiveWndVideoStats.totalFrames++;
 
     int requiredBufferSize = du->fullLength;

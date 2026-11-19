@@ -14,6 +14,7 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   external address supplied by the host.
 - Give the GNOME and Plasma Hosts and Settings pages named accessibility
   landmarks. Screen readers identify the application as Moonwalk.
+- Report frame gaps where the client measures them, before decoding.
 - Pin every Flatpak Git dependency to a commit, keep local build paths out of
   staged provenance, and check the exported bundle against the source revision.
   Include the package's actual sandbox permissions in the verification report.

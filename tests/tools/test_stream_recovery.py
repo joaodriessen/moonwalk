@@ -35,6 +35,13 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(result["metrics"]["incoming_fps"], "60.0")
         self.assertFalse(recovery.parse_log(SUMMARY.replace("59.77", "0.00"))["rendered_frames_proven"])
 
+    def test_frame_gaps_use_their_own_metric(self):
+        summary = SUMMARY.replace("Incoming frame rate from network", "Frame rate submitted for decoding")
+        metrics = recovery.parse_log(summary + "Frames missing before decoding: 42.5%\n")["metrics"]
+        self.assertEqual(metrics["incoming_fps"], "60.0")
+        self.assertEqual(metrics["before_decode_gap_percent"], "42.5")
+        self.assertNotIn("network_drop_percent", metrics)
+
     def run_fixture(self, root, code, extra=()):
         config = root / "copied-config"
         config.mkdir()
