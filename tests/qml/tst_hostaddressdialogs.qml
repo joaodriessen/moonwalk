@@ -2,7 +2,6 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.15
 import QtTest 1.3
-import "TestCompat.js" as TestCompat
 
 TestCase {
     id: testCase
@@ -49,9 +48,9 @@ TestCase {
     function item(suffix) {
         var name = suffix === "connection-address" ? "starlight.hosts.connection-address"
                                                   : platform + "-host-dialog-" + suffix
-        var matches = TestCompat.walkQObjectGraph(dialogLayer).filter(function(object) { return object.objectName === name })
-        compare(matches.length, 1, name)
-        return matches[0]
+        var control = findChild(dialogLayer, name)
+        verify(control !== null, name)
+        return control
     }
     function platforms() { return [{ tag: "GNOME", platform: "gnome" }, { tag: "Plasma", platform: "plasma" }] }
     function test_draftSurvivesRefreshAndInterrupt_data() { return platforms() }
