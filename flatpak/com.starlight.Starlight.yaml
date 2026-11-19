@@ -323,7 +323,7 @@ modules:
         # helper described in docs/development.md.
       - type: git
         url: https://github.com/joaodriessen/moonwalk.git
-        commit: 1cbd31bb5284ed280b7cc730a65dd2547ca4d181
+        commit: f5dceaa8baa514b6b717f8af29c8a6920fdae965
         disable-shallow-clone: true
 
   # Run vainfo inside the sandbox to check its VA-API setup. Building it
