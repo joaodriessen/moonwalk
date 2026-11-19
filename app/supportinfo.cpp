@@ -65,10 +65,11 @@ QString SupportInfo::redact(QString text)
     auto matches = ipv6Candidates.globalMatch(text);
     while (matches.hasNext()) {
         const auto match = matches.next();
-        const QHostAddress address(match.captured());
+        auto start = match.capturedStart();
+        auto length = match.capturedLength();
+        while (length > 0 && text.at(start + length - 1) == QLatin1Char('.')) --length;
+        const QHostAddress address(text.mid(start, length));
         if (address.protocol() == QAbstractSocket::IPv6Protocol) {
-            auto start = match.capturedStart();
-            auto length = match.capturedLength();
             if (start > 0 && start + length < text.size()
                     && text.at(start - 1) == QLatin1Char('[')
                     && text.at(start + length) == QLatin1Char(']')) {

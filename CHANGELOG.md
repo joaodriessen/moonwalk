@@ -32,6 +32,9 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   host list can update before it gets focus.
 - Give the host a moment to release the stream during background disconnect
   cleanup. Leave sessions with other active viewers alone.
+- Keep IPv6 addresses out of diagnostic summaries when they end a sentence.
+- Honor `--no-frame-pacing` from the command line. On Wayland with EGL,
+  pace swaps using the renderer’s own callback.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

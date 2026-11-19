@@ -39,11 +39,13 @@ private slots:
     {
         const auto result = SupportInfo::redact(QStringLiteral(
             "Connect [2001:db8::1234]:47984 fe80::abcd%eth0 ::ffff:192.0.2.7 ::1\n"
+            "The last address was 2001:db8::5678.\n"
             "RTT: 12.5 ms at 12:34:56; decoder: VAAPI; version: 0.3.1-alpha.9\n"));
         for (const auto* secret : {"2001:db8", "fe80", "eth0", "::ffff", "192.0.2.7", "::1"}) {
             QVERIFY(!result.contains(QString::fromLatin1(secret)));
         }
         QVERIFY(result.contains("[address]:47984"));
+        QVERIFY(result.contains("The last address was [address]."));
         QVERIFY(result.contains("RTT: 12.5 ms at 12:34:56"));
         QVERIFY(result.contains("version: 0.3.1-alpha.9"));
     }
