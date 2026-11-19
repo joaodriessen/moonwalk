@@ -42,6 +42,18 @@ for mappings, compatibility information, and connection diagnostics.
 [Network requests](how-it-works.md#what-moonwalk-sends-over-the-network)
 describes when.
 
+## What can the Flatpak access?
+
+Moonwalk uses the network, the local display, and your sound service. The
+`--device=all` grant includes graphics devices for hardware decoding and
+input devices such as gamepads. Read-only host OS access supports Gamescope's
+Vulkan layer. Moonwalk uses logind when you press a local brightness key
+during a stream. Pairings and settings live in the app's Flatpak data.
+
+To inspect an installed build's permissions, run
+`flatpak info --show-permissions com.starlight.Starlight`.
+[Package manifest](../../flatpak/com.starlight.Starlight.yaml)
+
 ## Does it work with games?
 
 You can open a game on the streamed desktop and use a supported gamepad.
