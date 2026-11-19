@@ -19,7 +19,7 @@ build.
 | --- | --- |
 | Vibepollo on Windows | Pairing, streaming, and disconnect cleanup on real machines. Full-rate streaming at native resolution remains unresolved on one Intel host. |
 | Moonwalk Host on Apple Silicon | Pairing and live desktop streams with the separate macOS 14+ host. |
-| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, and recovery after the client was killed. We also upgraded a paired Flatpak through the normal install and run commands and streamed from the same host. The lab used the stock Sunshine 2026.914.233613 AppImage, X11, and software H.264 at 1280×720 and 60 fps. |
+| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, and recovery after the client was killed. An installed upgrade retained the pairing and the saved display settings. The stock Sunshine 2026.914.233613 AppImage passed X11 streams at 1280×720 with software H.264 at 60 fps and HEVC at 30 fps. When asked for AV1, Moonwalk reported that the host could not encode it and negotiated H.264. |
 | Apollo on Windows | Uses the same base protocol. Current releases and optional features need more testing with Moonwalk. |
 
 Most testing has been on a local network. Moonwalk has no built-in relay or

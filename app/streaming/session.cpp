@@ -1734,7 +1734,8 @@ bool Session::validateLaunch(SDL_Window* testWindow)
         return false;
     }
 
-    if (m_Preferences->absoluteMouseMode && !m_App.isAppCollectorGame) {
+    const bool desktopTarget = m_IsDesktopRequest || m_App.isDesktopTarget();
+    if (m_Preferences->absoluteMouseMode && !desktopTarget && !m_App.isAppCollectorGame) {
         emitLaunchWarning(tr("Desktop pointer mode can interfere with games that use the mouse to turn a camera."));
     }
 
