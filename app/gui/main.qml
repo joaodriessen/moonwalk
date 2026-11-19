@@ -1211,21 +1211,6 @@ ApplicationWindow {
         }
     }
 
-    // NOTE: the legacy blue ToolBar (back arrow / Add PC / update-checker /
-    // help / settings) that used to live here as `header:` is gone. It used
-    // to flash for 1-2s during StreamSegue's connection setup, and every
-    // control on it had already been ported to HIG-native chrome elsewhere:
-    // back -> Esc/goBack() (StackView.Keys.onEscapePressed above, plus each
-    // segue's own Keys.onEscapePressed), Add PC -> sidebar "Pair a new
-    // host…" footer row (PcView.qml) + the Ctrl+N Shortcut below, settings
-    // -> the sidebar cog (PcView.qml) + the Ctrl+, Shortcut below. The help
-    // button (linked to the upstream moonlight-docs wiki) and the
-    // update-available button (linked to moonlight-qt's own GitHub
-    // releases) were both moonlight-qt-specific cruft that doesn't apply to
-    // this fork, so they're dropped rather than ported -- and AutoUpdateChecker
-    // is deliberately never started or connected to from QML any more (it
-    // was only ever wired from the button we just deleted).
-
     // The launcher outlives stream routes, including asynchronous final cleanup.
     function reportStreamCleanupFailure(message) {
         streamCleanupErrorDialog.text = message

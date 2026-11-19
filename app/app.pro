@@ -231,7 +231,6 @@ SOURCES += \
     streaming/bandwidth.cpp \
     streaming/streamutils.cpp \
     streaming/windowdecoration.cpp \
-    backend/autoupdatechecker.cpp \
     path.cpp \
     settings/mappingmanager.cpp \
     gui/sdlgamepadkeynavigation.cpp \
@@ -315,7 +314,6 @@ HEADERS += \
     streaming/video/decoder.h \
     streaming/bandwidth.h \
     streaming/streamutils.h \
-    backend/autoupdatechecker.h \
     path.h \
     settings/mappingmanager.h \
     gui/sdlgamepadkeynavigation.h \
@@ -788,10 +786,7 @@ VERSION = 0.3.1
 # platform packaging fields that expect numeric triplets.
 DEFINES += STARLIGHT_VERSION_STR=\\\"$$VERSION-alpha.17\\\"
 
-# The upstream moonlight-qt engine version this fork tracks. Deliberately kept
-# reading version.txt (unchanged) rather than following the VERSION bump above
-# -- autoupdatechecker.cpp compares this against upstream moonlight-qt
-# releases, and commandlineparser.cpp's --version prints it as the engine line.
+# The upstream engine version printed by --version comes from version.txt.
 DEFINES += VERSION_STR=\\\"$$cat(version.txt)\\\"
 
 SOURCES += supportinfo.cpp
