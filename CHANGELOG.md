@@ -27,6 +27,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   archives without the local paths in Flatpak Builder’s Git metadata.
 - Follow the local light or dark theme even when the stream controls are
   collapsed to the handle.
+- Check host status when the launcher opens in the background, so a visible
+  host list can update before it gets focus.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

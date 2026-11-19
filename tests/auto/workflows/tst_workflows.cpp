@@ -181,6 +181,7 @@ private slots:
     void hostWorkflowIgnoresCompletionWithoutPendingAttempt();
 
     void pollingLifecycleStartsOnceForVisibleActiveWindow();
+    void pollingLifecycleStartsForVisibleInactiveWindow();
     void pollingLifecycleDefersStopWhileInactive();
     void pollingLifecycleStopsAfterInactiveTimeout();
     void pollingLifecycleStopsImmediatelyWhenHidden();
@@ -327,6 +328,17 @@ void WorkflowsTest::pollingLifecycleDefersStopWhileInactive()
     QVERIFY(!decision.value(QStringLiteral("stopPolling")).toBool());
     QVERIFY(!decision.value(QStringLiteral("hasFocus")).toBool());
     QVERIFY(lifecycle.pollingActive());
+}
+
+void WorkflowsTest::pollingLifecycleStartsForVisibleInactiveWindow()
+{
+    PollingLifecycle lifecycle;
+    const auto shown = lifecycle.visibilityChanged(true, false);
+    QVERIFY(shown.value(QStringLiteral("startPolling")).toBool());
+    QVERIFY(shown.value(QStringLiteral("startInactivityTimer")).toBool());
+    QVERIFY(!shown.value(QStringLiteral("hasFocus")).toBool());
+    lifecycle.commitPollingState(true);
+    QVERIFY(lifecycle.inactivityExpired(false).value(QStringLiteral("stopPolling")).toBool());
 }
 
 void WorkflowsTest::pollingLifecycleStopsAfterInactiveTimeout()

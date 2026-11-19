@@ -20,8 +20,10 @@ QVariantMap PollingLifecycle::visibilityChanged(bool visible, bool active)
             result.insert(QStringLiteral("stopPolling"), true);
         }
     }
-    else if (active) {
-        result.insert(QStringLiteral("stopInactivityTimer"), true);
+    else {
+        // A visible launcher may open in the background on another screen.
+        result.insert(active ? QStringLiteral("stopInactivityTimer")
+                             : QStringLiteral("startInactivityTimer"), true);
         if (!m_PollingActive) {
             result.insert(QStringLiteral("startPolling"), true);
         }
