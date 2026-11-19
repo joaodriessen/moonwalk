@@ -1376,6 +1376,9 @@ bool Session::initializeInternal(QWindow* qtWindow)
     if (Utils::getEnvironmentVariableOverride("STARLIGHT_FRAME_PACING", &pacingOverride)) {
         m_PacingMode = pacingOverride ? PacingMode::On : PacingMode::Off;
     }
+    else if (const auto pacing = m_Preferences->cliFramePacingOverride()) {
+        m_PacingMode = *pacing ? PacingMode::On : PacingMode::Off;
+    }
     else if (m_Preferences->framePacing) {
         m_PacingMode = PacingMode::On;
     }

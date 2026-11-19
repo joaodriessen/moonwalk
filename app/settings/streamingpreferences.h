@@ -8,6 +8,7 @@
 #include <QSettings>
 
 #include <memory>
+#include <optional>
 
 class LanguageWorkflow;
 
@@ -110,6 +111,7 @@ public:
     // SER_ key table in the .cpp file.
     void rememberCliOverride(const QByteArray& propertyName, const QVariant& value);
     Q_INVOKABLE void reapplyCliOverrides();
+    std::optional<bool> cliFramePacingOverride() const;
 
     enum AudioConfig
     {

@@ -1094,6 +1094,13 @@ void StreamingPreferences::reapplyCliOverrides()
     if (effective != bitrateKbps) { bitrateKbps = effective; emit bitrateChanged(); }
 }
 
+std::optional<bool> StreamingPreferences::cliFramePacingOverride() const
+{
+    const QVariant pacing = m_CliOverrides.value(QByteArrayLiteral("framePacing"));
+    if (!pacing.isValid()) return std::nullopt;
+    return pacing.toBool();
+}
+
 bool StreamingPreferences::retranslate()
 {
 #if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)

@@ -51,6 +51,7 @@ private slots:
     void automaticDisplayAndInputWinInSessionsAndManualValuesStay();
     void presetsAndLastWorkingSettingsDeriveDisplayAndInputModes();
     void cliPointerIsAManualInputChoice();
+    void cliCanExplicitlyDisableFramePacing();
     void explicitCliChoicesSurviveAutomaticSessionPolicy();
     void relearningOnlyClearsThisHostsMeasurements();
     void bitrateLearningSurvivesAReversibleModeTrial();
@@ -945,6 +946,24 @@ void StreamingPreferencesTest::cliPointerIsAManualInputChoice()
     auto session = prefs->cloneForSession();
     QVERIFY(!session->automaticPointer);
     QVERIFY(!session->absoluteMouseMode);
+}
+
+void StreamingPreferencesTest::cliCanExplicitlyDisableFramePacing()
+{
+    auto* prefs = loadPreferences();
+    QVERIFY(prefs->initializeHostDisplayMode("host-a", 1920, 1080, 60));
+    prefs->framePacing = true;
+    prefs->save();
+    QVERIFY(!prefs->cliFramePacingOverride().has_value());
+
+    StreamCommandLineParser parser;
+    parser.parse({"starlight", "stream", "--no-frame-pacing", "host-a", "Desktop"}, prefs);
+    prefs->setCurrentHost(QStringLiteral("host-a"));
+    const auto session = prefs->cloneForSession();
+    QVERIFY(session->cliFramePacingOverride().has_value());
+    QVERIFY(!session->cliFramePacingOverride().value());
+    QVERIFY(!session->framePacing);
+    QVERIFY(!prefs->cloneForSession(true)->cliFramePacingOverride().has_value());
 }
 
 void StreamingPreferencesTest::explicitCliChoicesSurviveAutomaticSessionPolicy()
