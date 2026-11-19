@@ -23,9 +23,13 @@ rendered frame rates helps identify where cadence dropped.
 
 Each `.log` is combined client stdout/stderr. `summary.json` records argv, timing, signals, exit status, cleanup and parsed facts. Exit zero requires every scheduled trial to pass. Missing startup/frame evidence, unexpected early/nonzero exit, log overflow, surviving owned processes or a deadline fails the run. A successful connection requires the real `Starting input stream...`/following SDL `done` and `Received first video packet` messages. Every graceful trial must also emit a `Global video stats` summary with positive `Rendering frame rate`. Packet receipt alone cannot prove rendering. SIGKILL cannot flush that summary: the abrupt seed explicitly leaves rendering unverified and the subsequent graceful reconnect must prove it.
 
-The parser records the frame rate submitted for decoding, network RTT, decode
-time, frame queue delay, rendering time and host processing latency when
-present. It records frame gaps before decoding separately. Older logs can
+Compare the frame rates submitted for decoding, decoded and rendered. When
+the renderer supplies presentation feedback, the report includes the time
+from decoding to display and the percentage of frames replaced before they
+reached the screen. Frames skipped to catch up with the display have their
+own metric. Historical logs use the older network jitter label.
+The parser also records network RTT, decode time, queue delay, rendering
+time and host processing latency when present. It records frame gaps before decoding separately. Older logs can
 label the same gaps as network drops. RTT is the network round trip, and
 rendering time includes the wait for V-sync. Measuring physical display and
 speaker latency or checking the picture and sound requires a separate test.

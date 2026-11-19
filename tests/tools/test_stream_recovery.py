@@ -42,6 +42,21 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(metrics["before_decode_gap_percent"], "42.5")
         self.assertNotIn("network_drop_percent", metrics)
 
+    def test_presentation_metrics_are_separate_from_legacy_jitter(self):
+        metrics = recovery.parse_log(SUMMARY
+            + "Decoding frame rate: 119.97 FPS\n"
+            + "Frames skipped to catch up with the display: 7.31%\n"
+            + "Frames replaced before reaching the screen: 0.75%\n"
+            + "Average decoded to on screen: 18.52 ms\n")["metrics"]
+        self.assertEqual(metrics["decoded_fps"], "119.97")
+        self.assertEqual(metrics["display_skip_percent"], "7.31")
+        self.assertEqual(metrics["display_replaced_percent"], "0.75")
+        self.assertEqual(metrics["decoded_to_screen_ms"], "18.52")
+        self.assertNotIn("jitter_drop_percent", metrics)
+        legacy = recovery.parse_log(SUMMARY + "Frames dropped due to network jitter: 2.50%\n")["metrics"]
+        self.assertEqual(legacy["jitter_drop_percent"], "2.50")
+        self.assertNotIn("display_skip_percent", legacy)
+
     def run_fixture(self, root, code, extra=()):
         config = root / "copied-config"
         config.mkdir()

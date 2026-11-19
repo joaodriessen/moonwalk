@@ -18,6 +18,7 @@ DONE = re.compile(r"SDL Info \(\d+\): done\s*$")
 RENDER = re.compile(r"Rendering frame rate: ([0-9.]+) FPS")
 METRICS = {
     "incoming_fps": r"(?:Frame rate submitted for decoding|Incoming frame rate from network): ([0-9.]+) FPS",
+    "decoded_fps": r"Decoding frame rate: ([0-9.]+) FPS",
     "network_rtt": r"Average network latency: ([^\r\n]+)",
     "decode_ms": r"Average decoding time: ([0-9.]+) ms",
     "queue_ms": r"Average frame queue delay: ([0-9.]+) ms",
@@ -25,7 +26,10 @@ METRICS = {
     "host_processing_ms_min_max_average": r"Host processing latency min/max/average: ([^\r\n]+)",
     "network_drop_percent": r"Frames dropped by your network connection: ([0-9.]+)%",
     "before_decode_gap_percent": r"Frames missing before decoding: ([0-9.]+)%",
-    "jitter_drop_percent": r"Frames (?:dropped due to network jitter|skipped to catch up with the display): ([0-9.]+)%",
+    "jitter_drop_percent": r"Frames dropped due to network jitter: ([0-9.]+)%",
+    "display_skip_percent": r"Frames skipped to catch up with the display: ([0-9.]+)%",
+    "display_replaced_percent": r"Frames replaced before reaching the screen: ([0-9.]+)%",
+    "decoded_to_screen_ms": r"Average decoded to on screen: ([0-9.]+) ms",
 }
 MAX_LOG_BYTES = 32 * 1024 * 1024
 CANCELLED = False
