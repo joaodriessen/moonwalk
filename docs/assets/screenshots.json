@@ -1,5 +1,5 @@
 {
-  "render_inputs_sha256": "f74bea87555604fba444aae3519711233cb8a49a2527d26e7242fde738a130a9",
+  "render_inputs_sha256": "a868c8755d85b65328128c774d8b853ab40078d21b138745aa01ee82c515550c",
   "render_input_scope": [
     "app/",
     "tests/preview/",
@@ -14,7 +14,7 @@
       "scene": "first-run-empty",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "825c2d05d211fb1920cf53dc29f49695213217a6fc3c85d8bd0711e760104044",
+      "sha256": "e76d92954ca003825aef6c86e21343316694fdb069f52e0d369495bcf157d190",
       "dimensions": [
         1720,
         1440
@@ -47,7 +47,7 @@
       "scene": "pairing",
       "desktop": "gnome",
       "scheme": "light",
-      "sha256": "15b6a7738f077f756b3ea10f8e76ea0edab9ec53fb94be9681a2f95048a5df0c",
+      "sha256": "a2bcac59ed5a2256f1684c2f95c2fe37f0a0eb6574d17610d91c27e0810b4fa6",
       "dimensions": [
         1720,
         1440
@@ -80,7 +80,7 @@
       "scene": "first-run-empty",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "f1d2e86cedbeb32137ce9f3ea52d6b905b4b161c9bf2571ad492ae3c7fcae0ee",
+      "sha256": "e072b7726e332b93633a42cec6dfc23137fdcaff6fe67bef6337079232d2629a",
       "dimensions": [
         1720,
         1440
@@ -91,7 +91,7 @@
       "scene": "hosts-ready",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "a6dd7c539f4cae9debea1f728d2eb257ab79286be6a7c5e04907e7da49350643",
+      "sha256": "d93afcbe63628eebd559873d1c2423d6ec0efc48abb74533b3fe32b9b5fdf888",
       "dimensions": [
         1720,
         1440
@@ -102,7 +102,7 @@
       "scene": "hosts-unpaired",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "8f6945751a424d4a4575bbc6aa46e96a947498efb543d04933552035f0d83478",
+      "sha256": "edd2ddc90469e3c8f0b2e40d125324e3e30b49b9cffe9651735d71699f7f0753",
       "dimensions": [
         1720,
         1440
@@ -113,7 +113,7 @@
       "scene": "pairing",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "32fe566329913582602b5c38ff82474b9241d4db107e486afca931e696502249",
+      "sha256": "347ec620dc13a6441efd36cf2dcef447a9845e6255172ac3ddea324f541b83e5",
       "dimensions": [
         1720,
         1440
@@ -124,7 +124,7 @@
       "scene": "settings",
       "desktop": "gnome",
       "scheme": "dark",
-      "sha256": "ea8a7cf3623e9004f705495d8821fae10793772ac459ba38bc1e5d43f19ce4dc",
+      "sha256": "f2b139a38a2239a94286e7ff21a3d6c9fd299a2d93da8a0b771110a9777f8107",
       "dimensions": [
         1720,
         1440
@@ -165,5 +165,5 @@
     }
   ],
   "scale_factor": 2,
-  "source_revision": "92b210fc5ff228eda8c6341b109b35f1e373e2e9"
+  "source_revision": "29793fbced4a785c7cef9d158d9b9639753e5705"
 }
