@@ -52,6 +52,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 - On Wayland, hold an incoming clipboard update until the stream can apply it
   after a local selection change. Keep a newer local copy in preference to
   an older pending update.
+- Skip unnecessary HEVC and AV1 renderer probes when the host does not offer
+  those codecs for an Automatic connection.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 
