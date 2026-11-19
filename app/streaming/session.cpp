@@ -3012,7 +3012,7 @@ QString Session::endHostTarget()
     m_HostTargetMayExist = false;
     try {
         NvHTTP http(m_Computer);
-        const QString fresh = http.getAuthenticatedServerInfo(NvHTTP::NVLL_ERROR);
+        QString fresh = http.getAuthenticatedServerInfo(NvHTTP::NVLL_ERROR);
         if (m_App.isRemoteMonitor()) {
             if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid)
                 return tr("Disconnected. The host's identity changed before Moonwalk could end the remote session.");
@@ -3021,22 +3021,37 @@ QString Session::endHostTarget()
             http.disconnectRemoteMonitor();
             return {};
         }
-        const int current = NvHTTP::getCurrentGame(fresh);
-        qInfo("Host cleanup: authenticated state=%s target=%s resolved=%d active_streams=%s",
-              qPrintable(NvHTTP::getXmlString(fresh,"state")),qPrintable(NvHTTP::getXmlString(fresh,"currentgame")),
-              current,qPrintable(NvHTTP::getXmlString(fresh,"ActiveStreams")));
-        if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid ||
-            (current && !m_App.matchesRunningTarget(current, NvHTTP::getXmlString(fresh, "currentgameuuid"))))
-            return tr("Disconnected. The remote session changed before Moonwalk could finish cleanup.");
-        if (NvHTTP::getXmlString(fresh, "ActiveStreams").toInt() > 0)
-            return tr("Disconnected from this device. The host still reports an active stream.");
-        if (current) http.quitApp();
+        // The host may still be releasing our stream after the local window closes.
+        // Wait briefly in the cleanup worker and validate each new snapshot.
+        for (unsigned delay : {0u, 250u, 500u}) {
+            if (delay) {
+                QThread::msleep(delay);
+                fresh = http.getAuthenticatedServerInfo(NvHTTP::NVLL_ERROR, true);
+            }
+            const int current = NvHTTP::getCurrentGame(fresh);
+            const QString activeStreams = NvHTTP::getXmlString(fresh, "ActiveStreams");
+            qInfo("Host cleanup: authenticated state=%s target=%s resolved=%d active_streams=%s",
+                  qPrintable(NvHTTP::getXmlString(fresh, "state")),
+                  qPrintable(NvHTTP::getXmlString(fresh, "currentgame")), current, qPrintable(activeStreams));
+            if (NvHTTP::getXmlString(fresh, "uniqueid") != m_Computer->uuid ||
+                (current && !m_App.matchesRunningTarget(current, NvHTTP::getXmlString(fresh, "currentgameuuid"))))
+                return tr("Disconnected. The remote session changed before Moonwalk could finish cleanup.");
+            if (!current) return {};
+            bool countReported;
+            const int count = activeStreams.toInt(&countReported);
+            if (count < 0 || (!countReported && (delay || !activeStreams.isEmpty())))
+                return tr("Disconnected. The host couldn't confirm cleanup. Check its status before you reconnect.");
+            if (count == 0) {
+                http.quitApp();
+                return {};
+            }
+        }
+        return tr("Disconnected from this device. The host still reports an active stream.");
     } catch (const GfeHttpResponseException&) {
         return tr("Disconnected. The host couldn't confirm cleanup. Check its status before you reconnect.");
     } catch (const QtNetworkReplyException&) {
         return tr("Disconnected. Moonwalk couldn't reach the host to end the session. It may still be in use.");
     }
-    return {};
 }
 
 void Session::cancelPendingStart()

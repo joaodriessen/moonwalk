@@ -29,6 +29,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   collapsed to the handle.
 - Check host status when the launcher opens in the background, so a visible
   host list can update before it gets focus.
+- Give the host a moment to release the stream during background disconnect
+  cleanup. Leave sessions with other active viewers alone.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 
