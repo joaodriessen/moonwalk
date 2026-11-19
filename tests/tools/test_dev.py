@@ -70,13 +70,11 @@ class DevelopmentRunnerTests(unittest.TestCase):
     def test_timeout_is_a_failure_and_reaps_child_process(self):
         with tempfile.TemporaryDirectory() as directory:
             pidfile = Path(directory) / "child.pid"
-            script = ("import subprocess,time,pathlib; "
-                      "p=subprocess.Popen(['sleep','60']); "
-                      f"pathlib.Path({str(pidfile)!r}).write_text(str(p.pid)); "
-                      "time.sleep(60)")
-            code, _ = dev.execute([sys.executable, "-c", script], Path(directory) / "run.log",
-                                  os.environ.copy(), directory, 0.2)
+            script = 'sleep 60 & printf "%s\\n" "$!" > "$1"; wait'
+            code, _ = dev.execute(["sh", "-c", script, "timeout-fixture", str(pidfile)],
+                                  Path(directory) / "run.log", os.environ.copy(), directory, 2)
             self.assertEqual(code, 124)
+            self.assertTrue(pidfile.is_file(), "timeout fixture did not finish starting")
             pid = int(pidfile.read_text())
             # An orphan may briefly be a zombie until init reaps it; it must not run.
             stat = Path(f"/proc/{pid}/stat")
