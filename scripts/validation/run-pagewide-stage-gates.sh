@@ -516,12 +516,21 @@ run_flatpak() {
     [[ $builder_home_sdk_stat == "$cow_sdk_stat" ]]
     tar -C "$source_dir" --exclude=.git --exclude=.superpowers --exclude=artifacts \
         --exclude=build-baseline -cf - . | tar -xf - -C "$local_source"
-    cp "$source_dir/flatpak/com.starlight.Starlight.yaml" "$local_manifest"
-    perl -0pi -e '
-        s{(?ms)(  - name: starlight\n.*?    sources:\n).*?(?=\n\n  # --- vainfo)}
-         {$1 . "      - type: dir\n        path: /work/source\n        skip: [.git, .superpowers, artifacts, build-baseline, flatpak]\n"}e
-         or die "unable to replace the Starlight Flatpak source\n";
-    ' "$local_manifest"
+    python3 - "$source_dir/flatpak/com.starlight.Starlight.yaml" "$local_manifest" <<'PY'
+from pathlib import Path
+import sys
+
+import yaml
+
+source, output = map(Path, sys.argv[1:])
+document = yaml.safe_load(source.read_text())
+apps = [module for module in document["modules"] if module["name"] == "starlight"]
+if len(apps) != 1:
+    raise SystemExit("The Flatpak manifest must contain one Moonwalk module")
+apps[0]["sources"] = [{"type": "dir", "path": "/work/source",
+                       "skip": [".git", ".superpowers", "artifacts", "build-baseline", "flatpak"]}]
+output.write_text(yaml.safe_dump(document, sort_keys=False))
+PY
     run_private_builder_runtime /app/bin/flatpak-builder --version \
         >"$artifact/flatpak-builder-version.log" 2>&1
     # shellcheck disable=SC2016 # The direct Builder shell expands its own XDG variables.

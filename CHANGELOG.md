@@ -37,6 +37,9 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   pace swaps using the renderer’s own callback.
 - Keep the pointer automatic when importing older host profiles with only
   display settings saved. Explicit Game pointer choices stay saved.
+- Leave the game pointer warning out of desktop streams.
+- Build and cache the `vainfo` diagnostic separately. Ship its license in the
+  Flatpak.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

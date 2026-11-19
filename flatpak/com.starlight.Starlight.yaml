@@ -300,6 +300,21 @@ modules:
             }
           }
 
+  # Build the VA-API diagnostic before the client so it can be reused across
+  # app revisions. Only the diagnostic and its license need to be installed.
+  - name: libva-utils
+    buildsystem: simple
+    build-commands:
+      - meson setup _build --prefix=/app --libdir=lib --buildtype=release -Ddrm=true -Dtests=false
+      - meson compile -C _build vainfo
+      - install -Dm755 _build/vainfo/vainfo /app/bin/vainfo
+      - install -Dm644 COPYING /app/share/licenses/libva-utils/COPYING
+    sources:
+      - type: git
+        url: https://github.com/intel/libva-utils.git
+        tag: '2.22.0'
+        commit: 1a13ae13382b7b548f3a7e8035e1d7df66662c0a
+
   # Moonwalk and its pinned Git submodules.
   - name: starlight
     buildsystem: qmake
@@ -323,16 +338,5 @@ modules:
         # helper described in docs/development.md.
       - type: git
         url: https://github.com/joaodriessen/moonwalk.git
-        commit: bbda46f30c27f9c5c32a0070dca37a8f776f1869
+        commit: 9d42ec63fe95c9e3a4418d4ae0e6c65492276e81
         disable-shallow-clone: true
-
-  # Run vainfo inside the sandbox to check its VA-API setup. Building it
-  # after the client keeps a diagnostic tool update out of the app cache.
-  - name: libva-utils
-    buildsystem: meson
-    config-opts: [-Ddrm=true, -Dtests=false]
-    sources:
-      - type: git
-        url: https://github.com/intel/libva-utils.git
-        tag: '2.22.0'
-        commit: 1a13ae13382b7b548f3a7e8035e1d7df66662c0a

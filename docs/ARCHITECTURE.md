@@ -78,7 +78,8 @@ The [Flatpak](../flatpak/com.starlight.Starlight.yaml) is the primary Linux
 package. It builds the app with ahead-of-time QML and includes SDL3 through
 SDL2 compatibility, a Moonlight FFmpeg fork, video libraries, the legacy
 Intel VA-API driver, and the GNOME Wayland decoration plugin. The Qt runtime
-comes from `org.kde.Platform`.
+comes from `org.kde.Platform`. The package includes `vainfo` for checking
+the VA-API drivers from inside the same sandbox.
 
 The manifest leaves `LIBVA_DRIVER_NAME` unset so libva can choose a driver.
 `QML_DISABLE_DISK_CACHE=1` avoids stale interpreted QML cache entries across
