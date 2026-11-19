@@ -22,6 +22,10 @@ build.
 | Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, recovery after the client was killed, and an installed upgrade that retained the pairing and saved display settings. The stock Sunshine 2026.914.233613 AppImage passed X11 streams at 1280×720 with software H.264 at 60 fps and HEVC at 30 fps. An AV1 request fell back to H.264 on that host. Pairing and reconnect also passed over IPv6 loopback. |
 | Apollo on Windows | Uses the same base protocol. Current releases and optional features need more testing with Moonwalk. |
 
+Sunshine 2025.924.154138 also passed PIN pairing, 1280×720 H.264, ordinary
+reconnect and reconnect after the client was killed. That build could not
+create its virtual keyboard and mouse in the test environment.
+
 Most testing has been on a local network. Moonwalk has no built-in relay or
 internet setup. A private VPN can provide a route to the host, but we haven't
 qualified that setup.

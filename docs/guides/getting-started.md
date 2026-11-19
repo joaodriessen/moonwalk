@@ -88,11 +88,15 @@ Close Moonwalk before installing a newer bundle with the same command.
 Settings and pairings use the same Flatpak app ID. Install each new tester
 bundle by hand.
 
-To remove the user installation, run:
+This command removes the user installation and keeps your Moonwalk data.
 
 ```sh
 flatpak uninstall --user com.starlight.Starlight
 ```
+
+To go back to a previous tester build, close Moonwalk, remove it using the
+command above, and [install the previous bundle](#install-moonwalk). Keep a
+copy of your settings if the older build predates a settings migration.
 
 Add `--delete-data` only if you also want to remove Moonwalk's settings,
 hosts, and pairings.

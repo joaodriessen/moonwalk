@@ -66,9 +66,9 @@ release checks on the file you intend to distribute.
    files, and sandbox settings against the recipe. The report includes the
    checksum, runtime commit, and permissions
    read from the exported bundle. Review those permissions and test a fresh
-   install and an upgrade with private profiles. Check that settings and
-   pairings survive, run the affected streaming paths with that same bundle,
-   and keep the previous usable bundle.
+   install, an upgrade, and a rollback with private profiles. Check that
+   settings and pairings survive and stream through the paired host after
+   each change. Keep the previous usable bundle. [Install and rollback](guides/getting-started.md#update-or-remove-moonwalk)
 5. Publish the tested bundle with its checksum, corresponding source, and
    release notes after the release decision. Leave earlier release assets
    intact so existing downloads remain identifiable.
@@ -98,9 +98,9 @@ come from the runtime distributor.
 
 To test a source archive, extract it in a fresh directory and use its `git`
 and `downloads` directories as the starting Flatpak Builder state. Run
-Flatpak Builder against `manifest/manifest.yaml` with `--disable-updates` in
-an offline test environment that already has the SDK. Keep the extracted
-inputs separate from previous build caches when checking completeness.
+Flatpak Builder against `manifest/manifest.yaml` with `--disable-updates`
+and `--disable-download` in an offline test environment that already has
+the SDK. Use a fresh build directory to check that the archive is complete.
 
 ## Record what you tested
 
