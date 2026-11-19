@@ -19,7 +19,7 @@ build.
 | --- | --- |
 | Vibepollo on Windows | Pairing, streaming, and disconnect cleanup on real machines. Full-rate streaming at native resolution remains unresolved on one Intel host. |
 | Moonwalk Host on Apple Silicon | Pairing and live desktop streams with the separate macOS 14+ host. |
-| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, recovery after the client was killed, and an installed upgrade that retained the pairing and saved display settings. The stock Sunshine 2026.914.233613 AppImage passed X11 streams at 1280×720 with software H.264 at 60 fps and HEVC at 30 fps. An AV1 request fell back to H.264 on that host. |
+| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, recovery after the client was killed, and an installed upgrade that retained the pairing and saved display settings. The stock Sunshine 2026.914.233613 AppImage passed X11 streams at 1280×720 with software H.264 at 60 fps and HEVC at 30 fps. An AV1 request fell back to H.264 on that host. Pairing and reconnect also passed over IPv6 loopback. |
 | Apollo on Windows | Uses the same base protocol. Current releases and optional features need more testing with Moonwalk. |
 
 Most testing has been on a local network. Moonwalk has no built-in relay or
@@ -27,7 +27,10 @@ internet setup. A private VPN can provide a route to the host, but we haven't
 qualified that setup.
 
 A separate controlled 1280×720 AV1 stream at 30 fps exercised Moonwalk's
-software decoder and presentation on Plasma Wayland.
+software decoder and presentation on Plasma Wayland. Stock Sunshine tests
+confirmed negotiated LAN video encryption with the host set to **Required**
+and unencrypted video with that setting disabled. Audio stayed encrypted in
+both tests.
 
 ## Features by host
 
@@ -76,9 +79,11 @@ provides.
 In isolated GNOME and Plasma tests, a 2880×1800 display at 2× scaling
 requested 2880×1800 at 60 fps with 2× desktop scaling from a host that
 advertised the scale extension. The same Plasma setup mapped pointer motion
-across the full picture. In a separate GNOME test at 1920×1200 on a 2× display,
-Moonwalk requested 1× host scale and kept the 60 fps stream target. Display placement and restoration
-still need tests on the actual host OS.
+across the full picture. On a 2256×1504 Plasma display at 1.5×, pointer motion
+also reached all four corners of a letterboxed 1280×720 stream. In a separate
+GNOME test at 1920×1200 on a 2× display, Moonwalk requested 1× host scale
+and kept the 60 fps stream target. Display placement and restoration still
+need tests on the actual host OS.
 
 ## Performance and disconnect
 
