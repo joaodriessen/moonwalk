@@ -69,6 +69,31 @@ release checks on the file you intend to distribute.
    release notes after the release decision. Leave earlier release assets
    intact so existing downloads remain identifiable.
 
+## Archive the Flatpak sources
+
+For a release build, add `--bundle-sources` to the staged Flatpak Builder
+command. It prepares a source ref in the same export repository. Use that ref
+to make the archive, since Flatpak Builder’s raw source ref contains absolute
+paths to its Git cache.
+
+```sh
+python3 scripts/archive-flatpak-sources.py "$candidate" "$workspace/repo" \
+  Moonwalk-sources.tar.gz > Moonwalk-sources.json
+```
+
+The archive includes the staged app and submodule sources, build recipe,
+patches, pinned downloads, and dependency Git objects. It checks the recipe
+and staged files against the build’s source ref and leaves out generated Git
+remotes, fetch records, and hooks. Review the archive before sharing it.
+Record its checksum alongside the verified Flatpak. The KDE SDK and platform
+come from the runtime distributor.
+
+To test a source archive, extract it in a fresh directory and use its `git`
+and `downloads` directories as the starting Flatpak Builder state. Run
+Flatpak Builder against `manifest/manifest.yaml` with `--disable-updates` in
+an offline test environment that already has the SDK. Keep the extracted
+inputs separate from previous build caches when checking completeness.
+
 ## Record what you tested
 
 Record the exact client OS, desktop, GPU, driver, and host build. Note which

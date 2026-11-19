@@ -4,7 +4,6 @@ import argparse
 import configparser
 import json
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import tempfile
@@ -12,7 +11,7 @@ import xml.etree.ElementTree as ET
 
 import yaml
 
-from flatpak_provenance import file_hash, source_hash
+from flatpak_provenance import file_hash, verify_stage
 
 
 def run(*command):
@@ -26,18 +25,9 @@ def require(actual, expected, field):
 
 def verify(candidate, bundle):
     manifest_path = candidate / "manifest.yaml"
-    provenance = json.loads((candidate / "provenance.json").read_text())
-    require(file_hash(manifest_path), provenance["manifest_sha256"], "staged manifest checksum")
+    provenance = verify_stage(candidate)
     source = candidate / "source"
-    require(source_hash(source), provenance["source_sha256"], "staged source fingerprint")
-    for name, checksum in provenance["patches_sha256"].items():
-        patch = (candidate / name).resolve()
-        if not patch.is_relative_to(candidate.resolve()):
-            raise ValueError("staged patch is outside the candidate directory")
-        require(file_hash(patch), checksum, "staged patch checksum")
     revision = provenance["revision"]
-    if not re.fullmatch(r"[0-9a-f]{40}", revision):
-        raise ValueError("staged source revision must be a full Git commit")
 
     manifest = yaml.safe_load(manifest_path.read_text())
     app_id = manifest["app-id"]
