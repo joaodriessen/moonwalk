@@ -48,6 +48,7 @@ private:
     PresentationMonitor m_Presentation;
     bool m_PresentationStarted = false;
     bool m_HoldForDesktop = false;
+    bool m_ForceDesktopPacing = false;
     int m_HoldTimeoutMs = 25;
     IFFmpegRenderer *m_Backend;
     unsigned int m_VideoVAO;

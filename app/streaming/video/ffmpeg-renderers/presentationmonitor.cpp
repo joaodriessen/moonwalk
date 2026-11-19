@@ -30,7 +30,7 @@ PresentationMonitor::PresentationMonitor() {}
 PresentationMonitor::~PresentationMonitor() {}
 bool PresentationMonitor::initialize(SDL_Window*) { return false; }
 void PresentationMonitor::beforeSwap(uint64_t) {}
-void PresentationMonitor::waitForDesktop(int) {}
+void PresentationMonitor::waitForDesktop(int, bool) {}
 
 #else
 
@@ -148,7 +148,7 @@ bool PresentationMonitor::initialize(SDL_Window* window)
     return true;
 }
 
-void PresentationMonitor::waitForDesktop(int timeoutMs)
+void PresentationMonitor::waitForDesktop(int timeoutMs, bool forceHold)
 {
     if (!m_Queue) return;
     wl_display_dispatch_queue_pending(m_Display, m_Queue);
@@ -157,7 +157,7 @@ void PresentationMonitor::waitForDesktop(int timeoutMs)
         m_Holding = false;
         m_CleanSinceUs = LiGetMicroseconds();
     }
-    if (!m_Holding) {
+    if (!m_Holding && !forceHold) {
         if (m_CleanSinceUs && LiGetMicroseconds() - m_CleanSinceUs >= 30000000) {
             m_HoldSeconds = 2;
             m_CleanSinceUs = 0;

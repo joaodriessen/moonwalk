@@ -610,11 +610,12 @@ bool EGLRenderer::initialize(PDECODER_PARAMETERS params)
         SDL_GL_SetSwapInterval(0);
     }
 
-    // A Wayland swap never waits, so frames can replace each other unseen. Frame pacing
-    // already spaces them out, at the price of a full extra refresh of delay.
+    // Use the callback from each EGL swap to pace the next one. A separate
+    // commit on this surface can replace the swap's presentation feedback.
 #ifdef SDL_VIDEO_DRIVER_WAYLAND
-    m_HoldForDesktop = params->enableVsync && !params->enableFramePacing && info.subsystem == SDL_SYSWM_WAYLAND
+    m_HoldForDesktop = params->enableVsync && info.subsystem == SDL_SYSWM_WAYLAND
                        && !qEnvironmentVariableIsSet("STARLIGHT_NO_DESKTOP_HOLD");
+    m_ForceDesktopPacing = m_HoldForDesktop && params->enableFramePacing;
     if (const int hz = StreamUtils::getDisplayRefreshRate(m_Window); hz > 0) m_HoldTimeoutMs = 1500 / hz + 1;
 #endif
 
@@ -730,7 +731,8 @@ void EGLRenderer::cleanupRenderContext()
 
 int EGLRenderer::getRendererAttributes()
 {
-    return m_HoldForDesktop ? RENDERER_ATTRIBUTE_HOLDS_ONE_FRAME : 0;
+    return (m_HoldForDesktop ? RENDERER_ATTRIBUTE_HOLDS_ONE_FRAME : 0) |
+           (m_ForceDesktopPacing ? RENDERER_ATTRIBUTE_HANDLES_FRAME_PACING : 0);
 }
 
 void EGLRenderer::waitToRender()
@@ -752,7 +754,7 @@ void EGLRenderer::waitToRender()
         glFinish();
     }
 
-    if (m_HoldForDesktop) m_Presentation.waitForDesktop(m_HoldTimeoutMs);
+    if (m_HoldForDesktop) m_Presentation.waitForDesktop(m_HoldTimeoutMs, m_ForceDesktopPacing);
 }
 
 void EGLRenderer::prepareToRender()

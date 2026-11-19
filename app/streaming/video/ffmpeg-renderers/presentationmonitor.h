@@ -49,7 +49,7 @@ public:
     // depends on when they arrive against the display's refresh, which drifts. It lets go
     // now and then to see if it's still needed, for longer each time it was.
     // A window that isn't being drawn won't answer, hence the timeout.
-    void waitForDesktop(int timeoutMs);
+    void waitForDesktop(int timeoutMs, bool forceHold);
 
     static Totals totals();
     static void resetTotals();

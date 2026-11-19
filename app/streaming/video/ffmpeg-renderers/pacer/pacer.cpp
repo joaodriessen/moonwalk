@@ -275,7 +275,12 @@ bool Pacer::initialize(SDL_Window* window, int maxVideoFps, bool enablePacing)
     m_DisplayFps = StreamUtils::getDisplayRefreshRate(window);
     m_RendererAttributes = m_VsyncRenderer->getRendererAttributes();
 
-    if (enablePacing) {
+    if (enablePacing && (m_RendererAttributes & RENDERER_ATTRIBUTE_HANDLES_FRAME_PACING)) {
+        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
+                    "Frame pacing: renderer callback at %d Hz with %d FPS stream",
+                    m_DisplayFps, m_MaxVideoFps);
+    }
+    else if (enablePacing) {
         SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
                     "Frame pacing: target %d Hz with %d FPS stream",
                     m_DisplayFps, m_MaxVideoFps);
