@@ -1,7 +1,7 @@
 # Repository privacy
 
-Treat the private repository as preparation for public release. Keep personal
-machine records, raw logs, pairing data, and coding-agent state outside GitHub.
+Keep personal machine records, raw logs, pairing data, and coding-agent state
+outside GitHub, including in private branches and pull requests.
 
 - Use example hosts, accounts, and addresses in docs and tests. For IPv4
   examples, use a documentation address such as `192.0.2.10`. Render

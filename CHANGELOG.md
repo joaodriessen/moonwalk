@@ -23,6 +23,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   page links to Moonwalk's releases.
 - Update the SDL libraries in the Flatpak for upstream Wayland clipboard,
   X11 cursor, Vulkan, and controller fixes.
+- Include libdrm’s copyright and license notices in the Flatpak. Make source
+  archives without the local paths in Flatpak Builder’s Git metadata.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

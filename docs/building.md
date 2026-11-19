@@ -8,7 +8,6 @@ cd moonwalk
 ```
 
 If you already have a checkout, run `git submodule update --init --recursive`.
-The private repository requires GitHub access.
 
 ## Flatpak
 
@@ -19,8 +18,8 @@ recipe uses Flathub for its runtime dependencies.
 flatpak install --user flathub org.kde.Platform//6.10 org.kde.Sdk//6.10
 ```
 
-The [manifest](../flatpak/com.starlight.Starlight.yaml) pins a Git commit. For
-the private repository, use the [local candidate workflow](development.md#local-flatpak-candidates).
+The [manifest](../flatpak/com.starlight.Starlight.yaml) pins a Git commit. To
+build your current checkout, use the [local candidate workflow](development.md#local-flatpak-candidates).
 It stages a committed revision and its submodules from your authenticated
 checkout. The helper prints the build and bundle commands. A manifest build
 that fetches from GitHub needs access to the pinned commit.

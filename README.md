@@ -16,9 +16,9 @@ the other machine. It's built on Moonlight Qt, with an interface for GNOME and K
 Plasma and stream settings you can save for each host.
 
 > [!NOTE]
-> Moonwalk is a private alpha. If you have a tester build, see the
-> [install guide](docs/guides/getting-started.md). If you have access to this
-> repository, you can also [build from source](docs/building.md).
+> Moonwalk is alpha software. If you have a tester build, follow the
+> [install guide](docs/guides/getting-started.md). You can also
+> [build from source](docs/building.md).
 
 <p align="center">
   <picture>
@@ -33,8 +33,8 @@ Plasma and stream settings you can save for each host.
 - A **host** on the computer you want to use. [Sunshine](https://github.com/LizardByte/Sunshine)
   runs on Windows and Linux. [Apollo](https://github.com/ClassicOldSong/Apollo)
   and [Vibepollo](https://github.com/Nonary/Vibepollo) are Windows options.
-  [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host) is a separate,
-  private alpha for Apple Silicon Macs running macOS 14 or later.
+  [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host) is the companion
+  app for Apple Silicon Macs running macOS 14 or later.
 - A **local network** both machines can reach. Use a network and hosts you trust.
 
 Start the host and make sure it has a **Desktop** entry. Select the host in

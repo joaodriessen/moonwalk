@@ -7,7 +7,6 @@ Install and start host software on the computer you want to control. Use
 [Apollo](https://github.com/ClassicOldSong/Apollo) or
 [Vibepollo](https://github.com/Nonary/Vibepollo) on Windows. If you're testing the
 Mac companion, see [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host).
-You'll need access to that separate private alpha.
 
 In the host's application list, look for **Desktop**. Moonwalk uses this entry
 to open the remote desktop. Moonwalk Host includes it. On hosts that manage an
@@ -86,8 +85,8 @@ stream. Your remote desktop applications stay open. See
 ## Update or remove Moonwalk
 
 Close Moonwalk before installing a newer bundle with the same command.
-Settings and pairings use the same Flatpak app ID. Builds are distributed
-manually during the private alpha.
+Settings and pairings use the same Flatpak app ID. Install each new tester
+bundle by hand.
 
 To remove the user installation, run:
 

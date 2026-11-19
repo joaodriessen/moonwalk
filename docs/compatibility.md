@@ -1,6 +1,6 @@
 # Compatibility
 
-Moonwalk is a private alpha. This page covers the current source. Check
+Moonwalk is in alpha. This page covers the current source. Check
 **About Moonwalk** and the [changelog](../CHANGELOG.md) if you're using an older
 build.
 
@@ -18,7 +18,7 @@ build.
 | Host | Streaming checks |
 | --- | --- |
 | Vibepollo on Windows | Pairing, streaming, and disconnect cleanup on real machines. Full-rate streaming at native resolution remains unresolved on one Intel host. |
-| Moonwalk Host on Apple Silicon | Pairing and live desktop streams. Moonwalk Host is a separate private alpha targeting macOS 14 or later. |
+| Moonwalk Host on Apple Silicon | Pairing and live desktop streams with the separate macOS 14+ host. |
 | Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, and recovery after the client was killed. We also upgraded a paired Flatpak through the normal install and run commands and streamed from the same host. The lab used the stock Sunshine 2026.914.233613 AppImage, X11, and software H.264 at 1280×720 and 60 fps. |
 | Apollo on Windows | Uses the same base protocol. Current releases and optional features need more testing with Moonwalk. |
 

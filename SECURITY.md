@@ -1,6 +1,6 @@
 # Security
 
-Moonwalk is a private alpha for computers and networks you trust. During a
+Moonwalk is alpha software for computers and networks you trust. During a
 stream, the host receives your input and sends video, audio, and any enabled
 clipboard or file data. Pair only with the host you intend to use. Moonwalk
 pins the host certificate during pairing and checks it on later paired
