@@ -17,6 +17,7 @@ TestCase {
         "hosts.connection-address", "hosts.desktop-scale", "hosts.view-scale",
         "hosts.local-text-input", "hosts.resume-running", "hosts.end-session",
         "hosts.list", "hosts.item.<uuid>", "hosts.empty-state", "hosts.add-host",
+        "hosts.setup-guide",
         "hosts.pair", "hosts.wake", "hosts.connection-test", "hosts.connect",
         "hosts.unsupported-server",
         "hosts.confirm-quit", "hosts.rename", "hosts.delete", "hosts.details",

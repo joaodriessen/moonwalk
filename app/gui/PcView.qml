@@ -991,6 +991,14 @@ Item {
                     text: qsTr("Pair a host")
                     onClicked: window.requestAddHost()
                 }
+                SLButton {
+                    Layout.alignment: Qt.AlignHCenter
+                    quiet: true
+                    objectName: "starlight.hosts.setup-guide"
+                    font.underline: true
+                    text: qsTr("Set Up a Host")
+                    onClicked: Qt.openUrlExternally("https://github.com/joaodriessen/moonwalk/blob/main/docs/guides/getting-started.md#set-up-a-host")
+                }
             }
 
             Flickable {

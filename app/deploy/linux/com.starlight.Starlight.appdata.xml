@@ -4,15 +4,15 @@
 	<metadata_license>CC0-1.0</metadata_license>
 	<project_license>GPL-3.0+</project_license>
 	<name>Moonwalk</name>
-	<summary>Stream and control another computer from Linux</summary>
+	<summary>Use your Mac from Linux</summary>
 
 	<description>
-		<p>Use another computer from your Linux desktop. Open its desktop in a window or fullscreen, with sound and keyboard, mouse, and gamepad input. Moonwalk has layouts for GNOME and KDE Plasma and remembers settings for each host.</p>
-		<p>Moonwalk is in alpha. Run a compatible host app on the computer you want to control and connect both devices to the same local network.</p>
+		<p>Open Finder or a Mac app from your Linux computer. Moonwalk shows the Mac desktop in a window or fullscreen and sends your keyboard and mouse input back. Run Moonwalk Host on an Apple Silicon Mac with macOS 14 or later.</p>
+		<p>Moonwalk also connects to compatible Windows and Linux hosts, including Sunshine. It is in alpha and designed for computers on the same local network.</p>
 		<ul>
 			<li>Discover a host, pair with a PIN, and open its Desktop entry.</li>
 			<li>Start with your display’s size and refresh rate in Automatic, or choose your own settings for a host.</li>
-			<li>Mute sound, release input, change the view, or disconnect from the stream controls.</li>
+			<li>Hear the host's sound, use a gamepad, or switch between a window and fullscreen.</li>
 			<li>Copy text, images, or files when the paired host supports it.</li>
 		</ul>
 	</description>

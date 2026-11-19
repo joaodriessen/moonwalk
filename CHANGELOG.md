@@ -5,6 +5,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 
 ## Unreleased
 
+- Link to host setup from the empty host list. It explains what to install
+  on the other computer, including Moonwalk Host for a Mac.
 - Apply the GeForce Experience compatibility check only to NVIDIA hosts. Its
   version list can no longer block Sunshine and other compatible hosts.
   Download updates to the list only when a paired NVIDIA host is present.

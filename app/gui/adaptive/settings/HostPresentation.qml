@@ -142,6 +142,7 @@ QtObject {
     // ---- First launch and an empty list ----------------------------------
     readonly property bool discoveryOff: prefs.enableMdns === false
     readonly property bool stillSearching: !discoveryOff && page.initialDiscoveryElapsed !== true
+    readonly property url setupGuide: "https://github.com/joaodriessen/moonwalk/blob/main/docs/guides/getting-started.md#set-up-a-host"
     readonly property string emptyTitle: discoveryOff ? qsTranslate("PcView", "Automatic Host Discovery Is Off")
                                          : stillSearching ? qsTranslate("PcView", "Looking for Hosts")
                                          : qsTranslate("PcView", "No Hosts Found Yet")
@@ -149,7 +150,7 @@ QtObject {
         ? qsTranslate("PcView", "Add a host by its address, or turn discovery back on in Preferences.")
         : stillSearching
           ? qsTranslate("PcView", "Looking for compatible hosts on your local network.")
-          : qsTranslate("PcView", "Start the host software with both computers on the same network. If the host doesn't appear, add it by address.")
+          : qsTranslate("PcView", "Open Moonwalk Host on your Mac, or start a compatible host on Windows or Linux. Both computers should be on the same network. You can also add the host by address.")
 
     // ---- What the next stream will be ------------------------------------
     // The stream plan chooses for Automatic and prices every Manual choice;

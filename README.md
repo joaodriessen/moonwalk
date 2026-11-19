@@ -1,93 +1,77 @@
-<p align="center">
-  <img src="docs/assets/starlight-icon.png" width="96" alt="">
-</p>
+<img src="docs/assets/starlight-icon.png" alt="" width="80" align="right">
 
-<h1 align="center">Moonwalk</h1>
+# Moonwalk
 
-<p align="center">
-  <a href="docs/guides/getting-started.md">Get started</a> ·
-  <a href="docs/compatibility.md">Compatibility</a> ·
-  <a href="docs/guides/troubleshooting.md">Troubleshooting</a>
-</p>
+**Open your Mac desktop from Linux.**
 
-Moonwalk lets you use another computer from your Linux desktop. It shows the
-remote picture and plays its sound, and sends your keyboard, mouse, and gamepad
-input back. It uses the Moonlight Qt engine, with GNOME and KDE Plasma layouts and
-settings you can save separately for each host.
+Open Finder, use a Mac-only app, or bring a file back to Linux without
+walking over to the Mac. **Moonwalk** runs on Linux.
+**[Moonwalk Host](https://github.com/joaodriessen/moonwalk-host)** runs on the
+Mac. Once you've paired them, pick the Mac and click **Connect**.
 
-> [!NOTE]
-> Moonwalk is alpha software. If you have a tester build, follow the
-> [install guide](docs/guides/getting-started.md). You can also
-> [build from source](docs/building.md).
+[Set up the two apps](#connect-to-your-mac) ·
+[Use the host you already have](#already-using-sunshine)
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hosts-dark.png">
-    <img src="docs/assets/hosts-light.png" width="760" alt="Moonwalk on GNOME with a paired host selected. The host page shows the Connect button and the planned resolution, frame rate, and bitrate.">
-  </picture>
-</p>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hosts-dark.png">
+  <img src="docs/assets/hosts-light.png" width="700" alt="Moonwalk on GNOME with Studio Mac selected. Connect is available and Automatic plans 2880×1800 at 60 FPS for this display.">
+</picture>
 
-## What you need
+<sub>Moonwalk on GNOME with an example Mac selected. The numbers show the request for the next stream.</sub>
 
-- An **x86-64 Linux** computer for Moonwalk. Flatpak is the primary build.
-- A **host app** on the computer you want to use. [Sunshine](https://github.com/LizardByte/Sunshine)
-  runs on Windows and Linux. [Apollo](https://github.com/ClassicOldSong/Apollo)
-  and [Vibepollo](https://github.com/Nonary/Vibepollo) are Windows options.
-  [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host) is an option for
-  Apple Silicon Macs running macOS 14 or later.
-- A **local network** both machines can reach. Use a network and hosts you trust.
+## Connect to your Mac
 
-Start the host app and make sure its app list includes **Desktop**. Select the
-host in Moonwalk and click **Pair**. Enter the PIN Moonwalk shows in the host
-app's pairing screen, then click **Connect** in Moonwalk. If the host doesn't
-appear, the [setup guide](docs/guides/getting-started.md) shows how to add it by
-address.
+1. **On the Mac**, install [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host/blob/main/docs/INSTALL.md).
+   It needs Apple Silicon, macOS 14 or later, and permission to capture the
+   screen and send input. Leave the Mac awake and logged in.
+2. **On Linux**, install Moonwalk from a tester Flatpak on an x86-64 computer.
+   Both machines should be on the same local network. Select the Mac and click
+   **Pair**. [Install Moonwalk](docs/guides/getting-started.md#install-moonwalk)
+3. **Back on the Mac**, open **Pair New Device…** from the Moonwalk Host menu
+   bar icon. Select the pending device and enter the PIN shown on Linux. Then
+   click **Connect** in Moonwalk.
 
-## What happens when you connect
+Both apps are in alpha. Tester builds are distributed privately. You can
+also [build Moonwalk from source](docs/building.md). If the Mac doesn't appear,
+copy its local address from **Moonwalk Host → Settings… → Network** and paste
+it into **Add Host…** on Linux.
 
-- **Automatic** starts with your screen's resolution and refresh rate, then
-  accounts for what the host and decoder can handle.
-- On hosts with live bitrate control, Moonwalk can adjust bitrate during the
-  stream. It saves resolution changes for next time. Use **Apply Now** if you
-  want to reconnect with a change right away.
-- Click the handle at the top of the picture to mute sound, release input, fit
-  the picture, or disconnect. **Disconnect** takes you straight back to the host
-  list while Moonwalk asks the host to end the Desktop session.
-- Clipboard sync, virtual displays, and live bitrate changes depend on the host
-  and what it permits your device to do. Moonwalk Host also offers image
-  clipboard and file transfer.
+## A desktop that fits the computer you're using
 
-You can open games from the remote desktop. The [compatibility guide](docs/compatibility.md)
-shows the setups we've tried and which features each host offers.
+A Mac mini can stay tucked away without a monitor. Moonwalk asks for your
+Linux screen's size and refresh rate, and Moonwalk Host can create a display
+for the stream. On supported modes, the two can also agree on a text size
+so your Mac apps stay readable.
 
-## GNOME and KDE Plasma
+Copy a screenshot to Linux, send a file back, or use the Mac's sound. The
+small handle at the top of the picture opens the controls. **Disconnect**
+takes you straight back to your Linux host list while Moonwalk asks the
+Mac to end the stream. You stay logged in on the Mac.
+[Stream controls and shortcuts](docs/guides/while-streaming.md)
 
-Moonwalk picks a layout based on your desktop. On Hyprland and other desktops
-it uses the generic layout, with window placement handled by your compositor.
+Moonwalk tries to keep the picture steady when the link gets busy. With
+live bitrate support it can lower bitrate and raise it again without leaving
+the stream. A different resolution can wait until the next time you connect.
+[How Automatic works](docs/guides/performance.md#what-automatic-changes)
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/kde-dark.png">
-    <img src="docs/assets/kde-light.png" width="680" alt="Moonwalk on KDE Plasma with a toolbar, a Connect button, and per-host settings.">
-  </picture>
-</p>
+## Already using Sunshine?
 
-<sub>The GNOME and Plasma screenshots use example hosts.</sub>
+Keep your host app. Moonwalk opens the **Desktop** entry on compatible hosts,
+including [Sunshine](https://github.com/LizardByte/Sunshine) on Linux and Windows
+and [Apollo](https://github.com/ClassicOldSong/Apollo) or
+[Vibepollo](https://github.com/Nonary/Vibepollo) on Windows. You can open games
+from the remote desktop and play with a supported gamepad. Clipboard, virtual
+displays, and live bitrate depend on your host and its permissions.
+[Features by host](docs/compatibility.md#features-by-host)
 
-## Help and development
+Moonwalk has GNOME and KDE Plasma layouts. For other desktops, including
+Hyprland, it uses a generic layout and follows the compositor's window
+placement. Stream and input settings are saved per host.
 
-- [Settings](docs/guides/settings.md) · [Stream controls and shortcuts](docs/guides/while-streaming.md) · [Performance](docs/guides/performance.md)
-- [Troubleshooting](docs/guides/troubleshooting.md) · [Questions and answers](docs/guides/faq.md) · [Report an issue](https://github.com/joaodriessen/moonwalk/issues/new/choose)
-- [Build from source](docs/building.md) · [Contributing](CONTRIBUTING.md) · [Changelog](CHANGELOG.md) · [Security](SECURITY.md)
+[Setup and troubleshooting](docs/guides/README.md) ·
+[Compatibility](docs/compatibility.md) · [Security](SECURITY.md) ·
+[Contribute](CONTRIBUTING.md) · [Changelog](CHANGELOG.md)
 
-## Credits and license
-
-Moonwalk is a fork of [Moonlight Qt](https://github.com/moonlight-stream/moonlight-qt)
-and uses its [moonlight-common-c](https://github.com/moonlight-stream/moonlight-common-c)
-streaming library. The interface uses icons from [Lucide](https://lucide.dev).
-See [upstream provenance](docs/upstream.md) and the
-[third-party notices](docs/third-party-notices.md). Moonwalk is licensed under
-the [GPL-3.0](LICENSE).
-
-Earlier builds were called Starlight. The Flatpak ID
-`com.starlight.Starlight` and the `starlight` command still use that name.
+Moonwalk is built on [Moonlight Qt](https://github.com/moonlight-stream/moonlight-qt)
+and uses [Lucide](https://lucide.dev) icons. Its license is [GPL-3.0](LICENSE).
+[Upstream history](docs/upstream.md) · [Third-party notices](docs/third-party-notices.md)

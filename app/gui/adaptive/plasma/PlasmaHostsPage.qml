@@ -419,6 +419,14 @@ Item {
                                 }
                             }
                         }
+                        Button {
+                            Layout.alignment: Qt.AlignHCenter
+                            objectName: "starlight.hosts.setup-guide"
+                            flat: true
+                            font.underline: true
+                            text: qsTranslate("PcView", "Set Up a Host")
+                            onClicked: Qt.openUrlExternally(root.presentation.setupGuide)
+                        }
                     }
                 }
 

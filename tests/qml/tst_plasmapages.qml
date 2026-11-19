@@ -848,7 +848,12 @@ TestCase {
         page.initialDiscoveryElapsed = true
         compare(empty.emptyMessage, "No Hosts Found Yet")
         verify(empty.guidance.indexOf("same network") >= 0)
+        verify(empty.guidance.indexOf("Moonwalk Host on your Mac") >= 0)
         verify(empty.Accessible.description.indexOf("address") >= 0)
+        const guide = control("hosts.setup-guide")
+        tryCompare(guide, "visible", true)
+        verify(guide.enabled)
+        compare(guide.text, "Set Up a Host")
         page.hostPreferenceSnapshot = Object.assign({}, page.hostPreferenceSnapshot,
                                                      {enableMdns:false})
         verify(empty.emptyMessage.indexOf("Off") >= 0)

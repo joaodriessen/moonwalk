@@ -1,12 +1,15 @@
-# Moonwalk guides
+# Using Moonwalk
 
-- [Getting started](getting-started.md) covers installation, pairing, and your first connection.
-- [Settings](settings.md) explains per-host choices and app-wide Preferences.
-- [While you're streaming](while-streaming.md) covers shortcuts, clipboard, files, and disconnect.
-- [Streaming performance](performance.md) explains what Automatic changes and how to read the statistics.
-- [Troubleshooting](troubleshooting.md) covers common failures and how to report one.
-- [Frequently asked questions](faq.md) covers Moonlight, hosts, updates, and languages.
-- [How Moonwalk works](how-it-works.md) covers the protocol, Flatpak permissions, and network requests.
+**[Connect for the first time](getting-started.md).** Start with the Mac
+setup, or use the Windows or Linux host you already have.
 
-See [Compatibility](../compatibility.md) for host features and tested setups,
-or [Project documentation](../README.md) if you're building or contributing.
+| If you want to… | Read |
+| --- | --- |
+| Copy a file, release the mouse, or disconnect | [While you're streaming](while-streaming.md) |
+| Change the picture or keyboard settings for one host | [Settings](settings.md) |
+| Work out why the picture stutters | [Streaming performance](performance.md) |
+| Find a missing host, fix pairing, or report a problem | [Troubleshooting](troubleshooting.md) |
+| Check what your host supports | [Compatibility](../compatibility.md) |
+| See what Moonwalk sends over the network | [How Moonwalk works](how-it-works.md) |
+
+[Common questions](faq.md) · [Project documentation](../README.md)

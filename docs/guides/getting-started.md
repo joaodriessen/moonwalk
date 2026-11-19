@@ -1,16 +1,27 @@
 # Getting started
 
+Install Moonwalk on the Linux computer in front of you. Install or start a
+host app on the computer you want to control. Then pair them on the same
+local network.
+
 ## Set up a host
 
-Install and start a host app on the computer you want to control. Use
-[Sunshine](https://github.com/LizardByte/Sunshine) on Windows or Linux, or
-[Apollo](https://github.com/ClassicOldSong/Apollo) or
-[Vibepollo](https://github.com/Nonary/Vibepollo) on Windows. If you're testing the
-Mac companion, see [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host).
+### For a Mac
 
-Moonwalk opens the **Desktop** entry from the host's app list. Moonwalk Host
-includes it. If your host lets you edit its app list and **Desktop** is
-missing, add it with the launch command left blank.
+Install and open **Moonwalk Host** on the Mac you want to use. It needs Apple
+Silicon and macOS 14 or later. Follow its setup window and leave the Mac
+awake and logged in. The host runs from the menu bar.
+[Set up Moonwalk Host](https://github.com/joaodriessen/moonwalk-host/blob/main/docs/INSTALL.md)
+
+### For Windows or Linux
+
+Start [Sunshine](https://github.com/LizardByte/Sunshine) on Windows or Linux,
+or use [Apollo](https://github.com/ClassicOldSong/Apollo) or
+[Vibepollo](https://github.com/Nonary/Vibepollo) on Windows. If you're already
+streaming with one of those hosts, use it here too.
+
+Moonwalk opens the **Desktop** entry. If your host's app list is missing it,
+add an entry called **Desktop** and leave the launch command blank.
 
 ## Install Moonwalk
 
@@ -40,7 +51,7 @@ discovers appear in the sidebar.
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="../assets/first-launch-dark.png">
-    <img src="../assets/first-launch-light.png" width="620" alt="Moonwalk's empty host list with an Add Host button.">
+    <img src="../assets/first-launch-light.png" width="620" alt="Moonwalk's empty host list with Add Host and Set Up a Host buttons.">
   </picture>
 </p>
 
@@ -50,13 +61,15 @@ where to look up the address.
 
 ## Pair and connect
 
-1. Select the host and press **Pair**. Moonwalk shows a four-digit PIN.
-2. Enter the PIN in the host's pairing screen. In Sunshine, open **PIN** in
-   the host web interface, usually at `https://localhost:47990` on the host.
-   Apollo and Vibepollo have a similar pairing page. On Moonwalk Host, use
-   **Pair New Device…** in the Mac menu bar and select the pending device.
-   Any login the host's web interface requires happens there.
-3. When the host accepts the PIN, press **Connect** in Moonwalk.
+1. On Linux, select the host and click **Pair**. Leave the four-digit PIN
+   visible while you go to the other computer.
+2. Enter the PIN on the host using the screen for your host below.
+3. Back in Moonwalk on Linux, click **Connect** after pairing succeeds.
+
+| Host app | Where to enter the PIN |
+| --- | --- |
+| **Moonwalk Host** | On the Mac, open its menu bar icon, choose **Pair New Device…**, and select the pending device. |
+| **Sunshine, Apollo, or Vibepollo** | On the host computer, open **PIN** in the host web interface. Sunshine usually uses `https://localhost:47990` on that computer. Sign in there if the host asks. |
 
 <p align="center">
   <picture>

@@ -1,8 +1,12 @@
 # Compatibility
 
-Moonwalk is in alpha. This page covers the current source. Check
-**About Moonwalk** and the [changelog](../CHANGELOG.md) if you're using an older
-build.
+Moonwalk runs on x86-64 Linux. To use an Apple Silicon Mac, run
+**[Moonwalk Host](https://github.com/joaodriessen/moonwalk-host)** on the Mac
+with macOS 14 or later. For a Windows or Linux desktop, use a compatible host
+such as Sunshine. Both Moonwalk apps are in alpha.
+
+If you're using a tester bundle, check **About Moonwalk** and the
+[changelog](../CHANGELOG.md) to see which version you have.
 
 ## Where it runs
 

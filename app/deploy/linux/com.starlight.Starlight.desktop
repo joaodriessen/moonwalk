@@ -1,10 +1,10 @@
 [Desktop Entry]
 Name=Moonwalk
 GenericName=Remote Desktop
-Comment=Stream and control another computer
+Comment=Use your Mac or another computer from Linux
 Exec=starlight
 Icon=starlight
 Terminal=false
 Type=Application
 Categories=Network;RemoteAccess;Qt;
-Keywords=remote desktop;remote play;streaming;moonwalk;starlight;sunshine;apollo;vibepollo;skylight;nvidia;gamestream;
+Keywords=remote desktop;remote play;mac;macos;streaming;moonwalk;moonlight;starlight;sunshine;apollo;vibepollo;skylight;nvidia;gamestream;

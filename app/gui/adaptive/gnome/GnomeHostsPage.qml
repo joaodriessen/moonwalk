@@ -657,6 +657,14 @@ Item {
                             root.page.requestAddHostOverlay()
                         }
                     }
+                    GnomeButton {
+                        Layout.alignment: Qt.AlignHCenter
+                        objectName: "starlight.hosts.setup-guide"
+                        linkStyle: true
+                        font.underline: true
+                        text: qsTranslate("PcView", "Set Up a Host")
+                        onClicked: Qt.openUrlExternally(root.presentation.setupGuide)
+                    }
                 }
             }
 
