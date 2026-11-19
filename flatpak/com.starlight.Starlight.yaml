@@ -184,6 +184,37 @@ modules:
   # build our own here and ship it in /app/lib (self-contained, no cross-module coupling). ---
   - name: libdrm
     buildsystem: meson
+    # This release puts its notices in the source and headers for both libraries.
+    license-files:
+      - xf86drm.c
+      - xf86drm.h
+      - xf86drmHash.c
+      - xf86drmHash.h
+      - xf86drmMode.c
+      - xf86drmMode.h
+      - xf86drmRandom.c
+      - xf86drmRandom.h
+      - xf86drmSL.c
+      - xf86atomic.h
+      - libdrm_lists.h
+      - libdrm_macros.h
+      - libsync.h
+      - util_double_list.h
+      - util_math.h
+      - include/drm/drm.h
+      - include/drm/drm_fourcc.h
+      - include/drm/drm_mode.h
+      - include/drm/i915_drm.h
+      - intel/intel_bufmgr.c
+      - intel/intel_bufmgr.h
+      - intel/intel_bufmgr_fake.c
+      - intel/intel_bufmgr_gem.c
+      - intel/intel_bufmgr_priv.h
+      - intel/intel_chipset.h
+      - intel/intel_decode.c
+      - intel/mm.c
+      - intel/mm.h
+      - intel/uthash.h
     config-opts:
       - -Dintel=enabled
       - -Dradeon=disabled

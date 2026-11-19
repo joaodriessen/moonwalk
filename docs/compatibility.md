@@ -19,7 +19,7 @@ build.
 | --- | --- |
 | Vibepollo on Windows | Pairing, streaming, and disconnect cleanup on real machines. Full-rate streaming at native resolution remains unresolved on one Intel host. |
 | Moonwalk Host on Apple Silicon | Pairing and live desktop streams. Moonwalk Host is a separate private alpha targeting macOS 14 or later. |
-| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, and recovery after the client was killed. The lab used the stock Sunshine 2026.914.233613 AppImage, X11, and software H.264 at 1280×720 and 60 fps. |
+| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, and recovery after the client was killed. We also upgraded a paired Flatpak through the normal install and run commands and streamed from the same host. The lab used the stock Sunshine 2026.914.233613 AppImage, X11, and software H.264 at 1280×720 and 60 fps. |
 | Apollo on Windows | Uses the same base protocol. Current releases and optional features need more testing with Moonwalk. |
 
 Most testing has been on a local network. Moonwalk has no built-in relay or
@@ -73,8 +73,9 @@ provides.
 In isolated GNOME and Plasma tests, a 2880×1800 display at 2× scaling
 requested 2880×1800 at 60 fps with 2× desktop scaling from a host that
 advertised the scale extension. The same Plasma setup mapped pointer motion
-across the full picture. Host display placement and restoration still need
-tests on the actual host OS.
+across the full picture. In a separate GNOME test at 1920×1200 on a 2× display,
+Moonwalk requested 1× host scale and kept the 60 fps stream target. Display placement and restoration
+still need tests on the actual host OS.
 
 ## Performance and disconnect
 

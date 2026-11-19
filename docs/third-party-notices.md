@@ -32,12 +32,13 @@ by this Linux rule.
 Flatpak Builder collects license files from most modules in the
 [manifest](../flatpak/com.starlight.Starlight.yaml), including FFmpeg, SDL,
 libplacebo, dav1d, and QAdwaitaDecorations. The SDL2_ttf module also lists
-the notices for its vendored FreeType and HarfBuzz sources explicitly.
+the notices for its vendored FreeType and HarfBuzz sources explicitly. The
+libdrm module includes the notice-bearing source and headers for libdrm and
+libdrm_intel under the package’s license directory.
 
 Run the [bundle verifier](releasing.md#build-and-test-the-candidate) to see the
 license files that made it into a particular package. Review those files against
-all packaged components and their exact sources. For example, libdrm carries
-notices in source headers rather than a root license file. Qt and other runtime
+all packaged components and their exact sources. Qt and other runtime
 components come from the selected runtime or system.
 
 The application icon, screenshots and other artwork also need provenance review.
