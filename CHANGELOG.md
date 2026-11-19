@@ -25,6 +25,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   X11 cursor, Vulkan, and controller fixes.
 - Include libdrm’s copyright and license notices in the Flatpak. Make source
   archives without the local paths in Flatpak Builder’s Git metadata.
+- Follow the local light or dark theme even when the stream controls are
+  collapsed to the handle.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

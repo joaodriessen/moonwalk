@@ -326,7 +326,7 @@ inline QString statusText(const Status& status)
     return parts.isEmpty() ? text("Connected") : parts.join(QStringLiteral(" · "));
 }
 
-// The HUD is one capsule that changes shape: a white pill at rest, a little larger
+// The HUD is one capsule that changes shape: a thin handle at rest, a little larger
 // and brighter under the pointer, a panel holding the controls once tapped, or a
 // panel holding a line of words. Each state is the same capsule somewhere else, so a
 // change of mind half-way only bends its path.
@@ -357,7 +357,7 @@ struct Spring {
 // One frame of the capsule. Geometry is in toolbar points.
 struct Look {
     QRectF capsule;
-    qreal glass = 0;     // 0 the white pill, 1 the panel
+    qreal glass = 0;     // 0 the handle, 1 the panel
     qreal controls = 0;  // how much of the controls shows
     qreal words = 0;     // how much of the message shows
     qreal bright = 0;    // the pill under the pointer
@@ -592,13 +592,15 @@ inline QImage hud(int logicalWidth, qreal pixelRatio, const QFont& font, const Q
     painter.setRenderHint(QPainter::Antialiasing);
     painter.translate(0, qMax(0, topInset));
     const QColor ink = palette.color(QPalette::WindowText);
+    const QColor panel = palette.color(QPalette::Window);
+    const bool dark = panel.lightnessF() < .5;
     const QRectF capsule = look.capsule;
     const qreal radius = capsule.height() / 2;
     painter.setPen(Qt::NoPen);
-    // A faint dark halo keeps the white pill readable over a white desktop; the
-    // panel's soft shadow takes over as it turns to glass.
+    // Keep the handle visible against a remote background of either tone.
     if (look.glass < 1) {
-        painter.setBrush(QColor(0, 0, 0, qRound((20 + 6 * look.bright) * (1 - look.glass))));
+        const int tone = dark ? 255 : 0;
+        painter.setBrush(QColor(tone, tone, tone, qRound((20 + 6 * look.bright) * (1 - look.glass))));
         for (int i = 3; i >= 1; --i)
             painter.drawRoundedRect(capsule.adjusted(-i, -i, i, i), radius + i, radius + i);
     }
@@ -608,7 +610,9 @@ inline QImage hud(int logicalWidth, qreal pixelRatio, const QFont& font, const Q
         painter.setOpacity(1);
         painter.setPen(mixed(ink, .14 * look.glass));
     }
-    painter.setBrush(blend(QColor::fromRgbF(1, 1, 1, .75 + .22 * look.bright), palette.color(QPalette::Window), look.glass));
+    QColor handle = dark ? panel : QColor(Qt::white);
+    handle.setAlphaF(.75 + .22 * look.bright);
+    painter.setBrush(blend(handle, panel, look.glass));
     painter.drawRoundedRect(capsule.adjusted(.5, .5, -.5, -.5), radius - .5, radius - .5);
     if (look.controls > 0 && !layer.isNull()) {
         // The controls rise into place as they appear, a whole device pixel at a

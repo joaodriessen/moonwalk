@@ -222,6 +222,17 @@ void OverlayManagerTest::toolbarRasterFollowsDpiPaletteAndState()
     QCOMPARE(normal.pixelColor(0, 0).alpha(), 0);
     const auto bounds = StreamToolbar::bounds(900);
     QCOMPARE(normal.pixelColor(bounds.center().x(), bounds.top() + 3), palette.color(QPalette::Window));
+    StreamToolbar::Look collapsed;
+    collapsed.capsule = StreamToolbar::pillRect(900, 0, false);
+    const auto darkHandle = StreamToolbar::hud(900, 2, font, palette, collapsed).pixelColor(900, 16);
+    QPalette lightPalette(palette);
+    lightPalette.setColor(QPalette::Window, QColor("#f6f6f8"));
+    lightPalette.setColor(QPalette::WindowText, QColor("#202024"));
+    const auto lightHandle = StreamToolbar::hud(900, 2, font, lightPalette, collapsed).pixelColor(900, 16);
+    QVERIFY(darkHandle.lightnessF() < .5);
+    QVERIFY(darkHandle.alpha() > 180);
+    QVERIFY(lightHandle.lightnessF() > .9);
+    QVERIFY(lightHandle.alpha() > 180);
     StreamToolbar::State toggled;
     toggled.muted = toggled.fullscreen = toggled.captured = toggled.actual = true;
     QVERIFY(normal != StreamToolbar::image(900, 1, font, palette, toggled));
