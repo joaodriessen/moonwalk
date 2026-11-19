@@ -10,7 +10,7 @@ build.
 | --- | --- |
 | **Linux x86-64 Flatpak** | The primary package. Hardware decoding depends on your GPU and drivers. |
 | **GNOME and KDE Plasma on Wayland** | Both layouts have been exercised in controlled desktop tests. Physical input, accessibility, and GPU coverage are still limited. |
-| **Hyprland and other desktops** | Moonwalk uses the generic layout here. Some paths have been tried on Hyprland. Other compositors may behave differently. |
+| **Hyprland and other desktops** | Moonwalk uses the generic layout here. A nested Hyprland test exercised the stream, local cursor size at 2× scaling, and cleanup after closing the window. Other compositors may behave differently. |
 | **X11** | Available as a fallback. Coverage is more limited than on Wayland. |
 | **Native Linux build** | CI builds on Ubuntu 24.04 with Qt 6.4.2. The Flatpak uses its own Qt runtime. See [build instructions](building.md) for other distributions. |
 | **Other client platforms** | Moonwalk targets x86-64 Linux. See [Moonlight](https://moonlight-stream.org/) for clients on other platforms. |
@@ -19,7 +19,7 @@ build.
 | --- | --- |
 | Vibepollo on Windows | Pairing, streaming, and disconnect cleanup on real machines. Full-rate streaming at native resolution remains unresolved on one Intel host. |
 | Moonwalk Host on Apple Silicon | Pairing and live desktop streams. Moonwalk Host is a separate private alpha targeting macOS 14 or later. |
-| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, reconnect, and recovery after the client was killed. The lab used the stock Sunshine 2026.914.233613 AppImage, X11, and software H.264 at 1280×720 and 60 fps. |
+| Sunshine on Linux | The Moonwalk Flatpak passed PIN pairing, stereo sound, reconnect, and recovery after the client was killed. The lab used the stock Sunshine 2026.914.233613 AppImage, X11, and software H.264 at 1280×720 and 60 fps. |
 | Apollo on Windows | Uses the same base protocol. Current releases and optional features need more testing with Moonwalk. |
 
 Most testing has been on a local network. Moonwalk has no built-in relay or
@@ -69,6 +69,12 @@ received. There is no standard response that verifies the capture size or the
 effective Windows UI scale. A host may warn that it disabled the virtual
 display. Moonwalk shows the warning and continues with the picture the host
 provides.
+
+In isolated GNOME and Plasma tests, a 2880×1800 display at 2× scaling
+requested 2880×1800 at 60 fps with 2× desktop scaling from a host that
+advertised the scale extension. The same Plasma setup mapped pointer motion
+across the full picture. Host display placement and restoration still need
+tests on the actual host OS.
 
 ## Performance and disconnect
 
