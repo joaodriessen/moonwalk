@@ -64,6 +64,7 @@ def verify(candidate, bundle):
         run(*ostree, "checkout", "--user-mode", app_ref, app)
 
         metadata = configparser.ConfigParser(interpolation=None)
+        metadata.optionxform = str
         metadata.read_string((app / "metadata").read_text())
         require(metadata["Application"]["name"], app_id, "application ID")
         require(metadata["Application"]["command"], command, "application command")
@@ -103,6 +104,11 @@ def verify(candidate, bundle):
             "product_version": version,
             "runtime_ref": runtime,
             "runtime_commit": run("flatpak", "info", "--show-commit", runtime),
+            "sandbox_permissions": {
+                section: dict(metadata[section])
+                for section in ("Context", "Session Bus Policy", "System Bus Policy")
+                if metadata.has_section(section)
+            },
             "sha256": file_hash(checked_bundle),
             "size_bytes": checked_bundle.stat().st_size,
             "source_revision": revision,

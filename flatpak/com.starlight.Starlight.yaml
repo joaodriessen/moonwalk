@@ -87,8 +87,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/libsdl-org/SDL.git
-        tag: release-3.4.12
-        commit: f87239e71e42da91ca317a12eefb82cfbf3393eb
+        tag: release-3.4.20
+        commit: f00dc919ca35b9756316e86c4777392de442f9b2
       - type: patch
         path: patches/sdl3-wayland-brightness-scancodes.patch
 
@@ -100,8 +100,8 @@ modules:
     sources:
       - type: git
         url: https://github.com/libsdl-org/sdl2-compat.git
-        tag: release-2.32.70
-        commit: a53b6ad90ecd2d0ccfe01d5cfd2059793acf8c12
+        tag: release-2.32.74
+        commit: e4df8a55f20da762290a78c2bbe8f8d89d01486a
       - type: patch
         path: patches/sdl2-compat-brightness-scancodes.patch
 

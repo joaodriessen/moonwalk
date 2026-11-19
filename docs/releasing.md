@@ -60,8 +60,9 @@ release checks on the file you intend to distribute.
    The check verifies the staged files, imports the bundle into a temporary
    repository, and runs its version command in an isolated runtime. It checks
    the app ID, release version, source revision, launcher, and declared license
-   files, then prints a checksum and runtime commit. Review permissions and
-   test a fresh install and an upgrade with private profiles separately. Check that settings and
+   files. The report includes the checksum, runtime commit, and permissions
+   read from the exported bundle. Review those permissions and test a fresh
+   install and an upgrade with private profiles. Check that settings and
    pairings survive, run the affected streaming paths with that same bundle,
    and keep the previous usable bundle.
 5. Publish the tested bundle with its checksum, corresponding source, and
