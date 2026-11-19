@@ -17,7 +17,10 @@ recovery = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(recovery)
 START = "00:00:03 - SDL Info (0): Starting input stream...\n00:00:03 - SDL Info (0): done\n"
 PACKET = "00:00:03 - SDL Info (0): Received first video packet after 0 ms\n"
-SUMMARY = "Global video stats\n------------------\nRendering frame rate: 59.77 FPS\nAverage network latency: 9 ms (variance: 4 ms)\n"
+SUMMARY = (
+    "Global video stats\n------------------\nIncoming frame rate from network: 60.0 FPS\n"
+    "Rendering frame rate: 59.77 FPS\nAverage network latency: 9 ms (variance: 4 ms)\n"
+)
 
 
 class RecoveryTests(unittest.TestCase):
@@ -29,6 +32,7 @@ class RecoveryTests(unittest.TestCase):
         result = recovery.parse_log(START + PACKET + SUMMARY)
         self.assertTrue(result["rendered_frames_proven"])
         self.assertEqual(result["metrics"]["network_rtt"], "9 ms (variance: 4 ms)")
+        self.assertEqual(result["metrics"]["incoming_fps"], "60.0")
         self.assertFalse(recovery.parse_log(SUMMARY.replace("59.77", "0.00"))["rendered_frames_proven"])
 
     def run_fixture(self, root, code, extra=()):
@@ -122,10 +126,11 @@ class RecoveryTests(unittest.TestCase):
         code += "def stop(*args):\n print(" + repr(SUMMARY) + ", flush=True)\n sys.exit(0)\n"
         code += "signal.signal(signal.SIGTERM, stop)\nprint(" + repr(START + PACKET) + ", flush=True)\ntime.sleep(60)\n"
         with tempfile.TemporaryDirectory() as temporary:
-            completed, report = self.run_fixture(Path(temporary), code, ["--abrupt"])
+            completed, report = self.run_fixture(Path(temporary), code, ["--abrupt", "--after-abrupt-delay", "0.2"])
         self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
         self.assertTrue(report["passed"])
         self.assertEqual(len(report["trials"]), 4)
+        self.assertEqual(report["after_abrupt_delay_seconds"], 0.2)
         self.assertFalse(report["trials"][2]["evidence"]["rendered_frames_proven"])
         self.assertTrue(report["trials"][3]["evidence"]["rendered_frames_proven"])
         self.assertIn("not executed", report["manual_events"]["sleep_wake"])

@@ -17,6 +17,7 @@ import time
 DONE = re.compile(r"SDL Info \(\d+\): done\s*$")
 RENDER = re.compile(r"Rendering frame rate: ([0-9.]+) FPS")
 METRICS = {
+    "incoming_fps": r"Incoming frame rate from network: ([0-9.]+) FPS",
     "network_rtt": r"Average network latency: ([^\r\n]+)",
     "decode_ms": r"Average decoding time: ([0-9.]+) ms",
     "queue_ms": r"Average frame queue delay: ([0-9.]+) ms",
@@ -338,11 +339,15 @@ def main(argv=None):
     parser.add_argument("--shutdown-budget", type=positive, default=15)
     parser.add_argument("--total-budget", type=positive, default=600)
     parser.add_argument("--abrupt", action="store_true", help="also kill one client and gracefully reconnect")
+    parser.add_argument("--after-abrupt-delay", type=positive, default=0,
+                        help="wait this many seconds after the forced exit before reconnecting")
     parser.add_argument("client", nargs=argparse.REMAINDER, help="-- CLIENT [client prefix arguments]")
     args = parser.parse_args(argv)
     command = args.client[1:] if args.client[:1] == ["--"] else args.client
     if not command or not 2 <= args.cycles <= 10:
         parser.error("provide -- CLIENT [arguments] and --cycles between 2 and 10")
+    if args.after_abrupt_delay and not args.abrupt:
+        parser.error("--after-abrupt-delay requires --abrupt")
     try:
         args.flatpak_prefix = flatpak_prefix(command)
     except ValueError as error:
@@ -363,13 +368,18 @@ def main(argv=None):
     command += ["stream", args.host, args.app] + args.stream_arg + ["--no-quit-after"]
     deadline = time.monotonic() + args.total_budget
     report = {"schema": 1, "started_utc": datetime.now(timezone.utc).isoformat(),
-              "total_budget_seconds": args.total_budget, "trials": [], "manual_events": {
+              "total_budget_seconds": args.total_budget,
+              "after_abrupt_delay_seconds": args.after_abrupt_delay, "trials": [], "manual_events": {
         name: "not executed or certified by this harness"
         for name in ("sleep_wake", "audio_device_change", "display_change", "clipboard_focus", "physical_input")}}
     schedule = [(f"graceful-{index + 1}", False) for index in range(args.cycles)]
     if args.abrupt:
         schedule += [("abrupt", True), ("after-abrupt-reconnect", False)]
     for label, abrupt in schedule:
+        if label == "after-abrupt-reconnect" and args.after_abrupt_delay:
+            wait_until = min(time.monotonic() + args.after_abrupt_delay, deadline - 2)
+            while not CANCELLED and time.monotonic() < wait_until:
+                time.sleep(0.1)
         if CANCELLED or time.monotonic() >= deadline - 2:
             report["failure"] = "harness interrupted" if CANCELLED else "total budget exhausted before next trial"
             break
