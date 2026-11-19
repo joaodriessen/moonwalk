@@ -71,6 +71,10 @@ release checks on the file you intend to distribute.
 
 ## Archive the Flatpak sources
 
+The manual Flatpak candidate workflow puts a portable source archive and its
+checksum beside the verified bundle. To build the archive locally, use the
+same staging directory and export repository as the bundle.
+
 For a release build, add `--bundle-sources` to the staged Flatpak Builder
 command. It prepares a source ref in the same export repository. Use that ref
 to make the archive, since Flatpak Builder’s raw source ref contains absolute
