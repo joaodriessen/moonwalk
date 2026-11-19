@@ -40,6 +40,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 - Leave the game pointer warning out of desktop streams.
 - Build and cache the `vainfo` diagnostic separately. Ship its license in the
   Flatpak.
+- Try a lower startup bitrate before reducing the picture on hosts that
+  accept bitrate only at launch. Learn from the next normal connection.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

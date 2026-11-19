@@ -33,8 +33,10 @@ includes transport overhead.
 - **Automatic** bitrate can change in place on suitable hosts after Moonwalk
   sees sustained pressure or spare capacity. An encoder that may need to
   restart is handled more conservatively.
-- **Recommended** is the starting estimate shown when live bitrate adjustment
-  is unavailable.
+- **Recommended** starts with an estimate when live bitrate adjustment is
+  unavailable. If delivery slows under sustained network or encoder pressure,
+  Moonwalk can try a lower bitrate at the same resolution the next time you
+  connect. It keeps the lower starting rate if delivery or latency improves.
 - **Limited** uses the target you chose under **Stream → Manual → Limit bandwidth**.
 
 Moonwalk keeps a working stream connected. When it has enough evidence to

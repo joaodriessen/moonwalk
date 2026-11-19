@@ -413,6 +413,8 @@ private:
     bool m_RuntimeRequestRaised = false;
     bool m_RuntimeBitrateSupported = false;
     int m_RuntimeBitrateKbps = 0;
+    int m_NormalStartupBitrateKbps = 0;
+    bool m_StartupBitrateKnown = false;
     // How a mid-stream bitrate change lands on this host, as last measured.
     std::atomic<HostCapacity::BitrateChange> m_BitrateChange {HostCapacity::BitrateChange::Unknown};
     bool m_BitrateRebuilt = false;
@@ -474,7 +476,7 @@ private:
 
     StreamPlan m_StreamPlan;
     QSize m_HostDesktopSize;
-    QString m_PerformanceContext, m_BitrateContext;
+    QString m_PerformanceContext, m_BitrateContext, m_StartupBitrateContext;
     // Probing a decoder is slow, and its answer doesn't change during a launch.
     QHash<QString, DecoderAvailability> m_DecoderProbes;
     int m_DisplayHdr = -1; // -1 until a 10-bit decoder says whether this display shows HDR

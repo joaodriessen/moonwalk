@@ -709,7 +709,8 @@ void Session::planStream(SDL_Window* testWindow)
         false, input.displayScale, input.integerDesktopScale);
     if (m_PlannedSizeAutomatically && !m_SafeSettingsTrial && !m_ConnectionRecovery && !m_Adaptation.pending) {
         const auto saved = StreamRecommendation::load(m_Computer->uuid, m_PerformanceContext, initialPlan.codec);
-        if (saved.valid(eligible, m_PerformanceContext, initialPlan.codec, QDateTime::currentSecsSinceEpoch())) {
+        if ((saved.bitrateKbps == 0 || m_Preferences->autoAdjustBitrate) &&
+                saved.valid(eligible, m_PerformanceContext, initialPlan.codec, QDateTime::currentSecsSinceEpoch())) {
             m_Adaptation.baseline = saved.baseline;
             m_Adaptation.target = saved.target;
             m_Adaptation.pending = true;
@@ -811,8 +812,9 @@ void Session::recommendStreamChange(StreamPlanning::Rung target, const HostCapac
     if (!candidate.valid(rungs, m_PerformanceContext, m_StreamPlan.codec, candidate.createdAt)) return;
     m_Recommendation = candidate;
     candidate.save(m_Computer->uuid, m_PerformanceContext, m_StreamPlan.codec);
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Stream recommendation: %dx%dx%d for next connection; current stream continues",
-        target.width, target.height, target.fps);
+    const auto bitrate = bitrateKbps > 0 ? QStringLiteral(" at %1 kbps encoder target").arg(bitrateKbps) : QString();
+    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Stream recommendation: %dx%dx%d for next connection%s; current stream continues",
+        target.width, target.height, target.fps, qPrintable(bitrate));
     emit controlsChanged();
 }
 
@@ -2778,6 +2780,22 @@ bool Session::startConnectionAsync()
                 emit controlsChanged();
             });
         }
+        else if (m_PlannedSizeAutomatically && m_Preferences->autoAdjustBitrate &&
+                 !m_SafeSettingsTrial && !m_ConnectionRecovery) {
+            // Hosts without live bitrate control still accept an ordinary
+            // launch bitrate. Keep these measurements separate from live ones.
+            m_StartupBitrateContext = m_BitrateContext + QStringLiteral("/startup");
+            const int channels = CHANNEL_COUNT_FROM_AUDIO_CONFIGURATION(m_StreamConfig.audioConfiguration);
+            m_NormalStartupBitrateKbps = RuntimeBitratePolicy::encoderKbps(m_StreamConfig.bitrate, channels);
+            const int remembered = StreamingPreferences::rememberedAutomaticBitrate(m_Computer->uuid, m_StartupBitrateContext);
+            m_StartupBitrateKnown = remembered > 0;
+            const int trial = m_Adaptation.pending ? m_Adaptation.encoderCeilingKbps : 0;
+            const int target = trial > 0 ? trial : remembered;
+            if (target >= 500 && target < m_NormalStartupBitrateKbps) {
+                m_StreamConfig.bitrate = RuntimeBitratePolicy::wireKbps(target, channels);
+                if (trial > 0) m_Adaptation.checkTrial = true;
+            }
+        }
         traceStartup("prepare-host");
         // A cancelled or lost HTTP reply does not prove the host skipped launch.
         // Retain cleanup responsibility before sending; cleanup rechecks host and
@@ -3652,7 +3670,23 @@ void Session::exec()
                 }
                 slowWindows = slow ? slowWindows + 1 : 0;
                 const StreamPlanning::Rung current {m_ActiveVideoWidth,m_ActiveVideoHeight,m_ActiveVideoFrameRate};
-                if (activeWindows >= 2 && m_Adaptation.checkTrial) {
+                if (activeWindows >= 2 && m_Adaptation.checkTrial && m_Adaptation.encoderCeilingKbps > 0) {
+                    m_Adaptation.checkTrial = false;
+                    // Retain a lower launch rate only when the same picture
+                    // improved. The original rate also records a tried mode.
+                    const auto sample = streamMeasurement(latency);
+                    const bool helped = StreamPlanning::reductionHelped(m_Adaptation.baseline,
+                        evidence.deliveredFps, latency.averageMs());
+                    if (!m_StartupBitrateContext.isEmpty() && sample.codec == m_Adaptation.baseline.codec) {
+                        const int settled = helped ? m_Adaptation.encoderCeilingKbps : m_NormalStartupBitrateKbps;
+                        StreamingPreferences::rememberAutomaticBitrate(m_Computer->uuid, settled, m_StartupBitrateContext);
+                        sample.save(m_Computer->uuid);
+                        m_StartupBitrateKnown = true;
+                        SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Automatic stream: %s startup bitrate at %d kbps",
+                            helped ? "retained" : "restored", settled);
+                    }
+                }
+                else if (activeWindows >= 2 && m_Adaptation.checkTrial) {
                     m_Adaptation.checkTrial = false;
                     auto capacity = m_Adaptation.baseline;
                     const auto previousPixels = qint64(capacity.width) * capacity.height;
@@ -3727,6 +3761,14 @@ void Session::exec()
                         if (applied > rate.floorKbps * 1.15)
                             recommendStreamChange(current, streamMeasurement(latency), false,
                                 qMin(rate.targetKbps, qMax(rate.floorKbps, applied * 7 / 10)));
+                    }
+                    if (!m_StartupBitrateContext.isEmpty() && !m_StartupBitrateKnown &&
+                            !m_Adaptation.checkTrial && !m_Recommendation.createdAt) {
+                        const int channels = CHANNEL_COUNT_FROM_AUDIO_CONFIGURATION(m_StreamConfig.audioConfiguration);
+                        const int floor = RuntimeBitratePolicy::encoderKbps(m_StreamPlan.floorKbps, channels);
+                        if (const int target = StreamPlanning::lowerStartupBitrate(m_NormalStartupBitrateKbps,
+                                floor, capacityNetworkClean(), latency, current.fps))
+                            recommendStreamChange(current, capacity, false, target);
                     }
                     if (evidence.canTrySize && QDateTime::currentSecsSinceEpoch() >= capacity.reductionRejectedUntil) {
                         const auto sample = streamMeasurement(latency);

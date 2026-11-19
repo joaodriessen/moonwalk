@@ -137,6 +137,14 @@ inline bool overloaded(double averageMs, double p95Ms, int fps)
     return load(averageMs, fps) > 1 || load(p95Ms, fps) > 2;
 }
 
+inline int lowerStartupBitrate(int currentKbps, int floorKbps, bool networkClean,
+                               const HostLatencyMeter& latency, int fps)
+{
+    if (currentKbps <= floorKbps * 1.15 ||
+            (networkClean && !overloaded(latency.averageMs(), latency.p95Ms(), fps))) return 0;
+    return qMax(floorKbps, currentKbps * 7 / 10);
+}
+
 // Healthy observed cadence permits a bounded larger-mode trial. A size actually
 // seen failing is retried only after a quiet recovery interval.
 constexpr int MaximumAdjustments = 4;

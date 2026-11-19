@@ -483,6 +483,20 @@ private slots:
         QCOMPARE(planStream(input).width, 2880);
     }
 
+    void lowerStartupBitrateNeedsPressureAndRoomAboveTheFloor()
+    {
+        HostLatencyMeter quickCapture, busyEncoder;
+        for (quint64 i = 0; i < 180; ++i) {
+            quickCapture.addFrame(i * 33333, 30);
+            busyEncoder.addFrame(i * 33333, 400);
+        }
+        QCOMPARE(StreamPlanning::lowerStartupBitrate(6000, 1500, true, quickCapture, 60), 0);
+        QCOMPARE(StreamPlanning::lowerStartupBitrate(6000, 1500, false, quickCapture, 60), 4200);
+        QCOMPARE(StreamPlanning::lowerStartupBitrate(6000, 1500, true, busyEncoder, 60), 4200);
+        QCOMPARE(StreamPlanning::lowerStartupBitrate(1900, 1500, true, busyEncoder, 60), 1500);
+        QCOMPARE(StreamPlanning::lowerStartupBitrate(1600, 1500, true, busyEncoder, 60), 0);
+    }
+
     void codecIsTheBestThisComputerDecodesInHardware()
     {
         StreamPlanInput input = macBook("Host");
