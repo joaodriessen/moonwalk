@@ -4,11 +4,17 @@ import QtQuick.Layouts 1.15
 import QtQuick.Window 2.15
 import ".." as Shared
 import "../settings" as Settings
+import "../../starlight" as AppStyle
 
 // AdwPreferencesDialog content: a title, a close button and every preference
 // on one page. main.qml floats it over the hosts page as a dialog.
 Item {
     id: root
+    objectName: "starlight.settings.page"
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTranslate("SettingsView", "Settings")
+
+    AppStyle.AccessibleIdentity { target: root; stableId: root.objectName }
 
     Shared.FocusReveal { viewport: contentFlickable }
 

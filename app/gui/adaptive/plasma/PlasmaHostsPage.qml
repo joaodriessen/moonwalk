@@ -11,6 +11,11 @@ import "../../starlight" as AppStyle
 // single heading above a System Settings style form. KWin draws the titlebar.
 Item {
     id: root
+    objectName: "starlight.hosts.page"
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTranslate("PcView", "Hosts")
+
+    AppStyle.AccessibleIdentity { target: root; stableId: root.objectName }
 
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
@@ -229,6 +234,7 @@ Item {
                 ListView {
                     id: hostList
                     objectName: "starlight.hosts.list"
+                    AppStyle.AccessibleIdentity { target: hostList; stableId: hostList.objectName }
                     anchors.fill: parent
                     anchors.margins: Kirigami.Units.smallSpacing
                     clip: true

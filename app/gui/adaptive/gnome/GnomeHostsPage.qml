@@ -12,6 +12,11 @@ import "../../starlight" as AppStyle
 // desktops without them, where the compositor owns the window frame.
 Item {
     id: root
+    objectName: "starlight.hosts.page"
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTranslate("PcView", "Hosts")
+
+    AppStyle.AccessibleIdentity { target: root; stableId: root.objectName }
 
     LayoutMirroring.enabled: Qt.application.layoutDirection === Qt.RightToLeft
     LayoutMirroring.childrenInherit: true
@@ -311,6 +316,7 @@ Item {
                 ListView {
                     id: hostList
                     objectName: "starlight.hosts.list"
+                    AppStyle.AccessibleIdentity { target: hostList; stableId: hostList.objectName }
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     Layout.leftMargin: 6

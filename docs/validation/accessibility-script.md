@@ -26,7 +26,8 @@ tool is unavailable, record the gap.
    **Hosts** and, in the inspector, that the page has identifier
    `starlight.hosts.page`.
 2. Navigate to the hosts list. Verify it is announced as a list named
-   **Hosts** with identifier `starlight.hosts.list`.
+   **Available streaming hosts** on GNOME or **Hosts** on Plasma, with
+   identifier `starlight.hosts.list`.
 3. Move between at least two host entries using the existing keyboard route.
    Each entry must announce its host name, online/checking state, and selected
    state; selection must change the visible host card without starting a
@@ -34,8 +35,9 @@ tool is unavailable, record the gap.
 4. With an entry selected, activate its existing connect/wake route once only
    when it is safe to do so. Confirm the screen-reader action has the same
    result as ordinary keyboard activation.
-5. Inspect the settings gear: it must announce **More settings**, describe
-   that it opens global settings, and activate through the normal route.
+5. Open **Main Menu** on GNOME or Plasma and activate its settings item.
+   In the fallback view, activate **More settings**. Confirm that the action
+   opens the same Settings view as `Ctrl+,`.
 
 ## Pairing and recovery
 

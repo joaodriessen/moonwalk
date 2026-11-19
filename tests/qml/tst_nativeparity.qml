@@ -55,6 +55,29 @@ TestCase {
         return [{ tag: "gnome", path: gnomeHosts }, { tag: "plasma", path: plasmaHosts }]
     }
 
+    function test_page_accessibility_landmarks_data() { return bothDesktops() }
+    function test_page_accessibility_landmarks(data) {
+        var hosts = createSurface(data.path, createFacade())
+        compare(hosts.objectName, "starlight.hosts.page")
+        compare(hosts.Accessible.role, Accessible.Pane)
+        compare(hosts.Accessible.name, "Hosts")
+        var list = findChild(hosts, "starlight.hosts.list")
+        verify(list !== null)
+        compare(list.Accessible.role, Accessible.List)
+        compare(list.Accessible.name, data.tag === "gnome" ? "Available streaming hosts" : "Hosts")
+
+        var component = Qt.createComponent(Qt.resolvedUrl("fixtures/SettingsFacade.qml"))
+        verify(component.status === Component.Ready, component.errorString())
+        var facade = createTemporaryObject(component, testCase)
+        var pageName = data.tag === "gnome" ? "GnomeSettingsPage.qml" : "PlasmaSettingsPage.qml"
+        var settings = createSurface("../../app/gui/adaptive/" + data.tag + "/" + pageName, facade)
+        compare(settings.objectName, "starlight.settings.page")
+        compare(settings.Accessible.role, Accessible.Pane)
+        compare(settings.Accessible.name, "Settings")
+        hosts.destroy()
+        settings.destroy()
+    }
+
     function test_every_host_setting_exists_on_every_desktop() {
         var facade = createFacade()
         var gnome = createSurface(gnomeHosts, facade)

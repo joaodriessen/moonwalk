@@ -4,11 +4,17 @@ import QtQuick.Layouts 1.15
 import org.kde.kirigami 2.20 as Kirigami
 import ".." as Shared
 import "../settings" as Settings
+import "../../starlight" as AppStyle
 
 // "Configure Starlight": a toolbar with Back above the shared preferences, as a
 // single System Settings style form.
 Item {
     id: root
+    objectName: "starlight.settings.page"
+    Accessible.role: Accessible.Pane
+    Accessible.name: qsTranslate("SettingsView", "Settings")
+
+    AppStyle.AccessibleIdentity { target: root; stableId: root.objectName }
 
     Shared.FocusReveal { viewport: contentFlickable }
 
