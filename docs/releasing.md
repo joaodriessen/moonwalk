@@ -39,9 +39,9 @@ tracks the inherited engine version.
 ## Build and test the candidate
 
 Run **Flatpak candidate** from GitHub Actions to build the selected revision on
-a fresh runner. On success the run has a bundle, a source manifest with hashes,
-and the verification report. These are candidate artifacts. Use the same
-release checks on the file you intend to distribute.
+a fresh runner. The workflow uploads the bundle, portable source archive,
+checksums, and verification report. Keep them together. Before distributing an
+older bundle, verify that its exact corresponding sources are available too.
 
 1. Commit the candidate. Run the relevant [development checks](development.md),
    including the shipped runtime, AOT build, and desktop and streaming checks
@@ -115,7 +115,11 @@ Dependabot doesn't track. The scripts under `scripts/validation/` can reproduce
 specific historic checks if you have their fixtures. Start with `./dev` for
 routine work.
 
-Flathub distribution is a separate step. Recheck the
+Flathub distribution is a separate step. Put the chosen example screenshots at
+public HTTPS URLs that serve the image files directly. Add them to the AppStream
+metadata and check that the store build mirrors them. Use the
+[screenshot guidelines](https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines#screenshots)
+and recheck the
 [submission requirements](https://docs.flathub.org/docs/for-app-authors/requirements)
 for app ID, permissions, licensing, supported architectures, and AI disclosure.
 Keep signing and upload credentials out of untrusted pull request jobs.
