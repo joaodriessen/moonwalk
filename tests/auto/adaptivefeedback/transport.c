@@ -20,7 +20,7 @@ uint32_t EncryptionFeaturesEnabled;
 uint32_t EncryptionFeaturesSupported;
 uint32_t EncryptionFeaturesRequested;
 bool ReferenceFrameInvalidationSupported;
-volatile bool ConnectionInterrupted;
+atomic_bool ConnectionInterrupted;
 struct sockaddr_storage RemoteAddr, LocalAddr;
 SOCKADDR_LEN AddrLen;
 uint16_t ControlPortNumber;
@@ -165,6 +165,7 @@ int AdaptiveTestDecrypt(unsigned index, unsigned char* output, int capacity) {
     int size = (int)wireLengths[index] - sizeof(*encrypted) - AES_GCM_TAG_LENGTH;
     if (size > capacity || size < 0) return -1;
     return PltDecryptMessage(decryptionCtx, ALGORITHM_AES_GCM, 0,
+                            CTRL_CHANNEL_GENERIC, LE32(encrypted->seq),
                             (unsigned char*)StreamConfig.remoteInputAesKey, sizeof(StreamConfig.remoteInputAesKey),
                             iv, sizeof(iv), (unsigned char*)(encrypted + 1), AES_GCM_TAG_LENGTH,
                             (unsigned char*)(encrypted + 1) + AES_GCM_TAG_LENGTH, size, output, &size) ? size : -1;

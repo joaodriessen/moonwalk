@@ -210,7 +210,7 @@ NvPairingManager::saltPin(const QByteArray& salt, QString pin)
 NvPairingManager::PairState
 NvPairingManager::pair(QString appVersion, QString pin, QSslCertificate& serverCert)
 {
-    int serverMajorVersion = NvHTTP::parseQuad(appVersion).at(0);
+    int serverMajorVersion = NvHTTP::parseQuad(appVersion).value(0);
     qInfo() << "Pairing with server generation:" << serverMajorVersion;
 
     // Send our real hostname as the devicename query param so the host can use it

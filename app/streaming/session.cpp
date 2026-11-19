@@ -1583,9 +1583,8 @@ bool Session::initializeInternal(QWindow* qtWindow)
             // to allow decoding via VideoToolbox on macOS. Since we don't
             // have fixup code for HEVC, just avoid it if GFE is too old.
             QVector<int> gfeVersion = NvHTTP::parseQuad(m_Computer->gfeVersion);
-            if (gfeVersion.isEmpty() || // Very old versions don't have GfeVersion at all
-                    gfeVersion[0] < 3 ||
-                    (gfeVersion[0] == 3 && gfeVersion[1] < 11)) {
+            if (gfeVersion.value(0) < 3 ||
+                    (gfeVersion.value(0) == 3 && gfeVersion.value(1) < 11)) {
                 SDL_LogWarn(SDL_LOG_CATEGORY_APPLICATION,
                             "Disabling HEVC on macOS due to old GFE version");
                 m_SupportedVideoFormats.removeByMask(VIDEO_FORMAT_MASK_H265);
@@ -2102,7 +2101,11 @@ private:
 
         // Exit the entire program if requested
         if (m_Session->m_ShouldExit) {
-            QCoreApplication::instance()->quit();
+            if (QCoreApplication* app = QCoreApplication::instance()) {
+                QMetaObject::invokeMethod(app, []() {
+                    QCoreApplication::quit();
+                }, Qt::QueuedConnection);
+            }
         }
     }
 

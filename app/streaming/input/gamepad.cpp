@@ -818,6 +818,7 @@ void SdlInputHandler::rumble(unsigned short controllerNumber, unsigned short low
     if (m_GamepadState[controllerNumber].hapticMethod == GAMEPAD_HAPTIC_METHOD_LEFTRIGHT) {
         if (m_GamepadState[controllerNumber].hapticEffectId >= 0) {
             SDL_HapticDestroyEffect(haptic, m_GamepadState[controllerNumber].hapticEffectId);
+            m_GamepadState[controllerNumber].hapticEffectId = -1;
         }
     } else if (m_GamepadState[controllerNumber].hapticMethod == GAMEPAD_HAPTIC_METHOD_SIMPLERUMBLE) {
         SDL_HapticRumbleStop(haptic);
@@ -877,7 +878,7 @@ void SdlInputHandler::setMotionEventState(uint16_t controllerNumber, uint8_t mot
 
 #if SDL_VERSION_ATLEAST(2, 0, 14)
     if (m_GamepadState[controllerNumber].controller != nullptr) {
-        uint8_t reportPeriodMs = reportRateHz ? (1000 / reportRateHz) : 0;
+        uint32_t reportPeriodMs = reportRateHz ? SDL_max(1000U / reportRateHz, 1U) : 0;
 
         switch (motionType) {
         case LI_MOTION_TYPE_ACCEL:
@@ -912,7 +913,7 @@ void SdlInputHandler::setAdaptiveTriggers(uint16_t controllerNumber, DualSenseOu
 
 #if SDL_VERSION_ATLEAST(2, 0, 16)
         // Make sure the controller number is within our supported count
-    if (controllerNumber <= MAX_GAMEPADS &&
+    if (controllerNumber < MAX_GAMEPADS &&
         // and we have a valid controller
         m_GamepadState[controllerNumber].controller != nullptr &&
         // and it's a PS5 controller
@@ -1005,7 +1006,7 @@ int SdlInputHandler::getAttachedGamepadMask()
             SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(i),
                                       guidStr, sizeof(guidStr));
 
-            if (!m_IgnoreDeviceGuids.contains(guidStr, Qt::CaseInsensitive))
+            if (!m_IgnoreDeviceGuids.contains(guidStr, Qt::CaseInsensitive) && count < MAX_GAMEPADS)
             {
                 mask |= (1 << count++);
             }
