@@ -23,7 +23,13 @@ rendered frame rates helps identify where cadence dropped.
 
 Each `.log` is combined client stdout/stderr. `summary.json` records argv, timing, signals, exit status, cleanup and parsed facts. Exit zero requires every scheduled trial to pass. Missing startup/frame evidence, unexpected early/nonzero exit, log overflow, surviving owned processes or a deadline fails the run. A successful connection requires the real `Starting input stream...`/following SDL `done` and `Received first video packet` messages. Every graceful trial must also emit a `Global video stats` summary with positive `Rendering frame rate`. Packet receipt alone cannot prove rendering. SIGKILL cannot flush that summary: the abrupt seed explicitly leaves rendering unverified and the subsequent graceful reconnect must prove it.
 
-The parser records incoming frame rate, network RTT, decode time, frame queue delay, rendering time, network/jitter drops and host processing min/max/average when present. RTT is round trip. Rendering time includes V-sync; host processing age is a separate metric. These fields do not measure physical input-to-photon or speaker latency, audible quality or actual display content. A renderer without the project's global FFmpeg statistics fails the evidence gate rather than silently passing.
+The parser records the frame rate submitted for decoding, network RTT, decode
+time, frame queue delay, rendering time and host processing latency when
+present. It records frame gaps before decoding separately. Older logs can
+label the same gaps as network drops. RTT is the network round trip, and
+rendering time includes the wait for V-sync. Measuring physical display and
+speaker latency or checking the picture and sound requires a separate test.
+The renderer must produce global FFmpeg statistics for this check to pass.
 
 Sleep/wake, audio-device changes, display changes, clipboard focus and physical input are explicitly recorded as **not executed**. Exercise them separately in a controlled session and record the exact event, observed recovery and relevant log range. A pass covers the measured disconnect and reconnect trials on that client and host. Record candidate source/artifact hashes and host version beside the output before using it as release evidence.
 
