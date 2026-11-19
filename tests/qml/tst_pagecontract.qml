@@ -13,7 +13,7 @@ TestCase {
     ]
 
     readonly property var hostIds: [
-        "hosts.display-target", "hosts.pointer-mode",
+        "hosts.page", "hosts.display-target", "hosts.pointer-mode",
         "hosts.connection-address", "hosts.desktop-scale", "hosts.view-scale",
         "hosts.local-text-input", "hosts.resume-running", "hosts.end-session",
         "hosts.list", "hosts.item.<uuid>", "hosts.empty-state", "hosts.add-host",
@@ -31,7 +31,7 @@ TestCase {
     ]
 
     readonly property var settingsIds: [
-        "settings.search", "settings.window-mode", "settings.mute-host-speakers", "settings.language",
+        "settings.page", "settings.search", "settings.window-mode", "settings.mute-host-speakers", "settings.language",
         "settings.mute-on-focus-loss", "settings.quit-app-after",
         "settings.ui-display-mode", "settings.connection-warnings",
         "settings.configuration-warnings", "settings.rich-presence",

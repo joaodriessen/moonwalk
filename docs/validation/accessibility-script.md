@@ -70,8 +70,10 @@ tool is unavailable, record the gap.
    its normal assistive action; do not commit an unwanted preference change.
 3. Verify **Language** is similarly labelled and reachable, with identifier
    `starlight.settings.language`.
-4. Tab from **Back to hosts** once. Focus must move to Streaming display mode,
-   preserving the established keyboard and controller order.
+4. In Plasma, press Tab from **Back to hosts**. Focus should move to
+   **Search preferences**, then to **Streaming display mode** on the next
+   Tab. In GNOME, check that you can move from **Close Preferences** to
+   **Streaming display mode** and that keyboard focus stays in the dialog.
 5. Navigate to **Advanced**. It must be announced as a toggle button with
    checked/unchecked state matching whether the disclosure is open. Invoke it
    twice and verify both the visible panel and focusable descendants appear
