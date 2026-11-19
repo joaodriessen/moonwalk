@@ -2,6 +2,8 @@
 #include "utils.h"
 
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 
 #include <openssl/pem.h>
 #include <openssl/rsa.h>
@@ -13,6 +15,21 @@
 #define SER_KEY "key"
 
 IdentityManager* IdentityManager::s_Im = nullptr;
+
+#ifdef Q_OS_LINUX
+static bool protectSettingsFile(const QString& path)
+{
+    QFile file(path);
+    if (!file.exists()) {
+        if (!QDir().mkpath(QFileInfo(file).absolutePath())) return false;
+        // Establish the mode before QSettings writes credentials. NewOnly
+        // preserves the file if another instance created it in the meantime.
+        if (file.open(QIODevice::WriteOnly | QIODevice::NewOnly)) file.close();
+    }
+    return QFileInfo(file).isFile() &&
+           file.setPermissions(QFileDevice::ReadOwner | QFileDevice::WriteOwner);
+}
+#endif
 
 IdentityManager*
 IdentityManager::get()
@@ -26,7 +43,7 @@ IdentityManager::get()
     return s_Im;
 }
 
-void IdentityManager::createCredentials(QSettings& settings)
+void IdentityManager::createCredentials()
 {
     X509* cert = X509_new();
     THROW_BAD_ALLOC_IF_NULL(cert);
@@ -92,6 +109,8 @@ void IdentityManager::createCredentials(QSettings& settings)
     BIO_free(biokey);
     BIO_free(biocert);
 
+    m_CachedSslCert.clear();
+    m_CachedSslKey.clear();
     // Check that the new keypair is valid before persisting it
     if (getSslCertificate().isNull()) {
         qFatal("Newly generated certificate is unreadable");
@@ -99,55 +118,49 @@ void IdentityManager::createCredentials(QSettings& settings)
     if (getSslKey().isNull()) {
         qFatal("Newly generated private key is unreadable");
     }
-
-    settings.setValue(SER_CERT, m_CachedPemCert);
-    settings.setValue(SER_KEY, m_CachedPrivateKey);
-
-    qInfo() << "Wrote new identity credentials to settings";
 }
 
 IdentityManager::IdentityManager()
 {
     QSettings settings;
+    bool canPersist = true;
+#ifdef Q_OS_LINUX
+    canPersist = protectSettingsFile(settings.fileName());
+    if (!canPersist) {
+        qWarning() << "Could not make Moonwalk settings private. New pairing credentials will only last for this run.";
+    }
+#endif
 
     m_CachedPemCert = settings.value(SER_CERT).toByteArray();
     m_CachedPrivateKey = settings.value(SER_KEY).toByteArray();
 
-    if (m_CachedPemCert.isEmpty() || m_CachedPrivateKey.isEmpty()) {
-        qInfo() << "No existing credentials found";
-        createCredentials(settings);
-    }
-    else if (getSslCertificate().isNull()) {
-        qWarning() << "Certificate is unreadable";
-        createCredentials(settings);
-    }
-    else if (getSslKey().isNull()) {
-        qWarning() << "Private key is unreadable";
-        createCredentials(settings);
-    }
-
-    // We should have valid credentials now. If not, we're screwed
-    if (getSslCertificate().isNull()) {
-        qFatal("Certificate is unreadable");
-    }
-    if (getSslKey().isNull()) {
-        qFatal("Private key is unreadable");
+    const bool haveCredentials = !m_CachedPemCert.isEmpty() && !m_CachedPrivateKey.isEmpty();
+    const bool newCredentials = !haveCredentials || getSslCertificate().isNull() || getSslKey().isNull();
+    if (newCredentials) {
+        if (haveCredentials) qWarning() << "Saved pairing credentials could not be read.";
+        createCredentials();
+        if (canPersist) {
+            settings.setValue(SER_CERT, m_CachedPemCert);
+            settings.setValue(SER_KEY, m_CachedPrivateKey);
+        }
     }
 
     // Load the unique ID from settings
     m_CachedUniqueId = settings.value(SER_UNIQUEID).toString();
-    if (!m_CachedUniqueId.isEmpty()) {
-        qInfo() << "Loaded unique ID from settings:" << m_CachedUniqueId;
-    }
-    else {
+    const bool newUniqueId = m_CachedUniqueId.isEmpty();
+    if (newUniqueId) {
         // Generate a new unique ID in base 16
         uint64_t uid;
         RAND_bytes(reinterpret_cast<unsigned char*>(&uid), sizeof(uid));
         m_CachedUniqueId = QString::number(uid, 16);
 
-        qInfo() << "Generated new unique ID:" << m_CachedUniqueId;
-
-        settings.setValue(SER_UNIQUEID, m_CachedUniqueId);
+        if (canPersist) settings.setValue(SER_UNIQUEID, m_CachedUniqueId);
+    }
+    if (canPersist && (newCredentials || newUniqueId)) {
+        settings.sync();
+        if (settings.status() != QSettings::NoError) {
+            qWarning() << "Could not save pairing credentials to Moonwalk settings.";
+        }
     }
 }
 
@@ -172,6 +185,7 @@ IdentityManager::getSslKey()
 
         EVP_PKEY* pk = PEM_read_bio_PrivateKey(bio, nullptr, nullptr, nullptr);
         BIO_free(bio);
+        if (!pk) return {};
 
         bio = BIO_new(BIO_s_mem());
         THROW_BAD_ALLOC_IF_NULL(bio);

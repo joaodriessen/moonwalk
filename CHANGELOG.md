@@ -17,6 +17,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   reject a valid response at the end of the XML document.
 - Leave pairing and session parameters out of request logs and diagnostic
   summaries. Logs still show the request endpoint and failure status.
+- Keep the Linux settings file readable and writable only by its owner,
+  including when importing a Moonlight profile.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

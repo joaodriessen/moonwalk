@@ -3,6 +3,7 @@
 #include <QTcpSocket>
 #include <QUrlQuery>
 #include <QElapsedTimer>
+#include <QFileInfo>
 #include <cstring>
 #include "backend/nvpairingmanager.h"
 #include "backend/nvcomputer.h"
@@ -22,6 +23,7 @@ private slots:
     }
 
     void initTestCase() { IdentityManager::get()->getSslConfig(); }
+    void identitySettingsArePrivate();
     void binaryKeyPreservesEmbeddedNul();
     void malformedCiphertextIsRejected();
     void challengeBounds_data();
@@ -46,6 +48,19 @@ private slots:
     void staleResumeRecovery_data();
     void staleResumeRecovery();
 };
+
+void NvPairingManagerTest::identitySettingsArePrivate()
+{
+#ifdef Q_OS_LINUX
+    const QSettings settings;
+    const QFileInfo profile(settings.fileName());
+    QVERIFY(profile.isFile());
+    const auto publicPermissions = QFileDevice::ReadGroup | QFileDevice::WriteGroup |
+        QFileDevice::ExeGroup | QFileDevice::ReadOther | QFileDevice::WriteOther | QFileDevice::ExeOther;
+    QCOMPARE(profile.permissions() & publicPermissions, QFileDevice::Permissions());
+    QVERIFY(!settings.value("key").toByteArray().isEmpty());
+#endif
+}
 
 void NvPairingManagerTest::binaryKeyPreservesEmbeddedNul()
 {

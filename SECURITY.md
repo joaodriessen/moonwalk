@@ -15,6 +15,10 @@ Moonwalk has no automatic diagnostic upload. Review copied diagnostics before
 sharing. Moonwalk and its Moonlight Qt engine have had no independent security
 audit for this release.
 
+The Linux profile contains pairing credentials. Moonwalk restricts the settings
+file to the account that owns it. Use **Copy Diagnostic Summary** for support
+and keep the settings file private.
+
 ## Report a vulnerability
 
 Use a private channel. While the repository is private, invited collaborators

@@ -497,27 +497,24 @@ int main(int argc, char *argv[])
             if (QFile::exists(oldConfPath)) {
                 QDir().mkpath(QFileInfo(newConfPath).absolutePath());
 
-                // Copy next to the destination and rename when complete.
-                // After an interrupted copy, the next launch can retry.
-                QString tempConfPath = newConfPath + QStringLiteral(".import-tmp");
-                QFile::remove(tempConfPath); // stale leftover from a previous crashed attempt
-                if (QFile::copy(oldConfPath, tempConfPath)) {
-                    if (QFile::rename(tempConfPath, newConfPath)) {
-                        qInfo() << "Imported existing Moonlight configuration (pairings and settings) from"
-                                << oldConfPath;
-                    }
-                    else {
-                        qWarning() << "Found a Moonlight configuration at" << oldConfPath
-                                   << "but could not finalize the import to" << newConfPath
-                                   << "- starting fresh";
-                        QFile::remove(tempConfPath);
+                // The imported file can include a private key. Copy it into a
+                // private temporary file and preserve any concurrently created store.
+                QFile previous(oldConfPath);
+                QTemporaryFile imported(newConfPath + QStringLiteral(".import-XXXXXX"));
+                bool succeeded = false;
+                if (previous.open(QIODevice::ReadOnly) && imported.open()) {
+                    const auto data = previous.readAll();
+                    if (previous.error() == QFileDevice::NoError &&
+                        imported.write(data) == data.size() && imported.flush()) {
+                        imported.close();
+                        succeeded = imported.rename(newConfPath);
+                        if (succeeded) imported.setAutoRemove(false);
                     }
                 }
-                else {
-                    qWarning() << "Found a Moonlight configuration at" << oldConfPath
-                               << "but could not copy it to" << newConfPath
-                               << "- starting fresh";
-                    QFile::remove(tempConfPath);
+                if (succeeded) {
+                    qInfo() << "Imported existing Moonlight configuration (pairings and settings).";
+                } else {
+                    qWarning() << "Found an existing Moonlight configuration but couldn't import it.";
                 }
             }
         }
