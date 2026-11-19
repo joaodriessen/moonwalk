@@ -229,7 +229,7 @@ private:
 
     int m_GamepadMask;
     GamepadState m_GamepadState[MAX_GAMEPADS];
-    QSet<short> m_KeysDown;
+    QSet<uint32_t> m_KeysDown;
     LocalTextInputPolicy m_LocalTextInput;
     ForwardedMouseButtons m_ForwardedMouseButtons;
     WheelAccumulator m_VerticalWheel;

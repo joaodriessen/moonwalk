@@ -262,23 +262,6 @@ void SdlInputHandler::setWindow(SDL_Window *window)
     m_Window = window;
 }
 
-void SdlInputHandler::raiseAllKeys()
-{
-    if (m_KeysDown.isEmpty()) {
-        return;
-    }
-
-    SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION,
-                "Raising %d keys",
-                (int)m_KeysDown.count());
-
-    for (auto keyDown : std::as_const(m_KeysDown)) {
-        LiSendKeyboardEvent(keyDown, KEY_ACTION_UP, 0);
-    }
-
-    m_KeysDown.clear();
-}
-
 void SdlInputHandler::notifyMouseLeave()
 {
     // SDL on Windows doesn't send the mouse button up until the mouse re-enters the window
