@@ -4,7 +4,10 @@
 #include "streaming/session.h"
 
 #include <QCoreApplication>
+#include <QGuiApplication>
+#include <QScreen>
 #include <QTimer>
+#include <QWindow>
 
 #define COMPUTER_SEEK_TIMEOUT 30000
 #define APP_SEEK_TIMEOUT 10000
@@ -83,15 +86,18 @@ public:
                     m_State = StateSeekApp;
                     m_Computer = event.computer;
 
-                    // Per-host settings (docs/design/2026-07-14-per-host-settings.md
-                    // §4). CLI flags were parsed before the target host was
-                    // known, so m_Preferences currently holds whatever the CLI
-                    // parser set on top of the process's global/template
-                    // state. Load this host's stored connection base now that
-                    // it's known, then re-stamp exactly the fields an explicit
-                    // CLI flag set on top of it. Restores precedence: CLI flag
-                    // > selected-host stored value > template default.
+                    // CLI flags were parsed before the target host was known.
+                    // Load the selected host before reapplying explicit flags.
                     m_Preferences->setCurrentHost(m_Computer->uuid);
+                    // The CLI bypasses host selection in the launcher. Use the
+                    // launch window's screen when available, before applying any
+                    // explicit resolution or frame rate for this connection.
+                    const auto* window = QGuiApplication::focusWindow();
+                    if (const auto* screen = window ? window->screen() : QGuiApplication::primaryScreen()) {
+                        const QSize pixels = screen->size() * screen->devicePixelRatio();
+                        m_Preferences->initializeHostDisplayMode(m_Computer->uuid,
+                            pixels.width(), pixels.height(), qRound(screen->refreshRate()));
+                    }
                     m_Preferences->reapplyCliOverrides();
 
                     m_TimeoutTimer->start(APP_SEEK_TIMEOUT);
