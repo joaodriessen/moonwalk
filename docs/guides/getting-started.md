@@ -27,8 +27,9 @@ flatpak install --user ./Moonwalk-VERSION.flatpak
 flatpak run com.starlight.Starlight
 ```
 
-If Flatpak can't find the KDE 6.10 runtime, make sure Flathub is configured
-and install it with `flatpak install --user flathub org.kde.Platform//6.10`.
+If Flatpak can't find the runtime on a current build, enable Flathub and
+install it with `flatpak install --user flathub org.kde.Platform//6.11`.
+Older tester bundles may ask for KDE 6.10.
 You can also open **Moonwalk** from your app launcher after installation.
 
 ## Find the host

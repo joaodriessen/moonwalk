@@ -11,11 +11,11 @@ If you already have a checkout, run `git submodule update --init --recursive`.
 
 ## Flatpak
 
-Install `flatpak`, `flatpak-builder`, and the KDE 6.10 platform and SDK. The
+Install `flatpak`, `flatpak-builder`, and the KDE 6.11 platform and SDK. The
 recipe uses Flathub for its runtime dependencies.
 
 ```sh
-flatpak install --user flathub org.kde.Platform//6.10 org.kde.Sdk//6.10
+flatpak install --user flathub org.kde.Platform//6.11 org.kde.Sdk//6.11
 ```
 
 The [manifest](../flatpak/com.starlight.Starlight.yaml) pins a Git commit. To
