@@ -45,15 +45,15 @@ Moonwalk uses your network to find hosts, pair, and stream. It can also:
 
 - Download controller mappings and host compatibility information from
   `moonlight-stream.org`.
-- Discover your public IPv4 address using `stun.moonlight-stream.org` for
-  certain IPv4 host additions, including local discovery.
+- Look up a fallback public IPv4 address through `stun.moonlight-stream.org`
+  after some IPv4 host additions. Local pairing can proceed during the lookup.
 - Check streaming ports using `qt.conntest.moonlight-stream.org`. This can
   happen when adding a host, through **Test Internet Streaming Ports**, or after
   certain stream failures.
 
 These services receive normal connection information, such as your public
-address. **Detect blocked connections automatically** controls automatic port
-checks when adding a host manually or after a stream fails. You can still run
+address. Turn off **Detect blocked connections automatically** to skip
+automatic port checks and fallback address lookups. You can still run
 **Test Internet Streaming Ports** yourself. Moonwalk has no analytics service.
 
 When you connect to a host, permissions and pairing determine which data is

@@ -58,8 +58,8 @@ public:
 
     explicit NvComputer(QSettings& settings);
 
-    void
-    setRemoteAddress(QHostAddress);
+    bool
+    setDiscoveredRemoteAddress(QHostAddress);
 
     bool
     update(const NvComputer& that);

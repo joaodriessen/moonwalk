@@ -84,13 +84,15 @@ NvComputer::NvComputer(QSettings& settings)
     this->activeHttpsPort = 0;
 }
 
-void NvComputer::setRemoteAddress(QHostAddress address)
+bool NvComputer::setDiscoveredRemoteAddress(QHostAddress address)
 {
     QWriteLocker lock(&this->lock);
 
+    if (!remoteAddress.isNull()) return false;
     Q_ASSERT(this->externalPort != 0);
 
     this->remoteAddress = NvAddress(address, this->externalPort);
+    return true;
 }
 
 void NvComputer::serialize(QSettings& settings, bool serializeApps) const

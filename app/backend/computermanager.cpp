@@ -12,6 +12,7 @@
 #include <QCoreApplication>
 #include <QRandomGenerator>
 #include <QSettings>
+#include <atomic>
 
 #define SER_HOSTS "hosts"
 #define SER_HOSTS_BACKUP "hostsbackup"
@@ -880,6 +881,7 @@ public:
           m_Address(address),
           m_MdnsIpv6Address(mdnsIpv6Address),
           m_Mdns(mdns),
+          m_AllowExternalLookup(computerManager->m_Prefs->detectNetworkBlocking),
           m_AboutToQuit(false),
           m_Cancellation(cancellation)
     {
@@ -942,7 +944,7 @@ private:
             if (!m_Mdns) {
                 unsigned int portTestResult;
 
-                if (m_ComputerManager->m_Prefs->detectNetworkBlocking) {
+                if (m_AllowExternalLookup) {
                     // We failed to connect to the specified PC. Let's test to make sure this network
                     // isn't blocking Moonlight, so we can tell the user about it.
                     portTestResult = LiTestClientConnectivity("qt.conntest.moonlight-stream.org", 443,
@@ -955,6 +957,29 @@ private:
                 emit computerAddCompleted(false, portTestResult != 0 && portTestResult != ML_TEST_RESULT_INCONCLUSIVE);
             }
             return QString();
+        }
+    }
+
+    void learnRemoteAddress(NvComputer& computer)
+    {
+        const auto cancelled = [this]() {
+            return m_AboutToQuit || (m_Cancellation && m_Cancellation->isCancelled());
+        };
+        if (!m_AllowExternalLookup || cancelled()) return;
+        {
+            QReadLocker lock(&computer.lock);
+            if (!computer.remoteAddress.isNull()) return;
+        }
+        if (!m_Mdns && computer.getActiveAddressReachability(cancelled) == NvComputer::RI_VPN) return;
+        if (cancelled()) return;
+
+        quint32 address;
+        const int error = LiFindExternalAddressIP4("stun.moonlight-stream.org", 3478, &address);
+        if (cancelled()) return;
+        if (error != 0) {
+            qWarning() << "STUN failed to get WAN address:" << error;
+        } else if (computer.setDiscoveredRemoteAddress(QHostAddress(qFromBigEndian(address)))) {
+            emit computerStateChanged(&computer);
         }
     }
 
@@ -1028,18 +1053,6 @@ private:
                 newComputer->localAddress = m_Address;
             }
 
-            // Get the WAN IP address using STUN if we're on mDNS over IPv4
-            if (QHostAddress(newComputer->localAddress.address()).protocol() == QAbstractSocket::IPv4Protocol) {
-                quint32 addr;
-                int err = LiFindExternalAddressIP4("stun.moonlight-stream.org", 3478, &addr);
-                if (err == 0) {
-                    newComputer->setRemoteAddress(QHostAddress(qFromBigEndian(addr)));
-                }
-                else {
-                    qWarning() << "STUN failed to get WAN address:" << err;
-                }
-            }
-
             if (!m_MdnsIpv6Address.isNull()) {
                 Q_ASSERT(QHostAddress(m_MdnsIpv6Address.address()).protocol() == QAbstractSocket::IPv6Protocol);
                 newComputer->ipv6Address = m_MdnsIpv6Address;
@@ -1054,6 +1067,8 @@ private:
                 hostAddress.isInSubnet(QHostAddress("10.0.0.0"), 8) ||
                 hostAddress.isInSubnet(QHostAddress("172.16.0.0"), 12) ||
                 hostAddress.isInSubnet(QHostAddress("192.168.0.0"), 16);
+        const bool mdnsCanLearnRemote = m_Mdns &&
+            QHostAddress(newComputer->localAddress.address()).protocol() == QAbstractSocket::IPv4Protocol;
 
         {
             // Check if this PC already exists using opportunistic read lock
@@ -1100,6 +1115,7 @@ private:
                     qInfo() << existingComputer->name << "is now at" << existingComputer->activeAddress.toString();
                     emit computerStateChanged(existingComputer);
                 }
+                if (mdnsCanLearnRemote) learnRemoteAddress(*existingOwner);
             }
             else {
                 // Store this in our active sets
@@ -1113,19 +1129,6 @@ private:
                 // Drop the lock before notifying
                 m_ComputerManager->m_Lock.unlock();
 
-                // If this wasn't added via mDNS but it is a RFC 1918 IPv4 address and not a VPN,
-                // go ahead and do the STUN request now to populate an external address.
-                if (!m_Mdns && addressIsSiteLocalV4 && newComputer->getActiveAddressReachability() != NvComputer::RI_VPN) {
-                    quint32 addr;
-                    int err = LiFindExternalAddressIP4("stun.moonlight-stream.org", 3478, &addr);
-                    if (err == 0) {
-                        newComputer->setRemoteAddress(QHostAddress(qFromBigEndian(addr)));
-                    }
-                    else {
-                        qWarning() << "STUN failed to get WAN address:" << err;
-                    }
-                }
-
                 // For non-mDNS clients, let them know it succeeded
                 if (!m_Mdns) {
                     emit computerAddCompleted(true, false);
@@ -1133,6 +1136,9 @@ private:
 
                 // Tell our client about this new PC
                 emit computerStateChanged(newComputer);
+                if (mdnsCanLearnRemote || (!m_Mdns && addressIsSiteLocalV4)) {
+                    learnRemoteAddress(*owner);
+                }
             }
         }
     }
@@ -1142,7 +1148,8 @@ private:
     NvAddress m_Address;
     NvAddress m_MdnsIpv6Address;
     bool m_Mdns;
-    bool m_AboutToQuit;
+    const bool m_AllowExternalLookup;
+    std::atomic_bool m_AboutToQuit;
     QSharedPointer<NvHTTP::CancelToken> m_Cancellation;
 };
 

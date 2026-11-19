@@ -8,6 +8,9 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 - Apply the GeForce Experience compatibility check only to NVIDIA hosts. Its
   version list can no longer block Sunshine and other compatible hosts.
 - Update the Flatpak to KDE Platform 6.11.
+- Let local pairing start before the optional internet address lookup.
+  Respect the network diagnostics preference for that lookup and keep an
+  external address supplied by the host.
 - Pin every Flatpak Git dependency to a commit, keep local build paths out of
   staged provenance, and check the exported bundle against the source revision.
   Include the package's actual sandbox permissions in the verification report.
