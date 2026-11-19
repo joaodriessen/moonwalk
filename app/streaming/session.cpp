@@ -4278,6 +4278,10 @@ void Session::exec()
                     goto DispatchDeferredCleanup;
                 }
 
+                // The previous renderer owned the toolbar surface. Upload it
+                // again even when the HUD is settled and its appearance is unchanged.
+                toolbarKey.clear();
+
                 // As of SDL 2.0.12, SDL_RecreateWindow() doesn't carry over mouse capture
                 // or mouse hiding state to the new window. By capturing after the decoder
                 // is set up, this ensures the window re-creation is already done.

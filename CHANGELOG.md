@@ -26,7 +26,8 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 - Include libdrm’s copyright and license notices in the Flatpak. Make source
   archives without the local paths in Flatpak Builder’s Git metadata.
 - Follow the local light or dark theme even when the stream controls are
-  collapsed to the handle.
+  collapsed to the handle. Keep the handle visible when frame pacing
+  rebuilds the renderer mid-stream.
 - Check host status when the launcher opens in the background, so a visible
   host list can update before it gets focus.
 - Give the host a moment to release the stream during background disconnect
