@@ -1,5 +1,8 @@
 #include "buildinfo.h"
 #include <QGuiApplication>
+#if defined(Q_OS_LINUX) && QT_CONFIG(accessibility)
+#include <QAccessibleObject>
+#endif
 #include <QProcess>
 #include <QQuickWindow>
 #include <QDBusVariant>
@@ -108,6 +111,23 @@ static QMutex s_SyncLoggerMutex;
 static bool s_SuppressVerboseOutput;
 static QRegularExpression k_RikeyRegex("&rikey=\\w+");
 static QRegularExpression k_RikeyIdRegex("&rikeyid=[\\d-]+");
+#if defined(Q_OS_LINUX) && QT_CONFIG(accessibility)
+namespace {
+
+class MoonwalkAccessibleApplication final : public QAccessibleApplication
+{
+public:
+    QString text(QAccessible::Text type) const override
+    {
+        if (type == QAccessible::Name) {
+            return QGuiApplication::applicationDisplayName();
+        }
+        return QAccessibleApplication::text(type);
+    }
+};
+
+}
+#endif
 #ifdef LOG_TO_FILE
 // Max log file size of 10 MB
 static const uint64_t k_MaxLogSizeBytes = 10 * 1024 * 1024;
@@ -962,6 +982,12 @@ int main(int argc, char *argv[])
                          qgetenv("QT_QUICK_CONTROLS_MATERIAL_VARIANT"))
                    : QString()));
 
+#if defined(Q_OS_LINUX) && QT_CONFIG(accessibility)
+    // Qt's default accessible root uses the name that also keys QSettings.
+    QAccessible::installFactory([](const QString&, QObject* object) -> QAccessibleInterface* {
+        return object == QCoreApplication::instance() ? new MoonwalkAccessibleApplication : nullptr;
+    });
+#endif
     std::unique_ptr<QGuiApplication> application;
 #if defined(STARLIGHT_PLASMA_DESKTOP_ADAPTER)
     if (plasmaDesktopAdapterActive) {
