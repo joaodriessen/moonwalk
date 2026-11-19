@@ -19,6 +19,18 @@ The Linux profile contains pairing credentials. Moonwalk restricts the settings
 file to the account that owns it. Use **Copy Diagnostic Summary** for support
 and keep the settings file private.
 
+## Flatpak permissions
+
+The Flatpak uses network access for host discovery and streaming, Wayland or
+X11 for the window and input, and PulseAudio for playback. The package grants
+access to all devices for hardware decoding and controllers. It has read-only access
+to host OS files for the Gamescope compatibility layer. During a stream,
+Moonwalk can use the system session service to handle local brightness keys.
+
+The KDE runtime adds access to read Plasma appearance settings and receive
+their changes. The [bundle verifier](docs/releasing.md#build-and-test-the-candidate)
+lists the permissions read from the exported file.
+
 ## Report a vulnerability
 
 Use a private channel. While the repository is private, invited collaborators

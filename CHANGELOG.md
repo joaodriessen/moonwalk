@@ -7,7 +7,7 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
 
 - Pin every Flatpak Git dependency to a commit, keep local build paths out of
   staged provenance, and check the exported bundle against the source revision.
-
+  Include the package's actual sandbox permissions in the verification report.
 - Rewrite the README, guides, package description, and support forms to
   match the current client and the features compatible hosts provide.
 - Clarify what the host page plans to request and what Moonwalk can confirm
@@ -19,6 +19,10 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   summaries. Logs still show the request endpoint and failure status.
 - Keep the Linux settings file readable and writable only by its owner,
   including when importing a Moonlight profile.
+- Remove the unused update checker inherited from Moonlight Qt. The About
+  page links to Moonwalk's releases.
+- Update the SDL libraries in the Flatpak for upstream Wayland clipboard,
+  X11 cursor, Vulkan, and controller fixes.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

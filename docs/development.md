@@ -110,12 +110,23 @@ It excludes ignored local files and Git metadata. Review the staged contents
 before distributing them.
 
 Run the printed `build_command` from `build_working_directory`, then run the
-bundle command. The helper prints both commands. It does not build or install
-anything. Use `--build-dir` to select an existing build directory in the
-workspace. Flatpak Builder canonicalizes manifest paths, so a new staging
-directory can affect cache reuse. If you installed Flatpak Builder from
-Flathub, use `flatpak run org.flatpak.Builder` in place of `flatpak-builder` and
-pass the staged manifest as an absolute path.
+bundle command. The helper prints both commands. Use `--build-dir` to select
+an existing build directory in the workspace. If you installed Flatpak Builder
+from Flathub, use `flatpak run org.flatpak.Builder` in place of `flatpak-builder`
+and pass the staged manifest as an absolute path.
+
+For repeated builds, point a stable workspace link at each new candidate. Use
+absolute paths for `candidate` and `workspace`, then replace the last argument
+of the printed build command with `"$workspace/active-candidate/manifest.yaml"`.
+Flatpak Builder caches by manifest path, so it can reuse unchanged dependency
+builds while you keep each candidate intact for verification.
+
+```sh
+ln -sfnT "$candidate" "$workspace/active-candidate"
+```
+
+Finish the build before pointing the link at another candidate. Use a separate
+workspace for parallel builds.
 
 ## Finishing a change
 
