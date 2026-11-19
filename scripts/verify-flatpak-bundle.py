@@ -23,6 +23,44 @@ def require(actual, expected, field):
         raise ValueError(f"{field} differs from the staged candidate")
 
 
+def read_metadata(path):
+    metadata = configparser.ConfigParser(interpolation=None)
+    metadata.optionxform = str
+    metadata.read_string(path.read_text())
+    return metadata
+
+
+def sandbox_policy(metadata):
+    policy = {section: dict(metadata[section]) for section in metadata.sections()
+              if section in {"Context", "Session Bus Policy", "System Bus Policy", "Environment"}
+              or section.startswith("Policy ")}
+    context = policy.get("Context", {})
+    for key, value in context.items():
+        context[key] = set(filter(None, value.split(";")))
+    sockets = context.get("sockets", set())
+    if "fallback-x11" in sockets:
+        # Flatpak 1.14 writes both flags. Fallback takes precedence over x11.
+        sockets.discard("x11")
+    if metadata["Application"]["runtime"].startswith("org.kde.Platform/"):
+        # Newer Flatpak adds these permissions for the KDE runtime. Treat the
+        # additive defaults alike across Builder and verifier versions.
+        context.get("filesystems", set()).discard("xdg-config/kdeglobals:ro")
+        bus = policy.get("Session Bus Policy", {})
+        for name in ("com.canonical.AppMenu.Registrar", "org.kde.kconfig.notify", "org.kde.KGlobalSettings"):
+            if bus.get(name) == "talk":
+                del bus[name]
+    policy["Context"] = {key: values for key, values in context.items() if values}
+    return {section: values for section, values in policy.items() if values}
+
+
+def verify_sandbox(metadata, manifest, app_id, runtime, scratch):
+    (scratch / "files").mkdir(parents=True)
+    expected = scratch / "metadata"
+    expected.write_text(f"[Application]\nname={app_id}\nruntime={runtime}\n")
+    run("flatpak", "build-finish", "--no-exports", *manifest.get("finish-args", []), scratch)
+    require(sandbox_policy(metadata), sandbox_policy(read_metadata(expected)), "sandbox permissions or environment")
+
+
 def verify(candidate, bundle):
     manifest_path = candidate / "manifest.yaml"
     provenance = verify_stage(candidate)
@@ -53,12 +91,11 @@ def verify(candidate, bundle):
         app = root / "app"
         run(*ostree, "checkout", "--user-mode", app_ref, app)
 
-        metadata = configparser.ConfigParser(interpolation=None)
-        metadata.optionxform = str
-        metadata.read_string((app / "metadata").read_text())
+        metadata = read_metadata(app / "metadata")
         require(metadata["Application"]["name"], app_id, "application ID")
         require(metadata["Application"]["command"], command, "application command")
         require(metadata["Application"]["runtime"], runtime, "runtime ref")
+        verify_sandbox(metadata, manifest, app_id, runtime, root / "expected-permissions")
 
         share = app / "files/share"
         metainfo = share / "metainfo" / f"{app_id}.metainfo.xml"

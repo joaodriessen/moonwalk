@@ -304,11 +304,11 @@ modules:
   # app revisions. Only the diagnostic and its license need to be installed.
   - name: libva-utils
     buildsystem: simple
+    license-files: [COPYING]
     build-commands:
       - meson setup _build --prefix=/app --libdir=lib --buildtype=release -Ddrm=true -Dtests=false
       - meson compile -C _build vainfo
       - install -Dm755 _build/vainfo/vainfo /app/bin/vainfo
-      - install -Dm644 COPYING /app/share/licenses/libva-utils/COPYING
     sources:
       - type: git
         url: https://github.com/intel/libva-utils.git
