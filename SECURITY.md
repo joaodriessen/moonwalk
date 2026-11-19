@@ -1,19 +1,18 @@
 # Security
 
-Moonwalk is alpha software for computers and networks you trust. During a
-stream, the host receives your input and sends video, audio, and any enabled
-clipboard or file data. Pair only with the host you intend to use. Moonwalk
-pins the host certificate during pairing and checks it on later paired
-requests.
+Pair with a host you recognize. Moonwalk saves its certificate during pairing
+and checks it on later paired requests. During a stream the host sees your
+input and sends you video and audio. Clipboard and file data can also travel
+between the two devices when you enable those features.
 
 Video encryption depends on the host's policy and the negotiated connection.
 Open **Stream Controls** to check whether the video is encrypted. Keep host
 ports off the public internet. For remote access, use a private network route
 such as a VPN.
 
-Moonwalk has no automatic diagnostic upload. Review copied diagnostics before
-sharing. Moonwalk and its Moonlight Qt engine have had no independent security
-audit for this release.
+**Copy Diagnostic Summary** copies text to your clipboard. Read it before
+sharing it. This alpha and its Moonlight Qt engine have had no independent
+security audit for this release.
 
 The Linux profile contains pairing credentials. Moonwalk restricts the settings
 file to the account that owns it. Use **Copy Diagnostic Summary** for support

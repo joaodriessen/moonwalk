@@ -12,7 +12,7 @@ build.
 | **GNOME and KDE Plasma on Wayland** | The installed Flatpak streamed on both desktops. The GNOME test opened Settings through its accessibility menu and the Plasma test mapped the pointer across a 2× display. Physical input and GPU coverage are still limited. |
 | **Hyprland and other desktops** | Moonwalk uses the generic layout here. The installed Flatpak streamed under nested Hyprland. Its local cursor matched the desktop cursor in height at 2×, and closing the window ended the session. Other compositors may behave differently. |
 | **X11** | Available as a fallback. Coverage is more limited than on Wayland. |
-| **Native Linux build** | CI builds on Ubuntu 24.04 with Qt 6.4.2. The Flatpak uses its own Qt runtime. See [build instructions](building.md) for other distributions. |
+| **Native Linux build** | Tested on Ubuntu 24.04 with Qt 6.4.2. The Flatpak has its own Qt runtime. See [build instructions](building.md) for other distributions. |
 | **Other client platforms** | Moonwalk targets x86-64 Linux. See [Moonlight](https://moonlight-stream.org/) for clients on other platforms. |
 
 | Host | Streaming checks |
@@ -57,8 +57,8 @@ advertises and allows for your paired device.
 
 A host that accepts live bitrate changes can still pause video briefly to restart
 its encoder. HDR, 4:4:4, surround sound, high refresh rates, and gamepads depend on
-the whole chain from host to display. Moonwalk Host currently streams SDR and
-stereo, and maps gamepad input to keyboard and mouse.
+the whole chain from host to display. Moonwalk Host targets SDR and stereo.
+It can emulate a keyboard and mouse when a macOS virtual gamepad is unavailable.
 
 ## Which desktop you get
 
@@ -76,13 +76,12 @@ If a check fails or the session changes, the attempt stops. Hosts without those
 controls may need the original client to end the retained session. The host
 handles display preparation and restoration.
 
-The stream resolution measures the encoded picture. The host may have scaled an
-existing desktop before encoding it, and Windows text size is a separate host
-setting. When available, the FFmpeg decoder can verify the picture dimensions
-received. There is no standard response that verifies the capture size or the
-effective Windows UI scale. A host may warn that it disabled the virtual
-display. Moonwalk shows the warning and continues with the picture the host
-provides.
+The resolution you receive is the size of the encoded picture. A host can
+resize a smaller desktop before encoding it. The FFmpeg decoder can report
+the received picture size. Windows text size is set on the host, and the
+standard protocol can't verify the capture size or effective UI scale. If the
+host reports that it disabled a virtual display, Moonwalk shows the warning
+and continues with the picture the host provides.
 
 In isolated GNOME and Plasma tests, a 2880×1800 display at 2× scaling
 requested 2880×1800 at 60 fps with 2× desktop scaling from a host that

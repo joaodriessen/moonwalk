@@ -2838,13 +2838,13 @@ bool Session::startConnectionAsync()
         traceStartup("host-prepared");
     } catch (const GfeHttpResponseException& e) {
         if (!m_StartCancellation.isCancelled())
-            emit displayLaunchError(tr("Couldn't start the stream. (%1)").arg(e.toQString()));
+            emit displayLaunchError(tr("Couldn't start the stream. Host response: %1").arg(e.toQString()));
         return false;
     } catch (const QtNetworkReplyException& e) {
         m_RetryableTermination = m_ResumeOnly && e.getError() != QNetworkReply::SslHandshakeFailedError &&
                 e.getError() != QNetworkReply::OperationCanceledError;
         if (!m_StartCancellation.isCancelled())
-            emit displayLaunchError(tr("Couldn't start the stream. (%1)").arg(e.toQString()));
+            emit displayLaunchError(tr("Couldn't start the stream. Connection error: %1").arg(e.toQString()));
         return false;
     }
 

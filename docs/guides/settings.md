@@ -10,9 +10,10 @@ controls. Moonwalk remembers those choices when you switch back to Automatic.
 
 ## Stream
 
-**Picture and bandwidth** sets the picture Moonwalk asks the host for.
-Automatic targets your display's size and refresh rate, taking host and decoder
-limits into account. The numbers on the host card describe the request.
+Under **Picture and bandwidth**, Automatic starts with your display's size and
+refresh rate, then accounts for host and decoder limits. The host card shows
+what Moonwalk plans to request. Open Stream Controls to see how the stream is
+actually running.
 
 | Manual setting | What it changes |
 | --- | --- |
@@ -27,9 +28,9 @@ See [Streaming performance](performance.md) for what **Automatic**,
 
 ## Display
 
-**Size and fit** covers the host's display and the local view. In Automatic,
-Moonwalk fits the picture to the window and requests a size for the host
-display when the host supports it.
+**Size and fit** covers two screens. **View scale** changes how the picture
+fits your window. **Host display** and **Remote text size** ask the host to
+change the remote desktop where it supports those options.
 
 | Manual setting | What it changes |
 | --- | --- |

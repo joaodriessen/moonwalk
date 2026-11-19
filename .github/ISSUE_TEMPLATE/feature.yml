@@ -1,5 +1,5 @@
 name: Suggest a change
-description: Describe something you want to do with Moonwalk.
+description: Suggest something Moonwalk could make easier.
 labels: [enhancement]
 body:
   - type: textarea
@@ -10,9 +10,9 @@ body:
   - type: textarea
     id: today
     attributes:
-      label: Where does the current app get in the way?
+      label: What's hard to do today?
   - type: textarea
     id: idea
     attributes:
       label: What would help?
-      description: If you have a host or desktop in mind, mention it.
+      description: Mention the host app or Linux desktop if it matters for your idea.

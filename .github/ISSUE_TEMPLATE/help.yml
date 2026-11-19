@@ -1,5 +1,5 @@
 name: Ask for help
-description: Get unstuck while installing, pairing, or streaming.
+description: Ask about installing, pairing, or using a stream.
 labels: [help wanted]
 body:
   - type: markdown

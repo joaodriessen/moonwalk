@@ -665,11 +665,8 @@ private:
     void run()
     {
         try {
-           // Construct INSIDE the try: NvPairingManager's constructor loads this
-           // client's identity cert/key, which can throw. Constructed outside the
-           // try (as it was), that throw is uncaught on a QThreadPool worker thread
-           // and std::terminate()s the WHOLE app -- a pairing attempt should fail
-           // gracefully, never crash Starlight.
+           // Loading the client certificate and key can throw. Catch that here
+           // so pairing fails without terminating the worker process.
            NvPairingManager pairingManager(m_Computer, m_Cancellation.data());
 
            NvPairingManager::PairState result = pairingManager.pair(m_Computer->appVersion, m_Pin, m_Computer->serverCert);
@@ -684,7 +681,7 @@ private:
                break;
            case NvPairingManager::PairState::FAILED:
                if (m_Computer->currentGameId != 0) {
-                   emit pairingCompleted(m_Computer, tr("You cannot pair while a previous session is still running on the host. Quit any running apps or reboot the host, then try pairing again."), m_AttemptId);
+                   emit pairingCompleted(m_Computer, tr("Pairing failed while the host had a session open. End that session, then try pairing again."), m_AttemptId);
                }
                else {
                    emit pairingCompleted(m_Computer, tr("Pairing failed. Please try again."), m_AttemptId);

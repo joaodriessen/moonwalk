@@ -1,8 +1,7 @@
 # Preparing a release
 
-Decide separately when to publish source, distribute a tester build, and call
-a release stable. Keep the app ID and settings identity so an upgrade can
-reuse existing settings and pairings.
+You can open the source repository before distributing a build. Keep the app
+ID and settings identity so upgrades can reuse existing settings and pairings.
 
 ## Check the repository
 
@@ -35,13 +34,17 @@ tracks the inherited engine version.
   [screenshot workflow](screenshots.md).
 - Build from a clean recursive clone. After the visibility change, verify
   anonymous access to the repository, submodules, and required source inputs.
+- GitHub Actions is disabled during the private alpha. When the repository is
+  ready for public CI, open **Settings → Actions → General** and enable Actions.
+  Run **Linux checks** manually, then check that a push starts it. Use the pinned
+  workflows in `.github/workflows/`.
 
 ## Build and test the candidate
 
-Run **Flatpak candidate** from GitHub Actions to build the selected revision on
-a fresh runner. The workflow uploads the bundle, portable source archive,
-checksums, and verification report. Keep them together. Before distributing an
-older bundle, verify that its exact corresponding sources are available too.
+Build private candidates locally. Once Actions is enabled, **Flatpak candidate**
+can build a selected revision on a fresh runner. It uploads the bundle, portable
+source archive, checksums, and verification report. Keep them together. Make
+sure the corresponding source is available before distributing an older bundle.
 
 1. Commit the candidate. Run the relevant [development checks](development.md),
    including the shipped runtime, AOT build, and desktop and streaming checks

@@ -1,10 +1,9 @@
 # Contributing to Moonwalk
 
-If something breaks, tell us what you saw and how to reproduce it. Reports
-from different GPUs, desktops, and hosts help us find gaps in the current
-testing. Use the [issue forms](https://github.com/joaodriessen/moonwalk/issues/new/choose).
-For a larger feature or change in behavior, discuss the problem in an issue
-before spending time on a patch.
+When something breaks, tell us which client and host builds you used, what
+you tried, and what happened. If the issue is visual or affects performance,
+include your Linux desktop and GPU. For a larger change, open an issue
+describing what you'd like to do before starting a patch. [Issue forms](https://github.com/joaodriessen/moonwalk/issues/new/choose)
 
 ## Work on the code
 
@@ -22,10 +21,10 @@ still say `PC`. Keep those identifiers when editing the copy around them.
 
 ## Send a patch
 
-Explain what changed, why, and how you checked it. For a visible change,
-show the affected screen with an example host. Explain what new dependencies
-are for and include their licenses. The same review and testing standards
-apply to AI-assisted changes.
+Tell us what changed, why, and which checks you ran. For an interface change,
+show the screen with an example host. If you add a dependency, explain what
+it does and include its license. Review and test AI-assisted changes with the
+same care as any patch.
 
 Use fictional hosts and documentation addresses in tests and examples. Read
 [repository privacy](docs/privacy.md) before sharing diagnostic text, screenshots,

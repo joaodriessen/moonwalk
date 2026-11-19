@@ -2,15 +2,15 @@
 
 ## Set up a host
 
-Install and start host software on the computer you want to control. Use
+Install and start a host app on the computer you want to control. Use
 [Sunshine](https://github.com/LizardByte/Sunshine) on Windows or Linux, or
 [Apollo](https://github.com/ClassicOldSong/Apollo) or
 [Vibepollo](https://github.com/Nonary/Vibepollo) on Windows. If you're testing the
 Mac companion, see [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host).
 
-In the host's application list, look for **Desktop**. Moonwalk uses this entry
-to open the remote desktop. Moonwalk Host includes it. On hosts that manage an
-application list, add **Desktop** with no launch command if it's missing.
+Moonwalk opens the **Desktop** entry from the host's app list. Moonwalk Host
+includes it. If your host lets you edit its app list and **Desktop** is
+missing, add it with the launch command left blank.
 
 ## Install Moonwalk
 
@@ -18,18 +18,18 @@ Use the Flatpak bundle supplied for testing, or [build from source](../building.
 If you don't have Flatpak yet, follow [the setup instructions](https://flatpak.org/setup/)
 for your distribution.
 
-Run these commands from the directory containing your bundle. Substitute its
-filename for `Moonwalk-VERSION.flatpak`. Some tester builds start with
-`Starlight`.
+In the directory containing the download, run these commands with your
+bundle's filename. Older tester builds may start with `Starlight`.
 
 ```sh
 flatpak install --user ./Moonwalk-VERSION.flatpak
 flatpak run com.starlight.Starlight
 ```
 
-If Flatpak can't find the runtime on a current build, enable Flathub and
-install it with `flatpak install --user flathub org.kde.Platform//6.11`.
-Older tester bundles may ask for KDE 6.10.
+If Flatpak can't find the runtime, enable Flathub and install the branch named
+in the error. Current bundles use
+`flatpak install --user flathub org.kde.Platform//6.11`. Some older builds use
+6.10.
 You can also open **Moonwalk** from your app launcher after installation.
 
 ## Find the host
@@ -80,7 +80,7 @@ picture to control the host again. Press **Ctrl+Alt+Shift+Q** to disconnect,
 or open the controls at the top of the picture and choose **Disconnect**.
 
 Moonwalk returns to the host list while it asks the host to end the Desktop
-stream. Your remote desktop applications stay open. See
+stream. You stay logged in on the host. See
 [stream controls and shortcuts](while-streaming.md) for details.
 
 ## Update or remove Moonwalk

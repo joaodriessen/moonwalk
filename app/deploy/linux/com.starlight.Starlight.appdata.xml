@@ -7,11 +7,11 @@
 	<summary>Stream and control another computer from Linux</summary>
 
 	<description>
-		<p>Moonwalk streams a remote desktop in a window or fullscreen. It sends keyboard, mouse, and gamepad input back to the host. The interface follows GNOME and KDE Plasma, and each host has its own stream settings.</p>
-		<p>Moonwalk is in alpha and designed for use on a local network. Run compatible host software on the computer you want to control.</p>
+		<p>Use another computer from your Linux desktop. Open its desktop in a window or fullscreen, with sound and keyboard, mouse, and gamepad input. Moonwalk has layouts for GNOME and KDE Plasma and remembers settings for each host.</p>
+		<p>Moonwalk is in alpha. Run a compatible host app on the computer you want to control and connect both devices to the same local network.</p>
 		<ul>
 			<li>Discover a host, pair with a PIN, and open its Desktop entry.</li>
-			<li>Start with Automatic settings based on your display, or choose a mode for each host.</li>
+			<li>Start with your display’s size and refresh rate in Automatic, or choose your own settings for a host.</li>
 			<li>Mute sound, release input, change the view, or disconnect from the stream controls.</li>
 			<li>Copy text, images, or files when the paired host supports it.</li>
 		</ul>

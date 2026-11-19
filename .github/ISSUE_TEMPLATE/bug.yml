@@ -1,5 +1,5 @@
 name: Report a bug
-description: Help us reproduce something that went wrong.
+description: Report a problem someone else can try to reproduce.
 labels: [bug]
 body:
   - type: markdown
@@ -12,7 +12,7 @@ body:
     id: happened
     attributes:
       label: What went wrong?
-      description: Tell us what you saw and what you expected. Include the error message if there was one.
+      description: What did Moonwalk do? What should it have done? If it showed an error, include the wording.
     validations: {required: true}
   - type: textarea
     id: steps
@@ -29,14 +29,14 @@ body:
   - type: input
     id: system
     attributes:
-      label: Client distribution, desktop, and GPU
-      placeholder: Fedora, GNOME Wayland, Intel integrated graphics
+      label: Linux distribution, desktop, and GPU
+      placeholder: Fedora, GNOME on Wayland, Intel Iris Xe
     validations: {required: true}
   - type: input
     id: host
     attributes:
       label: Host app, version, and OS
-      placeholder: Sunshine on Windows 11
+      placeholder: Sunshine 2025.924.154138 on Windows 11
     validations: {required: true}
   - type: dropdown
     id: network
@@ -47,5 +47,5 @@ body:
     id: diagnostics
     attributes:
       label: Diagnostic summary
-      description: Choose Copy Diagnostic Summary in Moonwalk's main menu. Remove host names, addresses, and other private details before pasting.
+      description: After the problem happens, choose Copy Diagnostic Summary in the main menu. Review it for private details, then paste the relevant lines.
       render: text

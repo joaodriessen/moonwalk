@@ -13,10 +13,10 @@ The core protocol library, `moonlight-common-c`, is a pinned submodule. See
 | `app/streaming/` | Stream planning, SDL input and presentation, decoding, audio, and host extensions |
 | `moonlight-common-c/moonlight-common-c/` | Common streaming protocol implementation |
 
-Keep changes in the engine focused and test the affected C++ path. Moonwalk
-extends the engine for clipboard sync, cursor shapes, file transfer, live
-quality, and desktop session cleanup. Use the host's advertised capabilities
-and the paired device's permissions before using an extension.
+Moonwalk adds clipboard sync, cursor shapes, file transfer, live bitrate, and
+desktop session cleanup to the engine. Gate each extension on what the host
+advertises and allows for the paired device. Keep engine patches small and
+test the C++ path they change.
 
 ## Desktop surfaces
 

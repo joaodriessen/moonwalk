@@ -31,8 +31,9 @@ updates and removal.
 
 ## Native Linux build
 
-CI builds on Ubuntu 24.04 with Qt 6.4.2. The following packages include the
-compiler and Qt Quick modules needed for a native build and offscreen checks.
+Ubuntu 24.04 with Qt 6.4.2 is the oldest build environment we currently test.
+Install the compiler and Qt Quick modules below for a native build and
+offscreen checks.
 
 ```sh
 sudo apt-get update

@@ -6,8 +6,9 @@ Make sure both computers are on the same local network and the host software is
 running. A guest Wi-Fi network can keep devices from reaching each other.
 Check **Find hosts on the local network automatically** in Preferences.
 
-If the host doesn't appear, use **Add Host…** to enter its local address.
-On macOS, look under **System Settings → Network** in the connection details.
+If the host doesn't appear, enter its local address with **Add Host…**.
+On Moonwalk Host, copy an address from **Settings… → Network**. On macOS you
+can also find the address in **System Settings → Network**.
 On Windows, run `ipconfig` and look for the active adapter's IPv4 address. On
 Linux, run `ip -4 addr`. If the address works but discovery still fails,
 check multicast and firewall settings with the host's documentation.
@@ -34,11 +35,11 @@ start **Desktop** and has keyboard and mouse permission if you need control.
 If the host is asleep, use **Wake and Connect** if it appears. Otherwise wake
 it at the machine and check that its host software is running.
 
-**In use** means the host reports a running target. If you just disconnected,
-give background cleanup a moment. If cleanup couldn't finish, the old target
-may still be resumable. If Moonwalk offers **Take Over Desktop?**, it can ask
-the host to clear that session before starting a new one. This can disconnect
-other viewers. See [which desktop you get](../compatibility.md#which-desktop-you-get).
+**In use** means the host still reports a running session. Wait a moment if
+you just disconnected. If the host kept the session open, it may offer to
+resume it. **Take Over Desktop?** asks the host to end the existing Desktop
+before starting a fresh one. It can disconnect other viewers.
+[Which desktop you get](../compatibility.md#which-desktop-you-get)
 
 ## Moonwalk can't find Desktop
 
@@ -55,8 +56,9 @@ be the right pixel size while the host's text scale is wrong.
 
 ## Is hardware video decoding working?
 
-The application can warn when it can't find a usable hardware decoder.
-The Flatpak includes video libraries and drivers for some older Intel GPUs.
+Moonwalk can warn when it can't find a hardware decoder for the requested
+codec. The Flatpak includes video libraries and drivers for some older Intel
+GPUs.
 NVIDIA graphics can require a Flatpak driver extension that matches the
 installed driver. Availability depends on the codec and the selected renderer
 as well as the GPU. The `vainfo` command only tests a VA-API configuration.

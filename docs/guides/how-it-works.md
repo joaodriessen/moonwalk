@@ -13,9 +13,8 @@ travels in the other direction. On a suitable setup, the host and client GPUs
 do the video encoding and decoding. Software paths also exist, depending on
 the hardware, drivers, and codec.
 
-Pairing identifies the client to the host before the first stream. You enter
-the PIN in the host's pairing screen. The host can then grant that device
-permissions to stream, send input, or use optional features.
+Enter Moonwalk's PIN in the host app. This lets the host recognize the client
+on later connections and apply the permissions for that device.
 
 ## Terms
 

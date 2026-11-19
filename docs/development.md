@@ -74,9 +74,13 @@ Use QtTest's `findChild` for named controls. Reserve the graph walker for tests
 that need to enumerate UI objects, and keep facade snapshots and Qt values out
 of that traversal.
 
-## GitHub checks
+## GitHub Actions
 
-Every run checks documentation links and headings, screenshot hashes, the
+Actions is disabled in the private repository. Use the local commands above
+for changes now. The [release checklist](releasing.md#before-opening-the-repository)
+covers turning Actions on.
+
+When enabled, each run checks documentation links and headings, screenshot hashes, the
 product version, and privacy in the proposed commits.
 Application changes also run the tests on Ubuntu 24.04's Qt 6.4.2 and compile
 the production QML. Changes limited to QML and JavaScript stop there. A change

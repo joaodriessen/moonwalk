@@ -1,9 +1,8 @@
 # Who controls stream settings
 
-Moonwalk knows the client screen, decoder, input devices, and user's
-preferences. The host knows what it can capture and encode, which displays
-are available, and what the paired device may do. The client requests a mode
-and the host applies its own limits and policies.
+Moonwalk picks a stream mode from the local display, your preferences, and
+the decoder. The host applies its own capture, encoding, and permission
+limits before the stream starts.
 
 | Setting | Moonwalk | Host |
 | --- | --- | --- |

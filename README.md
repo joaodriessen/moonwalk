@@ -10,10 +10,10 @@
   <a href="docs/guides/troubleshooting.md">Troubleshooting</a>
 </p>
 
-Moonwalk streams another computer's desktop to Linux. Open a stream in a window
-or fullscreen and use your keyboard, mouse, or gamepad as if you were sitting at
-the other machine. It's built on Moonlight Qt, with an interface for GNOME and KDE
-Plasma and stream settings you can save for each host.
+Moonwalk lets you use another computer from your Linux desktop. It shows the
+remote picture and plays its sound, and sends your keyboard, mouse, and gamepad
+input back. It uses the Moonlight Qt engine, with GNOME and KDE Plasma layouts and
+settings you can save separately for each host.
 
 > [!NOTE]
 > Moonwalk is alpha software. If you have a tester build, follow the
@@ -30,42 +30,40 @@ Plasma and stream settings you can save for each host.
 ## What you need
 
 - An **x86-64 Linux** computer for Moonwalk. Flatpak is the primary build.
-- A **host** on the computer you want to use. [Sunshine](https://github.com/LizardByte/Sunshine)
+- A **host app** on the computer you want to use. [Sunshine](https://github.com/LizardByte/Sunshine)
   runs on Windows and Linux. [Apollo](https://github.com/ClassicOldSong/Apollo)
   and [Vibepollo](https://github.com/Nonary/Vibepollo) are Windows options.
-  [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host) is the companion
-  app for Apple Silicon Macs running macOS 14 or later.
+  [Moonwalk Host](https://github.com/joaodriessen/moonwalk-host) is an option for
+  Apple Silicon Macs running macOS 14 or later.
 - A **local network** both machines can reach. Use a network and hosts you trust.
 
-Start the host and make sure it has a **Desktop** entry. Select the host in
-Moonwalk, click **Pair**, and enter the PIN on the other computer. Then click
-**Connect**. The
-[setup guide](docs/guides/getting-started.md) walks through discovery, pairing,
-and adding a host by address.
+Start the host app and make sure its app list includes **Desktop**. Select the
+host in Moonwalk and click **Pair**. Enter the PIN Moonwalk shows in the host
+app's pairing screen, then click **Connect** in Moonwalk. If the host doesn't
+appear, the [setup guide](docs/guides/getting-started.md) shows how to add it by
+address.
 
-## What Moonwalk does
+## What happens when you connect
 
-- **Starts with your display.** Automatic uses your screen's resolution and
-  refresh rate as targets, then accounts for what the host and your decoder can
-  handle. Each host keeps its own Manual settings.
-- **Keeps a working stream connected.** Moonwalk can adjust bitrate in place on
-  hosts that support it. It saves picture changes for the next connection, or
-  you can choose **Apply Now** to reconnect yourself.
-- **Puts stream controls within reach.** Use the handle at the top of the picture
-  to mute, release input, change the view, or disconnect. Disconnect returns
-  you to the host list while Moonwalk asks the host to end the Desktop session.
-- **Uses the features the host offers.** Depending on host version and
-  permissions, that can include clipboard sync, a virtual display, and live
-  bitrate changes. Moonwalk Host also supports image clipboard and file transfer.
+- **Automatic** starts with your screen's resolution and refresh rate, then
+  accounts for what the host and decoder can handle.
+- On hosts with live bitrate control, Moonwalk can adjust bitrate during the
+  stream. It saves resolution changes for next time. Use **Apply Now** if you
+  want to reconnect with a change right away.
+- Click the handle at the top of the picture to mute sound, release input, fit
+  the picture, or disconnect. **Disconnect** takes you straight back to the host
+  list while Moonwalk asks the host to end the Desktop session.
+- Clipboard sync, virtual displays, and live bitrate changes depend on the host
+  and what it permits your device to do. Moonwalk Host also offers image
+  clipboard and file transfer.
 
-The [compatibility guide](docs/compatibility.md) has the tested setups and feature
-limits. The standard connection uses PIN pairing and the host's existing
-**Desktop** entry. Open games from the remote desktop.
+You can open games from the remote desktop. The [compatibility guide](docs/compatibility.md)
+shows the setups we've tried and which features each host offers.
 
 ## GNOME and KDE Plasma
 
-Moonwalk picks a layout based on your desktop. On Hyprland and other desktops,
-it uses the GNOME-style layout and lets the compositor manage the window.
+Moonwalk picks a layout based on your desktop. On Hyprland and other desktops
+it uses the generic layout, with window placement handled by your compositor.
 
 <p align="center">
   <picture>

@@ -209,8 +209,8 @@ ApplicationWindow {
                         visible: !!panel.state.automaticBitrate
                         title: qsTr("Video quality")
                         subtitle: panel.state.automaticBitrateDeferred
-                            ? qsTr("Automatic bitrate changes will apply the next time you connect.")
-                            : qsTr("Moonwalk can adjust this bitrate target during the stream.")
+                            ? qsTr("The next connection will use any new automatic bitrate target.")
+                            : qsTr("Moonwalk can raise or lower this target while you stream.")
                         Label {
                             objectName: "starlight.controls.automatic-bitrate"
                             text: panel.state.automaticBitrateKbps > 0 ? qsTr("%1 Mbps").arg((panel.state.automaticBitrateKbps / 1000).toFixed(1)) : qsTr("Measuring…")
@@ -223,7 +223,7 @@ ApplicationWindow {
                         subtitle: panel.state.liveBitrateNotice
                                   || (panel.state.liveBitrateRebuilds
                                       ? qsTr("The host applies the bitrate when you release the slider. Video may pause briefly.")
-                                      : qsTr("Changes the bitrate during the stream."))
+                                      : qsTr("Move the slider to change the bitrate while you stream."))
                         Label {
                             objectName: "starlight.controls.bitrate-value"
                             text: qsTr("%1 Mbps").arg((bitrateValue.kbps / 1000).toFixed(1))

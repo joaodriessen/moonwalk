@@ -1,8 +1,8 @@
 ## What changed and why?
 
-## What did you test?
+## How did you test it?
 
-## What should a reviewer check?
+## What still needs checking?
 
-For visible changes, include the affected screen with an example host. Review
-logs and attachments for private information before sharing.
+For an interface change, show the affected screen with example hosts. Review
+logs and attachments for private details before sharing them.

@@ -15,9 +15,9 @@ what still needs testing.
 | [Release checklist](releasing.md) | Qualify a candidate for distribution |
 | [Screenshots](screenshots.md) | Refresh the synthetic documentation images |
 | [Privacy](privacy.md) | Check source, issue reports, and artifacts for private data |
-| [Security](../SECURITY.md) | Understand the trust model and report a vulnerability |
+| [Security](../SECURITY.md) | Check what Moonwalk can access and report a vulnerability privately |
 | [Changelog](../CHANGELOG.md) | Look up changes by build |
 
-The [design notes](design/) record architecture decisions and migrations.
-The [validation reports](validation/) describe particular test runs. Dates and
-limits in those reports matter when applying their results to current code.
+Use the [design notes](design/) to see why a part of the code was built a
+certain way. The [validation reports](validation/) record specific test runs
+and the versions they cover.

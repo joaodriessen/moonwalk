@@ -16,9 +16,10 @@ and leaves the original files in place.
 
 ## Do I need Moonwalk Host?
 
-Use Moonwalk Host if you have access to the Mac companion alpha and want to
-stream your Mac. On Windows and Linux, use a compatible host such as Sunshine.
-Apollo and Vibepollo are Windows alternatives. The
+Moonwalk works with the host you already use, as long as it speaks the
+Moonlight protocol. Sunshine is an option for Windows and Linux. Apollo and
+Vibepollo are Windows alternatives, and Moonwalk Host is available to testers
+on Apple Silicon Macs. The
 [compatibility table](../compatibility.md#features-by-host) shows which extras
 each host can provide.
 
@@ -31,9 +32,8 @@ Moonlight. See [Security](../../SECURITY.md).
 
 ## Is the stream encrypted?
 
-It depends on what the host and client negotiate. Encrypted pairing or input
-doesn't establish that video is encrypted. Open **Stream Controls** to see
-whether the connection negotiated video encryption.
+Video encryption depends on the host and what the two apps negotiate.
+Open **Stream Controls** to see whether your picture is encrypted.
 
 ## Does Moonwalk send data anywhere else?
 

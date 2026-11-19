@@ -16,9 +16,9 @@ outside GitHub, including in private branches and pull requests.
 Run `python3 scripts/check-privacy.py` before pushing. It checks the Git index
 for common secret formats, private paths, and certain image metadata. Enable
 the local push guard with `git config --local core.hooksPath .githooks` to check
-every new commit, its message, and its author and committer addresses. GitHub
-Actions checks new commits and the proposed tree, with findings summarized
-without filenames. Read the diff, commit messages, images, and any GitHub
+every new commit, its message, and its author and committer addresses. When
+enabled, Actions checks new commits and the proposed tree and summarizes
+findings without filenames. Read the diff, commit messages, images, and any GitHub
 attachments yourself as well.
 
 If something private reaches GitHub, contact a maintainer privately. Removing

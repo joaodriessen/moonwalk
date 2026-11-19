@@ -39,7 +39,7 @@ Item {
                 if (streamHandoffFn(nextSession, nextAppName))
                     return
                 if (terminalRecoveryFn)
-                    terminalRecoveryFn(qsTr("Unable to create stream session"))
+                    terminalRecoveryFn(qsTr("Couldn't start a new stream. Go back to the host page and try again."))
                 stackView.pop()
                 return
             }
@@ -73,7 +73,7 @@ Item {
         if (quitRunningAppFn && !quitDispatchStarted) {
             quitDispatchStarted = true
             if (quitRunningAppFn() === false)
-                quitAppCompleted(qsTr("Unable to dispatch the running app quit request"))
+                quitAppCompleted(qsTr("Couldn't ask the host to end the running session."))
         }
     }
 

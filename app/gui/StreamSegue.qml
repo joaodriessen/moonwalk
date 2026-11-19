@@ -73,9 +73,9 @@ Item {
         retrying = false
         spinnerShown = false
         stageShown = true
-        stageText = trialOutcome ? qsTr("Safe settings test finished")
+        stageText = trialOutcome ? qsTr("Safe settings tested")
                                  : everEstablished || !hostName ? qsTr("Stream ended")
-                                 : qsTr("Could Not Connect to %1").arg(hostName)
+                                 : qsTr("Couldn't connect to %1").arg(hostName)
         window.visible = true
     }
     function scheduleAfterCleanup() {
@@ -100,7 +100,7 @@ Item {
         var previous = session
         var next = previous.createRetrySession(safeSettings === true, automatic || everEstablished, !automatic, lastSuccessful === true)
         if (!next) {
-            lastFailure = qsTr("The remote session changed or ended. Return to the host page and connect again.")
+            lastFailure = qsTr("The host session changed. Go back to the host page and connect again.")
             showTerminalFailure()
             return false
         }
@@ -124,7 +124,7 @@ Item {
         stagesDone = 0
         spinnerShown = true
         stageShown = true
-        stageText = automatic ? qsTr("Reconnecting… attempt %1 of 5").arg(retryAttempts) : qsTr("Trying %1…").arg(appName)
+        stageText = automatic ? qsTr("Reconnecting… attempt %1 of 5").arg(retryAttempts) : qsTr("Opening %1…").arg(appName)
         startStreamWhenReady()
         return true
     }

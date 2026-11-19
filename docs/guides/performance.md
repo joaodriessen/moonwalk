@@ -3,15 +3,18 @@
 Press **Ctrl+Alt+Shift+S** while streaming to see the video statistics. For a
 quick check, open **Stream Controls** with **Ctrl+Alt+Shift+O**.
 
-When a moving picture looks uneven, compare the requested rate with the rate
-the client submits to the decoder and the rate it renders. A still desktop
-may send fewer updates.
-Stream Controls shows the requested frame rate in the stream details.
-The live rate counts frames the client renders. RTT is the network round trip.
-Host processing, decoding, and the queue before presentation have separate
-counters. Frames can go missing before decoding when packets are lost or the
-client's decode queue fills. Measuring from a key press to a change on the
-panel requires timing from both ends.
+When a moving picture looks uneven, compare these numbers while scrolling or
+moving a window. A still desktop may send fewer frames.
+
+| Statistic | What to look for |
+| --- | --- |
+| Requested frame rate | The target shown in Stream Controls. |
+| Frames submitted for decoding | How much video reached the decoder. Look at packet loss and host processing if this falls well below the target during motion. |
+| Rendered frames | How often Moonwalk draws the stream. Decode time, the display queue, and frames skipped to catch up help explain a drop here. |
+| RTT | The network round trip. Input-to-picture delay also includes capture, encoding, decoding, and display time. |
+
+Frames can go missing before decoding when the network drops packets or the
+client's decode queue fills. The frame gap count alone can't tell you which.
 
 ## If the stream stutters
 
@@ -34,9 +37,10 @@ picture and keeps the requested frame rate during those size trials. A bitrate
 target is a video encoder setting. Actual traffic varies with the picture and
 includes transport overhead.
 
-- **Automatic** bitrate can change in place on suitable hosts after Moonwalk
-  sees sustained pressure or spare capacity. An encoder that may need to
-  restart is handled more conservatively.
+- **Automatic** bitrate can fall under sustained network pressure and rise
+  again as the link recovers. On hosts with live bitrate control, Moonwalk can
+  also try a lower target when the host itself is sending too few frames.
+  Moonwalk is more cautious when a change may restart the encoder.
 - **Recommended** starts with an estimate when live bitrate adjustment is
   unavailable. If delivery slows under sustained network or encoder pressure,
   Moonwalk can try a lower bitrate at the same resolution the next time you

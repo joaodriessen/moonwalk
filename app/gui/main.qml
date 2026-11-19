@@ -481,7 +481,7 @@ ApplicationWindow {
     function copyDiagnosticSummary() {
         var copied = typeof supportInfo !== "undefined" && supportInfo.copySummary()
         showToast(copied ? qsTr("Diagnostic summary copied. Review before sharing.")
-                        : qsTr("Could not copy diagnostic summary"))
+                        : qsTr("Couldn't copy the diagnostic summary. Try again."))
         return copied
     }
 
@@ -617,7 +617,7 @@ ApplicationWindow {
         var streamSegue = createStreamSegue(session, false, hostUuid)
         if (!streamSegue) {
             if (route && route.context && route.context.presentError)
-                route.context.presentError(qsTr("Unable to create stream session"), "")
+                route.context.presentError(qsTr("Couldn't start a new stream. Go back to the host page and try again."), "")
             return false
         }
         unpinQuitRoute(route)

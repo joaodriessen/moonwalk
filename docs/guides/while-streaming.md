@@ -1,8 +1,8 @@
 # While you're streaming
 
-Move your pointer to the handle at the top of the picture and click it to
-show the quick controls. Narrow windows have fewer buttons. If the pointer is
-captured, press **Ctrl+Alt+Shift+Z** first.
+Click the handle at the top of the picture to show the quick controls. If the
+pointer is captured, press **Ctrl+Alt+Shift+Z** first. On a narrow stream
+window, use **Stream Controls** to reach the rest of the options.
 
 Open **Stream Controls** with **Ctrl+Alt+Shift+O** or the Controls button.
 The stream keeps playing while input stays with the controls. Press **Esc**
@@ -93,10 +93,10 @@ Moonwalk Host can read or write.
 ## Disconnect and recovery
 
 **Disconnect** closes local video and input and returns to the host list.
-Moonwalk asks the host to end the Desktop stream in the background without
-logging out of the remote desktop. If Moonwalk launched a separate game or app,
-**End games when you disconnect** in Preferences controls whether it asks the
-host to quit that app. Save your work before using that option.
+Moonwalk asks the host to end the Desktop session in the background. You stay
+logged in on the host. If Moonwalk launched a game or app as a separate
+session, **End games when you disconnect** in Preferences also asks the host
+to quit that app. Save your work first if that option is enabled.
 
 If the connection drops, Moonwalk can try up to five times within a minute to
 resume the stream. Cancel at any time. Cancelling also requests cleanup of the
