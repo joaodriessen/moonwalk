@@ -3546,9 +3546,10 @@ void Session::exec()
     RemoteClipboard pendingClipboard;
     bool clipboardNeedsInput = false;
     auto noteClipboardChange = [&](const QByteArray &hash) {
-        if (clipboardFocusGuard.focusedClipboardChanged(hash) && waylandClipboard && !NativeClipboard::ownsSelection()) {
-            // An external selection can be newer than SDL's last Wayland input
-            // serial. SDL can report success even when the compositor ignores it.
+        clipboardFocusGuard.focusedClipboardChanged(hash);
+        if (waylandClipboard && !NativeClipboard::ownsSelection()) {
+            // Even a copy of the same bytes gives the external selection a newer
+            // Wayland serial. SDL can report success when the compositor ignores it.
             clipboardNeedsInput = true;
             pendingClipboard = {};
         }
@@ -3562,6 +3563,7 @@ void Session::exec()
             pendingClipboard = std::move(change);
             return;
         }
+        pendingClipboard = {};
         const bool applied = change.image
             ? ClientClipboardImage::publish(change.bytes, m_ControlsOpen)
             : NativeClipboard::publishText(change.bytes, m_ControlsOpen);

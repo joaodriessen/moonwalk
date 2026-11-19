@@ -26,8 +26,7 @@ void ClipboardFocusGuardTest::preservesFocusedCopyBeforeItsNotification()
     ClipboardFocusGuard guard("old image");
     guard.focusGained("old image", 7);
     QVERIFY(!guard.mayApply("new local image", 7));
-    QVERIFY(guard.focusedClipboardChanged("new local image"));
-    QVERIFY(!guard.focusedClipboardChanged("new local image"));
+    guard.focusedClipboardChanged("new local image");
     QVERIFY(guard.mayApply("new local image", 7));
     guard.applied("remote image");
     QVERIFY(guard.mayApply("remote image", 7));
