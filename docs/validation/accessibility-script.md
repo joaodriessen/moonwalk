@@ -41,23 +41,21 @@ tool is unavailable, record the gap.
 
 ## Pairing and recovery
 
-1. Return to Hosts. Tab to **Pair a new host** and verify the visible focus
-   treatment appears; activate it once with Return or the established
-   controller-confirm route, then close it. Open it once more through its
-   assistive action. Each route must use the ordinary pairing dialog. Enter
-   the test host address only; do not use a personal or production target.
-2. When the PIN sheet appears, verify a dialog is announced as **Pair with
-   _host_**. In the inspector, its semantic content has identifier
-   `starlight.hosts.pairing-dialog` and a description explaining that the PIN
-   is entered on the host.
-3. Verify the Cancel button announces **Cancel**, describes that it cancels
-   the current attempt, and activates exactly the ordinary cancel path.
-4. Cancel the pairing. Confirm focus recovers to the host workflow and the
-   app remains keyboard/controller navigable.
-5. Exercise one safe error path (for example, an invalid test address or a
-   deliberately failed test pairing). Confirm the error dialog is announced,
-   its visible error/help text is readable, its available actions work, and
-   closing it returns usable focus rather than trapping or losing it.
+1. Return to Hosts. Tab to **Add Host** on GNOME or Plasma, or **Pair a new
+   host** in the fallback view. Check the visible focus indicator, open the
+   form with Return or controller confirm, then close it. Reopen it with
+   its assistive action. On GNOME and Plasma the dialog has identifier
+   `starlight.hosts.add-dialog` and the field is named **Address or hostname**.
+2. Enter a synthetic invalid address. Confirm the error text is readable,
+   the address remains available to edit, and **Cancel** returns to Hosts.
+3. Select an unpaired test host. Activate **Pair** and check that the PIN
+   dialog is named **Pair with _host_**, with instructions to enter the PIN
+   on the host. Its identifier is `starlight.hosts.pairing` on GNOME and Plasma
+   and `starlight.hosts.pairing-dialog` in the fallback view.
+4. Activate **Cancel** through the assistive action. Verify that the dialog
+   closes and the host can be selected again. Separately check that focus
+   returns to the host workflow and keyboard or controller navigation
+   remains available.
 
 ## Settings landmark, labels, states, and focus
 
