@@ -76,9 +76,20 @@ class DevelopmentRunnerTests(unittest.TestCase):
             self.assertEqual(code, 124)
             self.assertTrue(pidfile.is_file(), "timeout fixture did not finish starting")
             pid = int(pidfile.read_text())
-            # An orphan may briefly be a zombie until init reaps it; it must not run.
+            # Group signals are asynchronous for descendants. The runner can
+            # reap its own child before the sleep process finishes exiting.
             stat = Path(f"/proc/{pid}/stat")
-            self.assertTrue(not stat.exists() or stat.read_text().split()[2] == "Z")
+            deadline = time.monotonic() + 1
+            while True:
+                try:
+                    state = stat.read_text().split()[2]
+                except FileNotFoundError:
+                    break
+                if state == "Z":
+                    break
+                if time.monotonic() >= deadline:
+                    self.fail(f"Timed-out descendant {pid} is still running")
+                time.sleep(0.02)
 
     def test_success_exit_without_totals_is_not_a_passing_suite(self):
         with tempfile.TemporaryDirectory() as directory:
