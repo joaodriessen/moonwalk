@@ -118,11 +118,15 @@ Dependabot doesn't track. The scripts under `scripts/validation/` can reproduce
 specific historic checks if you have their fixtures. Start with `./dev` for
 routine work.
 
-Flathub distribution is a separate step. Put the chosen example screenshots at
-public HTTPS URLs that serve the image files directly. Add them to the AppStream
-metadata and check that the store build mirrors them. Use the
-[screenshot guidelines](https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines#screenshots)
-and recheck the
-[submission requirements](https://docs.flathub.org/docs/for-app-authors/requirements)
-for app ID, permissions, licensing, supported architectures, and AI disclosure.
+Flathub requires an app ID tied to a domain or source repository the project
+controls. The current ID, `com.starlight.Starlight`, preserves upgrades for
+existing bundles. If a store build needs a new ID, verify that a rebase carries
+pairings and settings across, then test rollback in a disposable installation.
+A standalone bundle needs an update source to receive the rebase.
+[Flathub submission requirements](https://docs.flathub.org/docs/for-app-authors/requirements)
+
+Serve example screenshots at direct public HTTPS URLs, add them to the
+AppStream metadata, and check that the store build mirrors them.
+[Flathub screenshot guidelines](https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines#screenshots)
+
 Keep signing and upload credentials out of untrusted pull request jobs.
