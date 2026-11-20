@@ -130,10 +130,10 @@ modules:
     sources:
       - type: git
         url: https://code.videolan.org/videolan/dav1d.git
-        tag: 1.5.3
-        commit: b546257f770768b2c88258c533da38b91a06f737
+        tag: 1.5.5
+        commit: 6c7bee685677fd997a431302be4fea8ea4017606
 
-  # --- FFmpeg 8.1 (moonlight fork) + NVDEC fork-advantage flags ---
+  # --- FFmpeg (Moonlight fork) with the V4L2 Request and NVDEC decoders ---
   - name: ffmpeg
     build-options:
       config-opts:
@@ -177,7 +177,7 @@ modules:
     sources:
       - type: git
         url: https://github.com/cgutman/FFmpeg.git
-        commit: f116128cafb244bc0f809d0285932ced0471268d   # branch moonlight_8.1.1_r1
+        commit: 61d78f7b4493634b164530816b6ce4c5f5ad20c6   # moonlight_9.1_r1
 
   # --- libdrm with the Intel component: the SDK's stock libdrm only ships the core
   # headers/.pc, not libdrm_intel (needed to build intel-vaapi-driver below). The runtime
