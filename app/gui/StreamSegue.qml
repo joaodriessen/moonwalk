@@ -583,10 +583,34 @@ Item {
         hostSeed: root.hostSeed
         hostIcon: root.hostIcon
         hostDimmed: !root.trialOutcome
-        title: root.stageText
-        message: root.trialOutcome ? qsTr("This test used 1920×1080 at 60 FPS and 10 Mbps, with stereo, SDR, and automatic codec and decoder selection. Choose Keep Safe Settings to use them next time.") : root.lastFailure
+        title: {
+            if (root.decoderCheckFailed) {
+                if (SystemProperties.decoderProbeRunning)
+                    return qsTr("Still checking video support")
+                if (SystemProperties.decoderProbeReady)
+                    return qsTr("Video check finished")
+            }
+            return root.stageText
+        }
+        message: {
+            if (root.decoderCheckFailed) {
+                if (SystemProperties.decoderProbeRunning)
+                    return qsTr("This is taking longer than usual. You can wait here or return to the host list.")
+                if (SystemProperties.decoderProbeReady)
+                    return qsTr("Choose Continue to connect.")
+                return SystemProperties.decoderProbeError || root.lastFailure
+            }
+            return root.trialOutcome ? qsTr("This test used 1920×1080 at 60 FPS and 10 Mbps, with stereo, SDR, and automatic codec and decoder selection. Choose Keep Safe Settings to use them next time.") : root.lastFailure
+        }
 
-        Button { objectName: "starlight.stream.retry-video-check"; text: SystemProperties.decoderProbeReady ? qsTr("Continue") : qsTr("Try Video Check Again"); highlighted: true; visible: root.decoderCheckFailed; enabled: !SystemProperties.decoderProbeRunning; onClicked: root.retryVideoCheck() }
+        Button {
+            objectName: "starlight.stream.retry-video-check"
+            text: SystemProperties.decoderProbeReady ? qsTr("Continue") : qsTr("Try Video Check Again")
+            highlighted: true
+            visible: root.decoderCheckFailed && !SystemProperties.decoderProbeRunning
+            enabled: !SystemProperties.decoderProbeRunning
+            onClicked: root.retryVideoCheck()
+        }
         Button { objectName: "starlight.stream.retry"; text: qsTr("Retry"); highlighted: true; visible: !root.trialOutcome && !root.decoderCheckFailed; enabled: root.session && root.session.cleanupComplete === true; onClicked: root.retryWithSettings(false, false) }
         Button { objectName: "starlight.stream.retry-safe"; text: qsTr("Retry with Safe Settings"); visible: root.safeRetryRelevant && !root.trialOutcome && !root.decoderCheckFailed; enabled: root.session && root.session.cleanupComplete === true; onClicked: root.retryWithSettings(true, false) }
         Button { objectName: "starlight.stream.retry-last-working"; text: qsTr("Try Last Working Settings"); visible: !root.trialOutcome && !root.decoderCheckFailed && !!root.session && root.session.hasLastSuccessfulSettings(); enabled: root.session && root.session.cleanupComplete === true; onClicked: root.retryWithSettings(false, false, true) }
