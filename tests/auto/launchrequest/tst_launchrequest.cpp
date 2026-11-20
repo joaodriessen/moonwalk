@@ -72,8 +72,14 @@ private slots:
         QTest::addColumn<QByteArray>("response");
         QTest::addColumn<bool>("warn");
         const QByteArray warning = "<clientWarning>virtual_display_disabled_by_client</clientWarning>";
+        const QByteArray unavailable = "<clientWarning>virtual_display_unavailable</clientWarning>";
         QTest::newRow("stock-launch") << QByteArray("<gamesession>1</gamesession>") + warning << true;
         QTest::newRow("stock-resume") << QByteArray("<resume>1</resume>") + warning << true;
+        QTest::newRow("virtual-display-fallback-launch") << QByteArray("<gamesession>1</gamesession>") + unavailable << true;
+        QTest::newRow("virtual-display-fallback-resume") << QByteArray("<resume>1</resume>") + unavailable << true;
+        QTest::newRow("virtual-display-fallback-with-host-copy")
+            << QByteArray("<gamesession>1</gamesession>") + unavailable +
+               "<clientWarningMessage>Host-specific diagnostic.</clientWarningMessage>" << true;
         QTest::newRow("legacy-host") << QByteArray("<gamesession>1</gamesession>") << false;
         QTest::newRow("unknown-code") << QByteArray("<gamesession>1</gamesession><clientWarning>future_warning</clientWarning>") << false;
         QTest::newRow("not-started") << QByteArray("<gamesession>0</gamesession>") + warning << false;
@@ -96,7 +102,13 @@ private slots:
         http.startApp("launch",false,42,&configuration,true,false,0,false,false,url,{},-1,false,-1,{}, {}, &warning);
         QCOMPARE(url,QString("rtsp://fixture/session"));
         QCOMPARE(!warning.isEmpty(),warn);
-        if (warn) QVERIFY(warning.contains("existing display"));
+        if (warn) {
+            QVERIFY(warning.contains("existing display"));
+            if (response.contains("virtual_display_unavailable")) {
+                QVERIFY(warning.contains("couldn't create"));
+                QVERIFY(!warning.contains("Host-specific diagnostic"));
+            }
+        }
         QCOMPARE(network.requests.size(),1); // Observation never triggers a retry or host mutation.
     }
     void approvedTakeoverUsesAdvertisedControlAndFreshConfirmation() {

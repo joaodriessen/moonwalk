@@ -70,14 +70,18 @@ static QString hostDisplayWarning(const QString& response)
         else xml.skipCurrentElement();
     }
     while (!xml.atEnd()) xml.readNext();
-    if (xml.hasError() || duplicateWarning || !started ||
-        code != QStringLiteral("virtual_display_disabled_by_client")) return {};
+    if (xml.hasError() || duplicateWarning || !started) return {};
 
-    // Use local plain text, not untrusted host markup. Unknown optional warning
-    // codes and legacy responses leave the connection unchanged.
-    return QCoreApplication::translate("Session",
-        "The host reports that this client's settings disabled its virtual display. "
-        "Streaming continues with the existing display. Choose Automatic or Use host setting under Host display to use the host's display policy.");
+    if (code == QStringLiteral("virtual_display_disabled_by_client")) {
+        return QCoreApplication::translate("Session",
+            "The host reports that this client's settings disabled its virtual display. "
+            "Streaming continues with the existing display. Choose Automatic or Use host setting under Host display to use the host's display policy.");
+    }
+    if (code == QStringLiteral("virtual_display_unavailable")) {
+        return QCoreApplication::translate("Session",
+            "The host couldn't create the requested virtual display. This session is using an existing display.");
+    }
+    return {};
 }
 
 NvHTTP::NvHTTP(NvAddress address, uint16_t httpsPort, QSslCertificate serverCert, bool useTrueUid, QNetworkAccessManager* nam) :
