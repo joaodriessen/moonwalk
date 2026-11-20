@@ -71,6 +71,14 @@ separate engine version in `app/version.txt` belongs to Moonlight Qt.
   those codecs for an Automatic connection.
 - Keep showing live video if Moonwalk Host's optional capture status becomes
   unavailable. A confirmed capture failure still gets a startup error.
+- Use Moonlight's hardened H.264 parser when checking playback parameters.
+- Reject unreadable host certificates during pairing and report the reason.
+- Wake the video renderer when a new frame arrives after the queue empties.
+- Show when a slow video check finishes. Continue starts the stream when
+  selected.
+- Explain when a host uses an existing display after it could not create the
+  requested virtual display. The stream stays connected.
+- Update the Flatpak to Moonlight's FFmpeg 9.1 build and dav1d 1.5.5.
 
 ## 0.3.1-alpha.17 (private tester build, 2026-11-16)
 

@@ -27,6 +27,10 @@ This installation rule applies to current source builds. Older downloaded alpha
 bundles may not contain these files. macOS/Windows client packaging is not covered
 by this Linux rule.
 
+The stream statistics overlay uses ModeSeven by Andrew Bulhak. The embedded font
+matches the Windows download from the author, whose readme permits redistribution.
+[ModeSeven download and background](https://dev.null.org/fonts/)
+
 ## Review before distributing a build
 
 Flatpak Builder collects license files from most modules in the

@@ -49,9 +49,11 @@ memory-high and 4 GiB memory-max. Use `--no-scope` in CI or a container that
 already limits resources. Compilation uses the CPUs available to the process.
 `--jobs` changes the number of concurrent tests, which defaults to four.
 
-Test processes have a 120-second limit. Read logs and `summary.json` in the
-printed results directory. The summary records duration, exit status, and
-pass, fail, and skip counts.
+Test processes have a 120-second limit by default. The full GNOME and Plasma
+page suites can take several minutes on a busy machine. If a page suite times
+out, rerun that suite by itself with a larger limit, for example
+`./dev test tst_plasmapages --jobs 1 --timeout 540`. Logs and `summary.json`
+in the printed results directory record the duration, exit status, and counts.
 
 ## Choose what to run
 
