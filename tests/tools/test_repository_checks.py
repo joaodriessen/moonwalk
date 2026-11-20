@@ -154,9 +154,9 @@ class ScopeChecks(unittest.TestCase):
     def test_qml_still_gets_tests_and_compiler(self):
         self.assertEqual(ci.scope(["app/gui/main.qml", "app/gui/settings.js"]), (True, False))
 
-    def test_nested_gitlinks_and_resources_require_app_build(self):
+    def test_dependencies_and_resources_require_app_build(self):
         for path in ("moonlight-common-c/moonlight-common-c", "qmdnsengine/qmdnsengine",
-                     "h264bitstream/h264bitstream", "app/SDL_GameControllerDB",
+                     "h264bitstream/h264_stream.c", "app/SDL_GameControllerDB",
                      "app/qml.qrc", "app/res/icon.svg", "app/languages/qml_fr.ts",
                      "unknown-input", ".github/workflows/build.yml"):
             with self.subTest(path=path):

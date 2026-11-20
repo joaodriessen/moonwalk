@@ -689,8 +689,8 @@ win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../h264bitstream/relea
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../h264bitstream/debug/ -lh264bitstream
 else:unix: LIBS += -L$$OUT_PWD/../h264bitstream/ -lh264bitstream
 
-INCLUDEPATH += $$PWD/../h264bitstream/h264bitstream
-DEPENDPATH += $$PWD/../h264bitstream/h264bitstream
+INCLUDEPATH += $$PWD/../h264bitstream
+DEPENDPATH += $$PWD/../h264bitstream
 
 !winrt {
     win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../AntiHooking/release/ -lAntiHooking
@@ -735,7 +735,7 @@ unix:!macx: {
     license_enet.files = $$PWD/../moonlight-common-c/moonlight-common-c/enet/LICENSE
     license_nanors.files = $$PWD/../moonlight-common-c/moonlight-common-c/nanors/LICENSE
     license_qmdnsengine.files = $$PWD/../qmdnsengine/qmdnsengine/LICENSE.txt
-    license_h264bitstream.files = $$PWD/../h264bitstream/h264bitstream/LICENSE
+    license_h264bitstream.files = $$PWD/../h264bitstream/LICENSE
     license_controllerdb.files = $$PWD/SDL_GameControllerDB/LICENSE
     for(component, $$list(moonwalk lucide moonlight enet nanors qmdnsengine h264bitstream controllerdb)) {
         license_$${component}.path = $$PREFIX/$$DATADIR/licenses/moonwalk/$${component}/

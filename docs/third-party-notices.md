@@ -20,7 +20,7 @@ with `git submodule update --init --recursive` before building.
 | `enet` | [ENet](../moonlight-common-c/moonlight-common-c/enet/LICENSE) | MIT |
 | `nanors` | [NanoRS](../moonlight-common-c/moonlight-common-c/nanors/LICENSE) | MIT |
 | `qmdnsengine` | [QMdnsEngine](../qmdnsengine/qmdnsengine/LICENSE.txt) | MIT |
-| `h264bitstream` | [h264bitstream](../h264bitstream/h264bitstream/LICENSE) | LGPL version 2.1 |
+| `h264bitstream` | [h264bitstream](../h264bitstream/LICENSE) | LGPL version 2.1 |
 | `controllerdb` | [SDL GameControllerDB](../app/SDL_GameControllerDB/LICENSE) | zlib-style notice |
 
 This installation rule applies to current source builds. Older downloaded alpha
