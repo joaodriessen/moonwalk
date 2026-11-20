@@ -120,9 +120,16 @@ routine work.
 
 Flathub requires an app ID tied to a domain or source repository the project
 controls. The current ID, `com.starlight.Starlight`, preserves upgrades for
-existing bundles. If a store build needs a new ID, verify that a rebase carries
-pairings and settings across, then test rollback in a disposable installation.
-A standalone bundle needs an update source to receive the rebase.
+existing bundles. If a store build needs a new ID, test the rebase and rollback
+on the oldest supported Flatpak as well as a current version. Verify that the
+new app can stream using the saved pairing and display settings.
+
+A standalone bundle needs an update source to receive a rebase. On Flatpak
+1.14.6, adding a URL to the bundle's temporary origin left the app uninstalled
+when Flatpak removed that origin before fetching the replacement. Installing
+the old ID from a named remote first let the rebase and rollback finish with
+the original profile intact. Start migration tests from the distribution
+users actually installed, and keep the old installer available for recovery.
 [Flathub submission requirements](https://docs.flathub.org/docs/for-app-authors/requirements)
 
 Serve example screenshots at direct public HTTPS URLs, add them to the
