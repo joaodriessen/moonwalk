@@ -144,6 +144,9 @@ NvPairingManager::getSignatureFromPemCert(const QByteArray& certificate)
 
     X509* cert = PEM_read_bio_X509(bio, nullptr, nullptr, nullptr);
     BIO_free_all(bio);
+    if (cert == nullptr) {
+        return QByteArray();
+    }
 
     QByteArray signature = getSignatureFromCert(cert);
     X509_free(cert);
@@ -163,9 +166,15 @@ NvPairingManager::verifySignature(const QByteArray& data, const QByteArray& sign
 
     X509* cert = PEM_read_bio_X509(bio, nullptr, nullptr, nullptr);
     BIO_free_all(bio);
+    if (cert == nullptr) {
+        return false;
+    }
 
     EVP_PKEY* pubKey = X509_get_pubkey(cert);
-    THROW_BAD_ALLOC_IF_NULL(pubKey);
+    if (pubKey == nullptr) {
+        X509_free(cert);
+        return false;
+    }
 
     EVP_MD_CTX* mdctx = EVP_MD_CTX_create();
     THROW_BAD_ALLOC_IF_NULL(mdctx);
@@ -260,9 +269,8 @@ NvPairingManager::pair(QString appVersion, QString pin, QSslCertificate& serverC
     }
 
     QSslCertificate unverifiedServerCert = QSslCertificate(serverCertStr);
-    if (unverifiedServerCert.isNull()) {
-        Q_ASSERT(!unverifiedServerCert.isNull());
-
+    const QByteArray serverCertSignature = getSignatureFromPemCert(serverCertStr);
+    if (unverifiedServerCert.isNull() || serverCertSignature.isEmpty()) {
         qCritical() << "Failed to parse plaincert";
         m_Http.openConnectionToString(m_Http.m_BaseUrlHttp, "unpair", nullptr, REQUEST_TIMEOUT_MS);
         return PairState::FAILED;
@@ -339,7 +347,7 @@ NvPairingManager::pair(QString appVersion, QString pin, QSslCertificate& serverC
 
     QByteArray expectedResponseData;
     expectedResponseData.append(randomChallenge);
-    expectedResponseData.append(getSignatureFromPemCert(serverCertStr));
+    expectedResponseData.append(serverCertSignature);
     expectedResponseData.append(serverSecret);
     if (QCryptographicHash::hash(expectedResponseData, hashAlgo) != serverResponse)
     {
