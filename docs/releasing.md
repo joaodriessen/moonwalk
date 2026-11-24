@@ -119,10 +119,10 @@ specific historic checks if you have their fixtures. Start with `./dev` for
 routine work.
 
 Flathub requires an app ID tied to a domain or source repository the project
-controls. The current ID, `com.starlight.Starlight`, preserves upgrades for
-existing bundles. If a store build needs a new ID, test the rebase and rollback
-on the oldest supported Flatpak as well as a current version. Verify that the
-new app can stream using the saved pairing and display settings.
+controls. For the current GitHub URL, use `io.github.joaodriessen.moonwalk` for
+the store build. Tester bundles use `com.starlight.Starlight`. Test rebase and
+rollback on the oldest supported Flatpak and a current version. Verify that
+the store build can stream using the saved pairing and display settings.
 
 A standalone bundle needs an update source to receive a rebase. On Flatpak
 1.14.6, adding a URL to the bundle's temporary origin left the app uninstalled
@@ -132,8 +132,11 @@ the original profile intact. Start migration tests from the distribution
 users actually installed, and keep the old installer available for recovery.
 [Flathub submission requirements](https://docs.flathub.org/docs/for-app-authors/requirements)
 
-Serve example screenshots at direct public HTTPS URLs, add them to the
-AppStream metadata, and check that the store build mirrors them.
+Use the [store screenshots](screenshots.md#store-screenshots) at direct public
+HTTPS URLs. Add them to the AppStream metadata and verify that the store build
+mirrors them. The first Flathub submission needs a stable release and a
+human-authored manifest. Disclose any AI-assisted materials the application
+contains when submitting. [Flathub requirements](https://docs.flathub.org/docs/for-app-authors/requirements)
 [Flathub screenshot guidelines](https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines#screenshots)
 
 Keep signing and upload credentials out of untrusted pull request jobs.

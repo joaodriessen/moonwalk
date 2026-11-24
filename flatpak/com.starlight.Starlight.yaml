@@ -339,5 +339,5 @@ modules:
         # helper described in docs/development.md.
       - type: git
         url: https://github.com/joaodriessen/moonwalk.git
-        commit: bdb16a790947926db079b1b28a3e9fb10ee22f82
+        commit: c47021a1c48d86b2f48e47ed64f8926f11fda6b8
         disable-shallow-clone: true

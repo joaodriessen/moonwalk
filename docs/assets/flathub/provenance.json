@@ -1,0 +1,20 @@
+{
+  "app_source": "35553a58d9acacaf9bd827d6b751738e334e3545",
+  "capture": "GNOME Shell window capture with the native AOT client",
+  "scene": "Example host profiles in an isolated Linux session",
+  "preparation": "Removed text metadata without changing pixels",
+  "screenshots": [
+    {
+      "file": "hosts.png",
+      "width": 896,
+      "height": 610,
+      "sha256": "b1ef2c0a7a0fe8804670e9b4ffc7380b11df56c4d18e545752551914d4d6cafe"
+    },
+    {
+      "file": "preferences.png",
+      "width": 896,
+      "height": 610,
+      "sha256": "71b57060ad972820625c7ebac8f17540efbb64af851ba5449657974e800599f5"
+    }
+  ]
+}

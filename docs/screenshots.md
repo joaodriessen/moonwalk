@@ -48,3 +48,11 @@ A failed scene or capture makes the command exit nonzero. Check the exit
 status before copying any screenshots, since other scenes may have saved. Inspect both themes, dialogs and text wrapping before
 committing. App icons and social-preview artwork are separate assets; their
 provenance is not established by this capture process.
+
+## Store screenshots
+
+The images in [assets/flathub](assets/flathub/) are captures of the actual
+Moonwalk window in GNOME. The hosts are examples and the captures use the
+default appearance. The [provenance file](assets/flathub/provenance.json)
+records the build and the image hashes. Link to an exact commit when adding
+them to AppStream, so published images stay available when the docs change.
