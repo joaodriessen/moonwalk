@@ -32,14 +32,11 @@ lists the permissions read from the exported file.
 
 ## Report a vulnerability
 
-Use a private channel. While the repository is private, invited collaborators
-can report through its private issues. If you need a private contact, ask for
-one without describing the problem. Send the affected build, impact, and a
-minimal reproduction using synthetic data once you have the channel.
-
-If GitHub shows **Report a vulnerability** under **Security → Advisories**, use
-that form. Keep vulnerability details, keys, certificates, and unredacted logs
-out of public issues and pull requests.
+Use GitHub's [private vulnerability reporting form](https://github.com/joaodriessen/moonwalk/security/advisories/new).
+Include the affected build, impact, and a minimal reproduction using synthetic
+data. If you need another way to report privately, open an issue asking how to
+contact the maintainer. Keep vulnerability details, keys, certificates, and
+unredacted logs out of public issues and pull requests.
 
 Security fixes target the current alpha. Reports are handled on a best-effort
 basis.

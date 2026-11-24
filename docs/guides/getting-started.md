@@ -25,7 +25,8 @@ add an entry called **Desktop** and leave the launch command blank.
 
 ## Install Moonwalk
 
-Use the Flatpak bundle supplied for testing, or [build from source](../building.md).
+Download the Flatpak bundle from [GitHub Releases](https://github.com/joaodriessen/moonwalk/releases)
+or [build from source](../building.md).
 If you don't have Flatpak yet, follow [the setup instructions](https://flatpak.org/setup/)
 for your distribution.
 

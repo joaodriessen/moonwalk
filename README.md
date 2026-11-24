@@ -10,7 +10,7 @@ Sunshine.
 
 Moonwalk targets x86-64 Linux, with Flatpak as the primary package. The
 macOS host runs on Apple Silicon with macOS 14 or later. Both projects are
-in alpha, and tester builds are distributed privately.
+in alpha. Get the test builds from [GitHub Releases](https://github.com/joaodriessen/moonwalk/releases).
 
 - [Install Moonwalk on Linux](docs/guides/getting-started.md#install-moonwalk)
 - [Install Moonwalk Host on macOS](https://github.com/joaodriessen/moonwalk-host/blob/main/docs/INSTALL.md)
