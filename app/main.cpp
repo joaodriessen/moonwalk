@@ -1227,13 +1227,18 @@ int main(int argc, char *argv[])
     app.setWindowIcon(QIcon(":/res/starlight.png"));
 #endif
 
-    // This is necessary to show our icon correctly on Wayland
-    app.setDesktopFileName("com.starlight.Starlight");
-    // Must match the shipped .desktop file (com.starlight.Starlight.desktop) or
-    // Linux taskbars/docks can't associate the STREAM window with the app icon —
-    // the rebrand updated setDesktopFileName() but missed these two.
-    qputenv("SDL_VIDEO_WAYLAND_WMCLASS", "com.starlight.Starlight");
-    qputenv("SDL_VIDEO_X11_WMCLASS", "com.starlight.Starlight");
+    // Match the exported desktop launcher for both Qt and SDL windows.
+    // Flatpak provides the actual ID even when the manifest renames the launcher.
+    QByteArray desktopId = "com.starlight.Starlight";
+#ifdef Q_OS_LINUX
+    const auto flatpakId = qgetenv("FLATPAK_ID");
+    if (!flatpakId.isEmpty()) {
+        desktopId = flatpakId;
+    }
+#endif
+    app.setDesktopFileName(QString::fromUtf8(desktopId));
+    qputenv("SDL_VIDEO_WAYLAND_WMCLASS", desktopId);
+    qputenv("SDL_VIDEO_X11_WMCLASS", desktopId);
 
     // Register our C++ types for QML
     qmlRegisterType<HostWorkflow>("Starlight.Application", 1, 0, "HostWorkflow");
